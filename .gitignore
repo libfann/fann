@@ -5,3 +5,14 @@
 ipch
 Debug
 Release
+/bin/fanndoubled.dll
+/bin/fanndoubled.lib
+/bin/fannfixedd.dll
+/bin/fannfixedd.lib
+/bin/fannfloatd.dll
+/bin/fannfloatd.lib
+/bin/simple_train_doubled.exe
+/bin/simple_train_floatd.exe
+/bin/xor_test_fixedd.exe
+/bin/xor_test_floatd.exe
+/bin/xor_traind.exe
