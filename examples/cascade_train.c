@@ -40,8 +40,8 @@ int main()
 	
 	printf("Reading data.\n");
 	 
-	train_data = fann_read_train_from_file("../benchmarks/datasets/parity8.train");
-	test_data = fann_read_train_from_file("../benchmarks/datasets/parity8.test");
+	train_data = fann_read_train_from_file("../datasets/parity8.train");
+	test_data = fann_read_train_from_file("../datasets/parity8.test");
 
 	fann_scale_train_data(train_data, -1, 1);
 	fann_scale_train_data(test_data, -1, 1);
@@ -69,11 +69,11 @@ int main()
 		
 	if(training_algorithm == FANN_TRAIN_QUICKPROP)
 	{
-		fann_set_learning_rate(ann, 0.35);
-		fann_randomize_weights(ann, -2.0,2.0);
+		fann_set_learning_rate(ann, 0.35f);
+		fann_randomize_weights(ann, -2.0f, 2.0f);
 	}
 	
-	fann_set_bit_fail_limit(ann, 0.9);
+	fann_set_bit_fail_limit(ann, (fann_type)0.9);
 	fann_set_train_stop_function(ann, FANN_STOPFUNC_BIT);
 	fann_print_parameters(ann);
 		

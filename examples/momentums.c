@@ -31,10 +31,10 @@ int main()
 
 	float momentum;
 
-	train_data = fann_read_train_from_file("../benchmarks/datasets/robot.train");
-	test_data = fann_read_train_from_file("../benchmarks/datasets/robot.test");
+	train_data = fann_read_train_from_file("../datasets/robot.train");
+	test_data = fann_read_train_from_file("../datasets/robot.test");
 
-	for ( momentum = 0.0; momentum < 0.7; momentum += 0.1 )
+	for ( momentum = 0.0f; momentum < 0.7f; momentum += 0.1f )
 	{
 		printf("============= momentum = %f =============\n", momentum);
 

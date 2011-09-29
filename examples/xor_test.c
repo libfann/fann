@@ -41,7 +41,7 @@ int main()
 	if(!ann)
 	{
 		printf("Error creating ann --- ABORTING.\n");
-		return 0;
+		return -1;
 	}
 
 	fann_print_connections(ann);
