@@ -18,21 +18,13 @@ int main( int argc, char** argv )
 	fann_print_connections(ann);
 	fann_print_parameters(ann);
 	printf("Testing network.\n");
-	data = fann_read_train_from_file("scaling.data");
+	data = fann_read_train_from_file("../datasets/scaling.data");
 	for(i = 0; i < fann_length_train_data(data); i++)
 	{
 		fann_reset_MSE(ann);
-		/* Just pass any param to perform scaling */
-		if( argc > 1 )
-		{
-			fann_scale_input( ann, data->input[i] );
-			calc_out = fann_run( ann, data->input[i] );
-			fann_descale_output( ann, calc_out );
-		}
-		else
-		{
-			calc_out = fann_test(ann, data->input[i], data->output[i]);
-		}
+    	fann_scale_input( ann, data->input[i] );
+		calc_out = fann_run( ann, data->input[i] );
+		fann_descale_output( ann, calc_out );
 		printf("Result %f original %f error %f\n",
 			calc_out[0], data->output[i][0],
 			(float) fann_abs(calc_out[0] - data->output[i][0]));

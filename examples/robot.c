@@ -33,7 +33,7 @@ int main()
 
 	printf("Creating network.\n");
 
-	train_data = fann_read_train_from_file("../benchmarks/datasets/robot.train");
+	train_data = fann_read_train_from_file("../datasets/robot.train");
 
 	ann = fann_create_standard(num_layers,
 					  train_data->num_input, num_neurons_hidden, train_data->num_output);
@@ -41,13 +41,13 @@ int main()
 	printf("Training network.\n");
 
 	fann_set_training_algorithm(ann, FANN_TRAIN_INCREMENTAL);
-	fann_set_learning_momentum(ann, 0.4);
+	fann_set_learning_momentum(ann, 0.4f);
 
 	fann_train_on_data(ann, train_data, 3000, 10, desired_error);
 
 	printf("Testing network.\n");
 
-	test_data = fann_read_train_from_file("../benchmarks/datasets/robot.test");
+	test_data = fann_read_train_from_file("../datasets/robot.test");
 
 	fann_reset_MSE(ann);
 	for(i = 0; i < fann_length_train_data(test_data); i++)
@@ -64,7 +64,6 @@ int main()
 	fann_destroy_train(train_data);
 	fann_destroy_train(test_data);
 	fann_destroy(ann);
-	fann_destroy(copy);
 
 	return 0;
 }
