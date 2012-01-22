@@ -351,6 +351,16 @@ struct fann *fann_create_from_fd_1_1(FILE * conf, const char *configuration_file
 	} \
 }
 
+#define fann_skip(name) \
+{ \
+	if(fscanf(conf, name) != 0) \
+	{ \
+		fann_error(NULL, FANN_E_CANT_READ_CONFIG, name, configuration_file); \
+		fann_destroy(ann); \
+		return NULL; \
+	} \
+}
+
 /* INTERNAL FUNCTION
    Create a network from a configuration file descriptor.
  */
@@ -377,7 +387,11 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 		return NULL;
 	}
 
-	fread(read_version, 1, strlen(FANN_CONF_VERSION "\n"), conf);	/* reads version */
+	if(fread(read_version, 1, strlen(FANN_CONF_VERSION "\n"), conf) != 1)
+	{
+	        fann_error(NULL, FANN_E_CANT_READ_CONFIG, "FANN_VERSION", configuration_file);
+		return NULL;
+	}
 
 	/* compares the version information */
 	if(strncmp(read_version, FANN_CONF_VERSION "\n", strlen(FANN_CONF_VERSION "\n")) != 0)
@@ -412,11 +426,11 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 	free(read_version);
 
 #ifdef FIXEDFANN
-    fann_scanf("%u", "decimal_point", &decimal_point);
+	fann_scanf("%u", "decimal_point", &decimal_point);
 	multiplier = 1 << decimal_point;
 #endif
 
-    fann_scanf("%u", "num_layers", &num_layers);
+	fann_scanf("%u", "num_layers", &num_layers);
 
 	ann = fann_allocate_structure(num_layers);
 	if(ann == NULL)
@@ -424,10 +438,10 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 		return NULL;
 	}
 
-    fann_scanf("%f", "learning_rate", &ann->learning_rate);
-    fann_scanf("%f", "connection_rate", &ann->connection_rate);
-    fann_scanf("%u", "network_type", &tmpVal);
-    ann->network_type = (enum fann_nettype_enum)tmpVal;
+	fann_scanf("%f", "learning_rate", &ann->learning_rate);
+	fann_scanf("%f", "connection_rate", &ann->connection_rate);
+	fann_scanf("%u", "network_type", &tmpVal);
+	ann->network_type = (enum fann_nettype_enum)tmpVal;
 	fann_scanf("%f", "learning_momentum", &ann->learning_momentum);
 	fann_scanf("%u", "training_algorithm", &tmpVal);
 	ann->training_algorithm = (enum fann_train_enum)tmpVal;
@@ -470,9 +484,17 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 		return NULL;
 	}
 
-	fscanf(conf, "cascade_activation_functions=");
+
+	fann_skip("cascade_activation_functions=");
 	for(i = 0; i < ann->cascade_activation_functions_count; i++)
-		fscanf(conf, "%u ", (unsigned int *)&ann->cascade_activation_functions[i]);
+	{
+	        if(fscanf(conf, "%u ", (unsigned int *)&ann->cascade_activation_functions[i]) != 1)
+		{
+		       fann_error(NULL, FANN_E_CANT_READ_CONFIG, "cascade_activation_functions", configuration_file); 
+		       fann_destroy(ann); 
+		       return NULL;
+		}
+	}
 	
 	fann_scanf("%u", "cascade_activation_steepnesses_count", &ann->cascade_activation_steepnesses_count);
 
@@ -487,9 +509,16 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 		return NULL;
 	}
 
-	fscanf(conf, "cascade_activation_steepnesses=");
-	for(i = 0; i < ann->cascade_activation_steepnesses_count; i++)
-		fscanf(conf, FANNSCANF" ", &ann->cascade_activation_steepnesses[i]);
+	fann_skip("cascade_activation_steepnesses=");
+	for(i = 0; i < ann->cascade_activation_steepnesses_count; i++) 
+        {
+	        if(fscanf(conf, FANNSCANF" ", &ann->cascade_activation_steepnesses[i]) != 1)
+		{
+		       fann_error(NULL, FANN_E_CANT_READ_CONFIG, "cascade_activation_steepnesses", configuration_file); 
+		       fann_destroy(ann); 
+		       return NULL;
+		}
+	}
 
 #ifdef FIXEDFANN
 	ann->decimal_point = decimal_point;
@@ -505,7 +534,7 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 	printf("input\n");
 #endif
 
-	fscanf(conf, "layer_sizes=");
+	fann_skip("layer_sizes=");
 	/* determine how many neurons there should be in each layer */
 	for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++)
 	{
@@ -542,7 +571,7 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 
 #ifndef FIXEDFANN
 #define SCALE_LOAD( what, where )											\
-	fscanf( conf, #what "_" #where "=" );									\
+	fann_skip( #what "_" #where "=" );									\
 	for(i = 0; i < ann->num_##where##put; i++)								\
 	{																		\
 		if(fscanf( conf, "%f ", (float *)&ann->what##_##where[ i ] ) != 1)  \
@@ -578,7 +607,7 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 	}
 
 	last_neuron = (ann->last_layer - 1)->last_neuron;
-	fscanf(conf, "neurons (num_inputs, activation_function, activation_steepness)=");
+	fann_skip("neurons (num_inputs, activation_function, activation_steepness)=");
 	for(neuron_it = ann->first_layer->first_neuron; neuron_it != last_neuron; neuron_it++)
 	{
 		if(fscanf
@@ -606,7 +635,7 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 	weights = ann->weights;
 	first_neuron = ann->first_layer->first_neuron;
 
-	fscanf(conf, "connections (connected_to_neuron, weight)=");
+	fann_skip("connections (connected_to_neuron, weight)=");
 	for(i = 0; i < ann->total_connections; i++)
 	{
 		if(fscanf(conf, "(%u, " FANNSCANF ") ", &input_neuron, &weights[i]) != 2)

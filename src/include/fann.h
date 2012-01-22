@@ -273,7 +273,7 @@ FANN_EXTERNAL void FANN_API fann_destroy(struct fann *ann);
 
 	This function appears in FANN >= 2.2.0.
 */ 
-FANN_EXTERNAL struct fann * FANN_API fann_copy(const struct fann *ann);
+FANN_EXTERNAL struct fann * FANN_API fann_copy(struct fann *ann);
 
 
 /* Function: fann_run

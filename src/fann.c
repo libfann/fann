@@ -27,7 +27,7 @@
 #include "config.h"
 #include "fann.h"
 
-//#define FANN_NO_SEED
+/* #define FANN_NO_SEED */
 
 FANN_EXTERNAL struct fann *FANN_API fann_create_standard(unsigned int num_layers, ...)
 {
@@ -106,7 +106,6 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 	unsigned int random_number, found_connection, tmp_con;
 
 #ifdef FIXEDFANN
-	unsigned int decimal_point;
 	unsigned int multiplier;
 #endif
 	if(connection_rate > 1)
@@ -129,7 +128,6 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 
 	ann->connection_rate = connection_rate;
 #ifdef FIXEDFANN
-	decimal_point = ann->decimal_point;
 	multiplier = ann->multiplier;
 	fann_update_stepwise(ann);
 #endif
@@ -403,7 +401,6 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_
 	unsigned int num_neurons_in, num_neurons_out;
 
 #ifdef FIXEDFANN
-	unsigned int decimal_point;
 	unsigned int multiplier;
 #endif
 	/* seed random */
@@ -422,7 +419,6 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_
 	ann->connection_rate = 1;
 	ann->network_type = FANN_NETTYPE_SHORTCUT;
 #ifdef FIXEDFANN
-	decimal_point = ann->decimal_point;
 	multiplier = ann->multiplier;
 	fann_update_stepwise(ann);
 #endif
@@ -834,7 +830,7 @@ FANN_EXTERNAL void FANN_API fann_randomize_weights(struct fann *ann, fann_type m
 }
 
 /* deep copy of the fann structure */
-FANN_EXTERNAL struct fann* FANN_API fann_copy(const struct fann* orig)
+FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
 {
     struct fann* copy;
     unsigned int num_layers = orig->last_layer - orig->first_layer;
@@ -1788,7 +1784,14 @@ void fann_seed_rand()
 	}
 	else
 	{
-		fread(&foo, sizeof(foo), 1, fp);
+	        if(fread(&foo, sizeof(foo), 1, fp) != 1) 
+	        {
+  		       gettimeofday(&t, NULL);
+		       foo = t.tv_usec;
+#ifdef DEBUG
+		       printf("unable to read from /dev/urandom\n");
+#endif		      
+		}
 		fclose(fp);
 	}
 	srand(foo);
