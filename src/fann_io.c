@@ -387,7 +387,7 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 		return NULL;
 	}
 
-	if(fread(read_version, 1, strlen(FANN_CONF_VERSION "\n"), conf) != 1)
+	if(fread(read_version, 1, strlen(FANN_CONF_VERSION "\n"), conf) == 1)
 	{
 	        fann_error(NULL, FANN_E_CANT_READ_CONFIG, "FANN_VERSION", configuration_file);
 		return NULL;

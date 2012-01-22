@@ -9,10 +9,10 @@ DEBUG_TARGETS = xor_train_debug xor_test_debug xor_test_fixed_debug cascade_trai
 all: $(TARGETS)
 
 %: %.c Makefile
-	$(GCC) -O3 $< -o $@ -lm -lfann
+	$(GCC) -O3 $< -o $@ -lfann -lm
 
 %_fixed: %.c Makefile
-	$(GCC) -O3 -DFIXEDFANN $< -o $@ -lm -lfixedfann
+	$(GCC) -O3 -DFIXEDFANN $< -o $@ -lfixedfann -lm
 
 clean:
 	rm -f $(TARGETS) $(DEBUG_TARGETS) xor_fixed.data *.net *~ *.obj *.exe *.tds noscale.txt withscale.txt scale_test_results.txt
@@ -44,29 +44,6 @@ rundebugtest: $(DEBUG_TARGETS)
 	@echo
 	@echo Testing network with fixed points
 	./xor_test_fixed_debug
-
-runcompliancetest: $(DEBUG_TARGETS)
-	./xor_train_debug
-
-	@echo
-	@echo Testing network with floats
-	@cp xor_float.net xor_float_new.net
-	@cp xor_float_backup.net xor_float.net
-	@echo RUN
-	@./xor_test_debug | grep XOR
-	@echo CAT
-	@cat xor_float_backup.out
-
-#used to compare result when scale used and not used
-runscaletest: scaling_train scaling_test
-	echo Without scaling > noscale.txt
-	./scaling_train >> noscale.txt
-	./scaling_test >> noscale.txt
-	echo With scaling > withscale.txt
-	./scaling_train scale >> withscale.txt
-	./scaling_test scale >> withscale.txt
-	pr -m -t -T -w 150 noscale.txt withscale.txt > scale_test_results.txt
-	@echo See scale_test_results.txt for results of scaling test
 
 #compiletest is used to test whether the library will compile easily in other compilers
 compiletest:
