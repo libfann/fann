@@ -866,7 +866,7 @@ public:
 	   See also:
 	    		<copy_from_struct_fann>
         */
-	neural_net(const struct fann* other)
+	neural_net(struct fann* other)
 	{
 	    copy_from_struct_fann(other);
 	}
@@ -875,7 +875,7 @@ public:
 	   
 	   Set the internal fann struct to a copy of other
 	*/
-	void copy_from_struct_fann(const struct fann* other)
+	void copy_from_struct_fann(struct fann* other)
 	{
 	    destroy();
 	    if (other != NULL)
