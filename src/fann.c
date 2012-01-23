@@ -158,7 +158,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 	printf("creating network with connection rate %f\n", connection_rate);
 	printf("input\n");
 	printf("  layer       : %d neurons, 1 bias\n",
-		   ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1);
+		   (int)(ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1));
 #endif
 
 	num_neurons_in = ann->num_input;
@@ -455,7 +455,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_
 	printf("creating fully shortcut connected network.\n");
 	printf("input\n");
 	printf("  layer       : %d neurons, 1 bias\n",
-		   ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1);
+		   (int)(ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1));
 #endif
 
 	num_neurons_in = ann->num_input;
@@ -1119,8 +1119,8 @@ FANN_EXTERNAL void FANN_API fann_print_connections(struct fann *ann)
 					neurons[ann->connections[i] - ann->first_layer->first_neuron] = (char)('A' + value);
 				}
 			}
-			printf("L %3d / N %4d %s\n", layer_it - ann->first_layer,
-				   neuron_it - ann->first_layer->first_neuron, neurons);
+			printf("L %3d / N %4d %s\n", (int)(layer_it - ann->first_layer),
+				   (int)(neuron_it - ann->first_layer->first_neuron), neurons);
 		}
 	}
 
@@ -1221,12 +1221,12 @@ FANN_EXTERNAL void FANN_API fann_print_parameters(struct fann *ann)
 		if(ann->network_type == FANN_NETTYPE_SHORTCUT)
 		{
 			printf("  Hidden layer                       :%4d neurons, 0 bias\n",
-				   layer_it->last_neuron - layer_it->first_neuron);
+				   (int)(layer_it->last_neuron - layer_it->first_neuron));
 		}
 		else
 		{
 			printf("  Hidden layer                       :%4d neurons, 1 bias\n",
-				   layer_it->last_neuron - layer_it->first_neuron - 1);
+				   (int)(layer_it->last_neuron - layer_it->first_neuron - 1));
 		}
 	}
 	printf("Output layer                         :%4d neurons\n", ann->num_output);
@@ -1376,7 +1376,7 @@ FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann, struct f
     struct fann_neuron *first_neuron;
     struct fann_layer *layer_it;
     struct fann_neuron *neuron_it;
-    unsigned int index;
+    unsigned int idx;
     unsigned int source_index;
     unsigned int destination_index;
 
@@ -1392,7 +1392,7 @@ FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann, struct f
         /* for each neuron */
         for(neuron_it = layer_it->first_neuron; neuron_it != layer_it->last_neuron; neuron_it++){
             /* for each connection */
-            for (index = neuron_it->first_con; index < neuron_it->last_con; index++){
+            for (idx = neuron_it->first_con; idx < neuron_it->last_con; idx++){
                 /* Assign the source, destination and weight */
                 connections->from_neuron = ann->connections[source_index] - first_neuron;
                 connections->to_neuron = destination_index;
@@ -1409,11 +1409,11 @@ FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann, struct f
 FANN_EXTERNAL void FANN_API fann_set_weight_array(struct fann *ann,
     struct fann_connection *connections, unsigned int num_connections)
 {
-    unsigned int index;
+    unsigned int idx;
 
-    for (index = 0; index < num_connections; index++) {
-        fann_set_weight(ann, connections[index].from_neuron,
-            connections[index].to_neuron, connections[index].weight);
+    for (idx = 0; idx < num_connections; idx++) {
+        fann_set_weight(ann, connections[idx].from_neuron,
+            connections[idx].to_neuron, connections[idx].weight);
     }
 }
 
@@ -1423,7 +1423,7 @@ FANN_EXTERNAL void FANN_API fann_set_weight(struct fann *ann,
     struct fann_neuron *first_neuron;
     struct fann_layer *layer_it;
     struct fann_neuron *neuron_it;
-    unsigned int index;
+    unsigned int idx;
     unsigned int source_index;
     unsigned int destination_index;
 
@@ -1441,7 +1441,7 @@ FANN_EXTERNAL void FANN_API fann_set_weight(struct fann *ann,
         /* for each neuron */
         for(neuron_it = layer_it->first_neuron; neuron_it != layer_it->last_neuron; neuron_it++){
             /* for each connection */
-            for (index = neuron_it->first_con; index < neuron_it->last_con; index++){
+            for (idx = neuron_it->first_con; idx < neuron_it->last_con; idx++){
                 /* If the source and destination neurons match, assign the weight */
                 if (((int)from_neuron == ann->connections[source_index] - first_neuron) &&
                     (to_neuron == destination_index))
