@@ -16,3 +16,9 @@ Release
 /bin/xor_test_fixedd.exe
 /bin/xor_test_floatd.exe
 /bin/xor_traind.exe
+Makefile
+CMakeFiles
+CMakeCache.txt
+cmake_install.cmake
+install_manifest.txt
+*~
