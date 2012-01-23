@@ -22,3 +22,11 @@ CMakeCache.txt
 cmake_install.cmake
 install_manifest.txt
 *~
+/bin/cascade_traind.exe
+/bin/momentumsd.exe
+/bin/mushroomd.exe
+/bin/robotd.exe
+/bin/scaling_testd.exe
+/bin/scaling_traind.exe
+/bin/steepness_traind.exe
+/bin/xor_cpp_sampled.exe
