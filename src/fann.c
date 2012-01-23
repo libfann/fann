@@ -1,6 +1,6 @@
 /*
   Fast Artificial Neural Network Library (fann)
-  Copyright (C) 2003 Steffen Nissen (lukesky@diku.dk)
+  Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
