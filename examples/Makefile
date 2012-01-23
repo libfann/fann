@@ -9,10 +9,10 @@ DEBUG_TARGETS = xor_train_debug xor_test_debug xor_test_fixed_debug cascade_trai
 all: $(TARGETS)
 
 %: %.c Makefile
-	$(GCC) -O3 $< -o $@ -lm -lfann
+	$(GCC) -O3 $< -o $@ -lfann -lm
 
 %_fixed: %.c Makefile
-	$(GCC) -O3 -DFIXEDFANN $< -o $@ -lm -lfixedfann
+	$(GCC) -O3 -DFIXEDFANN $< -o $@ -lfixedfann -lm
 
 clean:
 	rm -f $(TARGETS) $(DEBUG_TARGETS) xor_fixed.data *.net *~ *.obj *.exe *.tds noscale.txt withscale.txt scale_test_results.txt
@@ -45,34 +45,12 @@ rundebugtest: $(DEBUG_TARGETS)
 	@echo Testing network with fixed points
 	./xor_test_fixed_debug
 
-runcompliancetest: $(DEBUG_TARGETS)
-	./xor_train_debug
-
-	@echo
-	@echo Testing network with floats
-	@cp xor_float.net xor_float_new.net
-	@cp xor_float_backup.net xor_float.net
-	@echo RUN
-	@./xor_test_debug | grep XOR
-	@echo CAT
-	@cat xor_float_backup.out
-
-#used to compare result when scale used and not used
-runscaletest: scaling_train scaling_test
-	echo Without scaling > noscale.txt
-	./scaling_train >> noscale.txt
-	./scaling_test >> noscale.txt
-	echo With scaling > withscale.txt
-	./scaling_train scale >> withscale.txt
-	./scaling_test scale >> withscale.txt
-	pr -m -t -T -w 150 noscale.txt withscale.txt > scale_test_results.txt
-	@echo See scale_test_results.txt for results of scaling test
-
 #compiletest is used to test whether the library will compile easily in other compilers
 compiletest:
 	gcc -O3 -ggdb -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wshadow -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -ansi -I../src/ -I../src/include/ ../src/floatfann.c xor_train.c -o xor_train -lm 
 	gcc -O3 -ggdb -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wshadow -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -ansi -DFIXEDFANN -I../src/ -I../src/include/ ../src/fixedfann.c xor_test.c -o xor_test -lm 
 	g++ -O3 -ggdb -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -ansi -I../src/ -I../src/include/ ../src/floatfann.c xor_train.c -o xor_train -lm 
+	g++ -O3 -ggdb -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -ansi -I../src/ -I../src/include/ ../src/floatfann.c xor_sample.cpp -o xor_train -lm
 
 quickcompiletest:
 	gcc -O -ggdb -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wshadow -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -ansi -I../src/ -I../src/include/ ../src/floatfann.c ../examples/xor_train.c -o ../examples/xor_train -lm 
