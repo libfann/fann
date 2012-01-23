@@ -488,14 +488,14 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 	fann_skip("cascade_activation_functions=");
 	for(i = 0; i < ann->cascade_activation_functions_count; i++)
 	{
-	        if(fscanf(conf, "%u ", (unsigned int *)&ann->cascade_activation_functions[i]) != 1)
+		if(fscanf(conf, "%u ", (unsigned int *)&ann->cascade_activation_functions[i]) != 1)
 		{
-		       fann_error(NULL, FANN_E_CANT_READ_CONFIG, "cascade_activation_functions", configuration_file); 
-		       fann_destroy(ann); 
-		       return NULL;
+			fann_error(NULL, FANN_E_CANT_READ_CONFIG, "cascade_activation_functions", configuration_file);
+			fann_destroy(ann);
+			return NULL;
 		}
 	}
-	
+
 	fann_scanf("%u", "cascade_activation_steepnesses_count", &ann->cascade_activation_steepnesses_count);
 
 	/* reallocate mem */
@@ -511,12 +511,12 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 
 	fann_skip("cascade_activation_steepnesses=");
 	for(i = 0; i < ann->cascade_activation_steepnesses_count; i++) 
-        {
-	        if(fscanf(conf, FANNSCANF" ", &ann->cascade_activation_steepnesses[i]) != 1)
+	{
+		if(fscanf(conf, FANNSCANF" ", &ann->cascade_activation_steepnesses[i]) != 1)
 		{
-		       fann_error(NULL, FANN_E_CANT_READ_CONFIG, "cascade_activation_steepnesses", configuration_file); 
-		       fann_destroy(ann); 
-		       return NULL;
+			fann_error(NULL, FANN_E_CANT_READ_CONFIG, "cascade_activation_steepnesses", configuration_file);
+			fann_destroy(ann);
+			return NULL;
 		}
 	}
 
