@@ -7,7 +7,7 @@ SET(CMAKE_MODULE_PATH
 	${CMAKE_SOURCE_DIR}/cmake/Modules 
 )
 
-SET(VERSION 2.1.99)
+SET(VERSION 2.2.0)
 
 INCLUDE(DefineInstallationPaths)
 

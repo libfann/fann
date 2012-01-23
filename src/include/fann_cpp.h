@@ -61,6 +61,9 @@
  *
  *  Note: Changes
  *
+ *  Version 2.2.0:
+ *     - General update to fann C library 2.2.0 with support for new functionality
+ *
  *  Version 2.1.0:
  *     - General update to fann C library 2.1.0 with support for new functionality
  *     - Due to changes in the C API the C++ API is not fully backward compatible:
