@@ -2,6 +2,9 @@ ADD_SUBDIRECTORY( include )
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/include)
 ADD_DEFINITIONS(-D_REENTRANT)
+if (WIN32)
+ADD_DEFINITIONS(-DFANN_DLL_EXPORTS)
+endif (WIN32)
 ########### next target ###############
 
 SET(floatfann_LIB_SRCS
