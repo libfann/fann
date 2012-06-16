@@ -954,11 +954,21 @@ public:
         */ 
         bool create_standard(unsigned int num_layers, ...)
         {
-            va_list layers;
-            va_start(layers, num_layers);
-            bool status = create_standard_array(num_layers,
-                reinterpret_cast<const unsigned int *>(layers));
-            va_end(layers);
+			va_list layer_sizes;
+			int i;
+			unsigned int *layers = new unsigned int[num_layers];
+			if(layers == NULL) return false;
+
+			va_start(layer_sizes, num_layers);
+			for(i = 0; i < (int) num_layers; i++)
+			{
+				layers[i] = va_arg(layer_sizes, unsigned int);
+			}
+			va_end(layer_sizes);
+
+            bool status = create_standard_array(num_layers, layers);
+
+			delete layers;
             return status;
         }
 
@@ -3679,7 +3689,7 @@ public:
                 data.train_data = train;
 
                 int result = (*user_data->user_callback)(*user_data->net,
-                    data, max_epochs, epochs_between_reports, desired_error, epochs, user_data);
+                    data, max_epochs, epochs_between_reports, desired_error, epochs, user_data->user_data);
 
                 data.train_data = NULL; // Prevent automatic cleanup
                 return result;
