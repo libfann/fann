@@ -143,7 +143,7 @@ static char const *const FANN_TRAIN_NAMES[] = {
 	 * y = tanh(s*x) = 2/(1 + exp(-2*s*x)) - 1
 	 * d = s*(1-(y*y))
 
-   FANN_SIGMOID_SYMMETRIC - Stepwise linear approximation to symmetric sigmoid.
+   FANN_SIGMOID_SYMMETRIC_STEPWISE - Stepwise linear approximation to symmetric sigmoid.
 	 * Faster than symmetric sigmoid but a bit less precise.
 
    FANN_GAUSSIAN - Gaussian activation function.
