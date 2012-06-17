@@ -62,6 +62,7 @@ struct fann_error;
 	FANN_E_SCALE_NOT_PRESENT - Scaling parameters not present
     FANN_E_INPUT_NO_MATCH - The number of input neurons in the ann and data don't match
     FANN_E_OUTPUT_NO_MATCH - The number of output neurons in the ann and data don't match
+	FANN_E_WRONG_PARAMETERS_FOR_CREATE - The parameters for create_standard are wrong, either too few parameters provided or a negative/very high value provided
 */
 enum fann_errno_enum
 {
@@ -85,7 +86,8 @@ enum fann_errno_enum
 	FANN_E_INDEX_OUT_OF_BOUND,
 	FANN_E_SCALE_NOT_PRESENT,
 	FANN_E_INPUT_NO_MATCH,
-	FANN_E_OUTPUT_NO_MATCH
+	FANN_E_OUTPUT_NO_MATCH,
+	FANN_E_WRONG_PARAMETERS_FOR_CREATE
 };
 
 /* Group: Error Handling */

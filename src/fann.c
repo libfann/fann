@@ -34,6 +34,8 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_standard(unsigned int num_layers
 	struct fann *ann;
 	va_list layer_sizes;
 	int i;
+	int status;
+	int arg;
 	unsigned int *layers = (unsigned int *) calloc(num_layers, sizeof(unsigned int));
 
 	if(layers == NULL)
@@ -43,11 +45,23 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_standard(unsigned int num_layers
 	}
 
 	va_start(layer_sizes, num_layers);
+	
+	status = 1;
 	for(i = 0; i < (int) num_layers; i++)
 	{
-		layers[i] = va_arg(layer_sizes, unsigned int);
+		arg = va_arg(layer_sizes, unsigned int);
+		if(arg < 0 || arg > 1000000)
+			status = 0;
+		layers[i] = arg;
 	}
 	va_end(layer_sizes);
+
+	if(!status)
+	{
+		fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
+		free(layers);
+		return NULL;
+	}
 
 	ann = fann_create_standard_array(num_layers, layers);
 
@@ -68,6 +82,8 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse(float connection_rate,
 	struct fann *ann;
 	va_list layer_sizes;
 	int i;
+	int status;
+	int arg;
 	unsigned int *layers = (unsigned int *) calloc(num_layers, sizeof(unsigned int));
 
 	if(layers == NULL)
@@ -77,14 +93,24 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse(float connection_rate,
 	}
 
 	va_start(layer_sizes, num_layers);
+	status = 1;
 	for(i = 0; i < (int) num_layers; i++)
 	{
-		layers[i] = va_arg(layer_sizes, unsigned int);
+		arg = va_arg(layer_sizes, unsigned int);
+		if(arg < 0 || arg > 1000000)
+			status = 0;
+		layers[i] = arg;
 	}
 	va_end(layer_sizes);
 
-	ann = fann_create_sparse_array(connection_rate, num_layers, layers);
+	if(!status)
+	{
+		fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
+		free(layers);
+		return NULL;
+	}
 
+	ann = fann_create_sparse_array(connection_rate, num_layers, layers);
 	free(layers);
 
 	return ann;
@@ -367,6 +393,8 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut(unsigned int num_layers
 {
 	struct fann *ann;
 	int i;
+	int status;
+	int arg;
 	va_list layer_sizes;
 	unsigned int *layers = (unsigned int *) calloc(num_layers, sizeof(unsigned int));
 
@@ -376,13 +404,22 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut(unsigned int num_layers
 		return NULL;
 	}
 
-
 	va_start(layer_sizes, num_layers);
 	for(i = 0; i < (int) num_layers; i++)
 	{
-		layers[i] = va_arg(layer_sizes, unsigned int);
+		arg = va_arg(layer_sizes, unsigned int);
+		if(arg < 0 || arg > 1000000)
+			status = 0;
+		layers[i] = arg;
 	}
 	va_end(layer_sizes);
+
+	if(!status)
+	{
+		fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
+		free(layers);
+		return NULL;
+	}
 
 	ann = fann_create_shortcut_array(num_layers, layers);
 

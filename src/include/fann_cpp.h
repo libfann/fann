@@ -954,19 +954,23 @@ public:
         */ 
         bool create_standard(unsigned int num_layers, ...)
         {
-			va_list layer_sizes;
-			int i;
 			unsigned int *layers = new unsigned int[num_layers];
 			if(layers == NULL) return false;
 
+			va_list layer_sizes;
 			va_start(layer_sizes, num_layers);
-			for(i = 0; i < (int) num_layers; i++)
+			bool status = true;
+			for(int i = 0; i < (int) num_layers; i++)
 			{
-				layers[i] = va_arg(layer_sizes, unsigned int);
+				int arg = va_arg(layer_sizes, unsigned int);
+				if(arg < 0 || arg > 1000000)
+					status = false;
+				layers[i] = arg;
 			}
 			va_end(layer_sizes);
 
-            bool status = create_standard_array(num_layers, layers);
+			if(status)
+				status = create_standard_array(num_layers, layers);
 
 			delete layers;
             return status;
@@ -1014,11 +1018,25 @@ public:
         */
         bool create_sparse(float connection_rate, unsigned int num_layers, ...)
         {
-            va_list layers;
-            va_start(layers, num_layers);
-            bool status = create_sparse_array(connection_rate, num_layers,
-                reinterpret_cast<const unsigned int *>(layers));
-            va_end(layers);
+			unsigned int *layers = new unsigned int[num_layers];
+			if(layers == NULL) return false;
+
+			va_list layer_sizes;
+			va_start(layer_sizes, num_layers);
+			bool status = true;
+			for(int i = 0; i < (int) num_layers; i++)
+			{
+				int arg = va_arg(layer_sizes, unsigned int);
+				if(arg < 0 || arg > 1000000)
+					status = false;
+				layers[i] = arg;
+			}
+			va_end(layer_sizes);
+
+			if(status)
+	            status = create_sparse_array(connection_rate, num_layers, layers);
+
+            delete layers;
             return status;
         }
 
@@ -1044,7 +1062,7 @@ public:
 
         /* Method: create_shortcut
 
-	        Creates a standard backpropagation neural network, which is not fully connected and which
+	        Creates a standard backpropagation neural network, which is fully connected and which
 	        also has shortcut connections.
 
  	        Shortcut connections are connections that skip layers. A fully connected network with shortcut 
@@ -1061,11 +1079,25 @@ public:
         */ 
         bool create_shortcut(unsigned int num_layers, ...)
         {
-            va_list layers;
-            va_start(layers, num_layers);
-            bool status = create_shortcut_array(num_layers,
-                reinterpret_cast<const unsigned int *>(layers));
-            va_end(layers);
+			unsigned int *layers = new unsigned int[num_layers];
+			if(layers == NULL) return false;
+
+			va_list layer_sizes;
+			va_start(layer_sizes, num_layers);
+			bool status = true;
+			for(int i = 0; i < (int) num_layers; i++)
+			{
+				int arg = va_arg(layer_sizes, unsigned int);
+				if(arg < 0 || arg > 1000000)
+					status = false;
+				layers[i] = arg;
+			}
+			va_end(layer_sizes);
+
+			if(status)
+				status = create_shortcut_array(num_layers, layers);
+
+            delete layers;
             return status;
         }
 
