@@ -405,6 +405,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut(unsigned int num_layers
 	}
 
 	va_start(layer_sizes, num_layers);
+	status = 1;
 	for(i = 0; i < (int) num_layers; i++)
 	{
 		arg = va_arg(layer_sizes, unsigned int);
