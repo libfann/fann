@@ -831,6 +831,7 @@ FANN_EXTERNAL void FANN_API fann_destroy(struct fann *ann)
 	fann_safe_free(ann->errstr);
 	fann_safe_free(ann->cascade_activation_functions);
 	fann_safe_free(ann->cascade_activation_steepnesses);
+	fann_safe_free(ann->cascade_candidate_scores);
 	
 #ifndef FIXEDFANN
 	fann_safe_free( ann->scale_mean_in );
