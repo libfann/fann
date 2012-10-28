@@ -656,35 +656,7 @@ namespace FANN
             unsigned int num_input, fann_type **input,
             unsigned int num_output, fann_type **output)
         {
-            // Uses the allocation method used in fann
-            struct fann_train_data *data =
-                (struct fann_train_data *)malloc(sizeof(struct fann_train_data));
-            data->input = (fann_type **)calloc(num_data, sizeof(fann_type *));
-            data->output = (fann_type **)calloc(num_data, sizeof(fann_type *));
-
-            data->num_data = num_data;
-            data->num_input = num_input;
-            data->num_output = num_output;
-
-        	fann_type *data_input = (fann_type *)calloc(num_input*num_data, sizeof(fann_type));
-        	fann_type *data_output = (fann_type *)calloc(num_output*num_data, sizeof(fann_type));
-
-            for (unsigned int i = 0; i < num_data; ++i)
-            {
-                data->input[i] = data_input;
-                data_input += num_input;
-                for (unsigned int j = 0; j < num_input; ++j)
-                {
-                    data->input[i][j] = input[i][j];
-                }
-                data->output[i] = data_output;
-		        data_output += num_output;
-                for (unsigned int j = 0; j < num_output; ++j)
-                {
-                    data->output[i][j] = output[i][j];
-                }
-            }
-            set_train_data(data);
+            set_train_data(fann_create_train_array(num_data, num_input, input, num_output, output));
         }
 
 private:

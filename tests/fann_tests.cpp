@@ -126,3 +126,26 @@ TEST(Create, CreateShortcutArrayFourLayers) {
 	TestCreate(net, 4, layers, 15, 83);
 	EXPECT_EQ(FANN_NETTYPE_SHORTCUT, net.get_network_type());
 }
+
+TEST(CreateTrain, CreateTrainDataFromArrays) {
+	FANN::training_data data;
+	fann_type **input = new fann_type*[2];
+	fann_type **output = new fann_type*[2];
+	for(int i = 0; i < 2; i++) {
+		input[i] = new fann_type[3];
+		output[i] = new fann_type[1];
+		for(int j = 0; j < 3; j++) {
+			input[i][j] = 1.1f;
+		}
+		output[i][0] = 2.2f;
+	}
+
+	data.set_train_data(2, 3, (fann_type**)input, 1, (fann_type**)output);
+
+	for(int i = 0; i < 2; i++) {
+		for(int j = 0; j < 3; j++) {
+			EXPECT_EQ(1.1f, data.get_input()[i][j]);
+		}
+		EXPECT_EQ(2.2f, data.get_output()[i][0]);
+	}
+}

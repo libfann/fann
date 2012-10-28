@@ -257,11 +257,22 @@ FANN_EXTERNAL struct fann_train_data *FANN_API fann_read_train_from_file(const c
   
    See also:
      <fann_read_train_from_file>, <fann_train_on_data>, <fann_destroy_train>,
-     <fann_save_train>
+     <fann_save_train>, <fann_create_train_array>
 
     This function appears in FANN >= 2.2.0
 */ 
 FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train(unsigned int num_data, unsigned int num_input, unsigned int num_output);
+
+/* Function: fann_create_train_array
+   Creates an training data struct and fills it with data from provided arrays.
+  
+   See also:
+     <fann_read_train_from_file>, <fann_train_on_data>, <fann_destroy_train>,
+     <fann_save_train>, <fann_create_train>
+
+    This function appears in FANN >= 2.3.0
+*/ 
+FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_array(unsigned int num_data, unsigned int num_input, fann_type **input, unsigned int num_output, fann_type **output);
 
 /* Function: fann_create_train_from_callback
    Creates the training data struct from a user supplied function.
