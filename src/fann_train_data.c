@@ -822,7 +822,7 @@ FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train(unsigned int n
 
 FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_pointer_array(unsigned int num_data, unsigned int num_input, fann_type **input, unsigned int num_output, fann_type **output)
 {
-	unsigned int i, j;
+	unsigned int i;
     struct fann_train_data *data;
 	data = fann_create_train(num_data, num_input, num_output);
 
@@ -840,7 +840,7 @@ FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_pointer_array(
 
 FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_array(unsigned int num_data, unsigned int num_input, fann_type *input, unsigned int num_output, fann_type *output)
 {
-	unsigned int i, j;
+	unsigned int i;
     struct fann_train_data *data;
 	data = fann_create_train(num_data, num_input, num_output);
 
