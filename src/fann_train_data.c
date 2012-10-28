@@ -820,28 +820,37 @@ FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train(unsigned int n
 	return data;
 }
 
-FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_array(unsigned int num_data, unsigned int num_input, fann_type **input, unsigned int num_output, fann_type **output)
+FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_pointer_array(unsigned int num_data, unsigned int num_input, fann_type **input, unsigned int num_output, fann_type **output)
 {
 	unsigned int i, j;
     struct fann_train_data *data;
-	fprintf(stderr, "***test***\n\n");
 	data = fann_create_train(num_data, num_input, num_output);
-	printf("Allocated train data at address %p\n", data);
 
 	if(data == NULL)
 		return NULL;
 
     for (i = 0; i < num_data; ++i)
     {
-        for (j = 0; j < num_input; ++j) {
-			printf("data->input[%d][%d] = %f\n", i, j, input[i][j]);
-            data->input[i][j] = input[i][j];
-		}
+		memcpy(data->input[i], input[i], num_input*sizeof(fann_type));
+		memcpy(data->output[i], output[i], num_output*sizeof(fann_type));
+    }
+    
+	return data;
+}
 
-		for (j = 0; j < num_output; ++j) {
-			printf("data->output[%d][%d] = %f\n", i, j, output[i][j]);
-            data->output[i][j] = output[i][j];
-		}
+FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_array(unsigned int num_data, unsigned int num_input, fann_type *input, unsigned int num_output, fann_type *output)
+{
+	unsigned int i, j;
+    struct fann_train_data *data;
+	data = fann_create_train(num_data, num_input, num_output);
+
+	if(data == NULL)
+		return NULL;
+
+    for (i = 0; i < num_data; ++i)
+    {
+		memcpy(data->input[i], &input[i*num_input], num_input*sizeof(fann_type));
+		memcpy(data->output[i], &output[i*num_output], num_output*sizeof(fann_type));
     }
     
 	return data;

@@ -656,6 +656,31 @@ namespace FANN
             unsigned int num_input, fann_type **input,
             unsigned int num_output, fann_type **output)
         {
+            set_train_data(fann_create_train_pointer_array(num_data, num_input, input, num_output, output));
+        }
+
+        /* Method: set_train_data
+
+            Set the training data to the input and output data provided.
+
+            A copy of the data is made so there are no restrictions on the
+            allocation of the input/output data and the caller is responsible
+            for the deallocation of the data pointed to by input and output.
+
+           Parameters:
+             num_data      - The number of training data
+             num_input     - The number of inputs per training data
+             num_output    - The number of ouputs per training data
+             input      - The set of inputs (an array with the dimension num_data*num_input)
+             output     - The set of desired outputs (an array with the dimension num_data*num_output)
+
+            See also:
+                <get_input>, <get_output>
+        */
+        void set_train_data(unsigned int num_data,
+            unsigned int num_input, fann_type *input,
+            unsigned int num_output, fann_type *output)
+        {
             set_train_data(fann_create_train_array(num_data, num_input, input, num_output, output));
         }
 
