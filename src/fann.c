@@ -908,6 +908,7 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
     copy->bit_fail_limit = orig->bit_fail_limit;
     copy->train_error_function = orig->train_error_function;
     copy->train_stop_function = orig->train_stop_function;
+	copy->training_algorithm = orig->training_algorithm;
     copy->callback = orig->callback;
     copy->cascade_output_change_fraction = orig->cascade_output_change_fraction;
     copy->cascade_output_stagnation_epochs = orig->cascade_output_stagnation_epochs;
