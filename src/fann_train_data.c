@@ -350,7 +350,7 @@ void fann_scale_data(fann_type ** data, unsigned int num_data, unsigned int num_
 					 fann_type new_min, fann_type new_max)
 {
 	unsigned int dat, elem;
-	fann_type old_min, old_max, temp, old_span, new_span, factor;
+	fann_type old_min, old_max, temp;
 
 	old_min = old_max = data[0][0];
 
@@ -368,6 +368,18 @@ void fann_scale_data(fann_type ** data, unsigned int num_data, unsigned int num_
 				old_max = temp;
 		}
 	}
+
+	fann_scale_data_to_range(data, num_data, num_elem, old_min, old_max, new_min, new_max);
+}
+
+/*
+ * INTERNAL FUNCTION Scales data to a specific range 
+ */
+FANN_EXTERNAL void FANN_API fann_scale_data_to_range(fann_type ** data, unsigned int num_data, unsigned int num_elem,
+					 fann_type old_min, fann_type old_max, fann_type new_min, fann_type new_max)
+{
+	unsigned int dat, elem;
+	fann_type temp, old_span, new_span, factor;
 
 	old_span = old_max - old_min;
 	new_span = new_max - new_min;
@@ -400,6 +412,7 @@ void fann_scale_data(fann_type ** data, unsigned int num_data, unsigned int num_
 		}
 	}
 }
+
 
 /*
  * Scales the inputs in the training data to the specified range 
@@ -883,6 +896,21 @@ FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_from_callback(
 
     return data;
 } 
+
+FANN_EXTERNAL fann_type * FANN_API fann_get_train_input(struct fann_train_data * data, unsigned int position)
+{
+	if(position >= data->num_data)
+		return NULL;
+	return data->input[position];
+}
+
+FANN_EXTERNAL fann_type * FANN_API fann_get_train_output(struct fann_train_data * data, unsigned int position)
+{
+	if(position >= data->num_data)
+		return NULL;
+	return data->output[position];
+}
+
 
 /*
  * INTERNAL FUNCTION Reads training data from a file descriptor. 

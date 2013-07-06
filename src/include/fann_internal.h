@@ -121,6 +121,9 @@ void fann_set_shortcut_connections(struct fann *ann);
 
 int fann_allocate_scale(struct fann *ann);
 
+FANN_EXTERNAL void FANN_API fann_scale_data_to_range(fann_type ** data, unsigned int num_data, unsigned int num_elem,
+					 fann_type old_min, fann_type old_max, fann_type new_min, fann_type new_max);
+
 /* called fann_max, in order to not interferre with predefined versions of max */
 #define fann_max(x, y) (((x) > (y)) ? (x) : (y))
 #define fann_min(x, y) (((x) < (y)) ? (x) : (y))

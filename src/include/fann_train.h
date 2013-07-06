@@ -337,6 +337,26 @@ FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_from_callback(
  */ 
 FANN_EXTERNAL void FANN_API fann_destroy_train(struct fann_train_data *train_data);
 
+/* Function: fann_get_train_input
+   Gets the training input data at the given position
+
+   See also:
+     <fann_get_train_output>
+
+   This function appears in FANN >= 2.3.0
+ */ 
+FANN_EXTERNAL fann_type * FANN_API fann_get_train_input(struct fann_train_data * data, unsigned int position);
+
+/* Function: fann_get_train_output
+   Gets the training output data at the given position
+
+   See also:
+     <fann_get_train_output>
+
+   This function appears in FANN >= 2.3.0
+ */ 
+FANN_EXTERNAL fann_type * FANN_API fann_get_train_output(struct fann_train_data * data, unsigned int position);
+
 
 /* Function: fann_shuffle_train_data
    
