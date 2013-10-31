@@ -1,4 +1,18 @@
-########### install files ###############
+########### install headers ###############
 
-INSTALL_FILES( /include FILES  fann.h doublefann.h fann_internal.h floatfann.h fann_data.h fixedfann.h compat_time.h fann_activation.h fann_cascade.h fann_error.h fann_train.h fann_io.h fann_cpp.h )
-
+install(FILES
+	fann.h
+	floatfann.h
+	doublefann.h
+	fixedfann.h
+	fann_activation.h
+	fann_cascade.h
+	fann_cpp.h
+	fann_data.h
+	fann_error.h
+	fann_internal.h
+	fann_io.h
+	fann_train.h
+	DESTINATION "${INSTALL_DIR_INCLUDE}"
+	COMPONENT dev
+)

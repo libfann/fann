@@ -1,0 +1,41 @@
+#
+# FANNConfig.cmake - FANN CMake configuration file for external projects.
+#
+
+#
+# This module defines
+#  FANN_INCLUDE_DIRS, where to find fann.h, floatfann.h, etc.
+#
+# Shared versions of the libraries
+#  FANN_LIBRARY
+#  FANN_FLOAT_LIBRARY
+#  FANN_DOUBLE_LIBRARY
+#  FANN_FIXED_LIBRARY
+#
+# Static versions of the libraries
+#  FANN_STATIC_LIBRARY
+#  FANN_STATIC_FLOAT_LIBRARY
+#  FANN_STATIC_DOUBLE_LIBRARY
+#  FANN_STATIC_FIXED_LIBRARY
+#
+# When linking against static libraries, you need to define the FANN_NO_DLL preprocessor variable:
+#     SET_TARGET_PROPERTIES(your_target PROPERTIES COMPILE_DEFINITIONS FANN_NO_DLL)
+
+get_filename_component(FANN_CMAKE_DIR "${CMAKE_CURRENT_LIST_FILE}" PATH)
+
+set(FANN_INCLUDE_DIRS "@CONF_INCLUDE_DIRS@")
+ 
+# Definitions for IMPORTED targets
+include("${FANN_CMAKE_DIR}/FANNTargets.cmake")
+ 
+# These are IMPORTED targets created by FANNTargets.cmake
+set(FANN_LIBRARY fann)
+set(FANN_FLOAT_LIBRARY floatfann)
+set(FANN_DOUBLE_LIBRARY doublefann)
+set(FANN_FIXED_LIBRARY fixedfann)
+
+set(FANN_STATIC_LIBRARY fann_static)
+set(FANN_STATIC_FLOAT_LIBRARY floatfann_static)
+set(FANN_STATIC_DOUBLE_LIBRARY doublefann_static)
+set(FANN_STATIC_FIXED_LIBRARY fixedfann_static)
+
