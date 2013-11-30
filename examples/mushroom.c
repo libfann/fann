@@ -42,8 +42,8 @@ int main()
 
 	printf("Training network.\n");
 
-	fann_set_activation_function_hidden(ann, FANN_SIGMOID_SYMMETRIC_STEPWISE);
-	fann_set_activation_function_output(ann, FANN_SIGMOID_STEPWISE);
+	fann_set_activation_function_hidden(ann, FANN_SIGMOID_SYMMETRIC);
+	fann_set_activation_function_output(ann, FANN_SIGMOID);
 
 	/*fann_set_training_algorithm(ann, FANN_TRAIN_INCREMENTAL); */
 

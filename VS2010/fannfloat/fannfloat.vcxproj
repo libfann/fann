@@ -91,6 +91,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_USRDLL;FANN_DLL_EXPORTS;WIN32;_WINDOWS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -121,6 +123,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_USRDLL;FANN_DLL_EXPORTS;WIN32;_WINDOWS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>..\..\src\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <CompileAs>CompileAsCpp</CompileAs>
+      <OpenMPSupport>true</OpenMPSupport>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -154,9 +158,10 @@
     <ClCompile Include="..\..\src\fann_io.c" />
     <ClCompile Include="..\..\src\fann_train.c" />
     <ClCompile Include="..\..\src\fann_train_data.c" />
+    <ClCompile Include="..\..\src\parallel_fann.c" />
+    <ClCompile Include="..\..\src\parallel_fann_cpp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\src\include\compat_time.h" />
     <ClInclude Include="..\..\src\include\config.h" />
     <ClInclude Include="..\..\src\include\fann.h" />
     <ClInclude Include="..\..\src\include\fann_activation.h" />
@@ -167,6 +172,8 @@
     <ClInclude Include="..\..\src\include\fann_internal.h" />
     <ClInclude Include="..\..\src\include\fann_io.h" />
     <ClInclude Include="..\..\src\include\fann_train.h" />
+    <ClInclude Include="..\..\src\include\parallel_fann.h" />
+    <ClInclude Include="..\..\src\include\parallel_fann.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
