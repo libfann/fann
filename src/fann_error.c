@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <limits.h>
 
 #include "config.h"
 #include "fann.h"
@@ -29,6 +30,19 @@
 #define vsnprintf _vsnprintf
 #define snprintf _snprintf
 #endif
+
+/* define path max if not defined */
+#if defined(_WIN32) && !defined(__MINGW32__)
+#define PATH_MAX _MAX_PATH
+#endif
+#ifndef PATH_MAX
+#ifdef _POSIX_PATH_MAX
+#define PATH_MAX _POSIX_PATH_MAX
+#else
+#define PATH_MAX 4096
+#endif
+#endif
+
 
 FILE * fann_default_error_log = (FILE *)-1;
 
@@ -94,6 +108,7 @@ void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, .
 {
 	va_list ap;
 	char *errstr;
+	int errfree = 0;
 	FILE * error_log = fann_default_error_log;
 
 	if(errdat != NULL)
@@ -105,12 +120,13 @@ void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, .
 	}
 	else
 	{
-		errstr = (char *) malloc(FANN_ERRSTR_MAX);
+		errstr = (char *) malloc(FANN_ERRSTR_MAX + PATH_MAX);
 		if(errstr == NULL)
 		{
 			fprintf(stderr, "Unable to allocate memory.\n");
 			return;
 		}
+		errfree = 1;
 	}
 
 	va_start(ap, errno_f);
@@ -188,7 +204,11 @@ void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, .
 
 	if(errdat != NULL)
 	{
-		errdat->errstr = errstr;
+		if (errdat->errstr == NULL)
+		{
+			errdat->errstr = errstr;
+			errfree = 0;
+		}
 		error_log = errdat->error_log;
 	}
 
@@ -199,6 +219,10 @@ void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, .
 	else if(error_log != NULL)
 	{
 		fprintf(error_log, "FANN Error %d: %s", errno_f, errstr);
+	}
+	if (errfree)
+	{
+		free(errstr);
 	}
 }
 
