@@ -107,33 +107,17 @@ FANN_EXTERNAL void FANN_API fann_print_error(struct fann_error *errdat)
 void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, ...)
 {
 	va_list ap;
-	char *errstr;
-	int errfree = 0;
+	char errstr[FANN_ERRSTR_MAX + PATH_MAX];
 	FILE * error_log = fann_default_error_log;
 
 	if(errdat != NULL)
 		errdat->errno_f = errno_f;
 
-	if(errdat != NULL && errdat->errstr != NULL)
-	{
-		errstr = errdat->errstr;
-	}
-	else
-	{
-		errstr = (char *) malloc(FANN_ERRSTR_MAX + PATH_MAX);
-		if(errstr == NULL)
-		{
-			fprintf(stderr, "Unable to allocate memory.\n");
-			return;
-		}
-		errfree = 1;
-	}
-
 	va_start(ap, errno_f);
 	switch (errno_f)
 	{
 	case FANN_E_NO_ERROR:
-		break;
+		return;
 	case FANN_E_CANT_OPEN_CONFIG_R:
 		vsprintf(errstr, "Unable to open configuration file \"%s\" for reading.\n", ap);
 		break;
@@ -204,11 +188,21 @@ void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, .
 
 	if(errdat != NULL)
 	{
-		if (errdat->errstr == NULL)
+		if(errdat->errstr == NULL)
 		{
-			errdat->errstr = errstr;
-			errfree = 0;
+			errdat->errstr = malloc(strlen(errstr) + 1);
 		}
+		else if(strlen(errdat->errstr) < strlen(errstr))
+		{
+			errdat->errstr = realloc(errdat->errstr, strlen(errstr) + 1);
+		}
+		/* allocation failed */
+		if(errdat->errstr == NULL)
+		{
+			fprintf(stderr, "Unable to allocate memory.\n");
+			return;
+		}
+		strcpy(errdat->errstr, errstr);
 		error_log = errdat->error_log;
 	}
 
@@ -219,10 +213,6 @@ void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, .
 	else if(error_log != NULL)
 	{
 		fprintf(error_log, "FANN Error %d: %s", errno_f, errstr);
-	}
-	if (errfree)
-	{
-		free(errstr);
 	}
 }
 
