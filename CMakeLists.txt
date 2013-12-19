@@ -3,7 +3,7 @@ PROJECT (FANN)
 cmake_minimum_required(VERSION 2.8)
 
 SET(CMAKE_MODULE_PATH
-	${CMAKE_SOURCE_DIR}/cmake/Modules 
+	${CMAKE_SOURCE_DIR}/cmake/Modules
 )
 
 SET(VERSION 2.2.0)
@@ -18,11 +18,17 @@ configure_file( ${CMAKE_SOURCE_DIR}/cmake/fann.pc.cmake ${CMAKE_CURRENT_BINARY_D
 
 SET(PKGCONFIG_INSTALL_DIR /lib/pkgconfig)
 
+IF(CMAKE_COMPILER_IS_GNUCC)
+  IF(CMAKE_BUILD_TYPE STREQUAL "Release")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -march=native")
+  ENDIF()
+ENDIF()
+
 ########### install files ###############
 
 INSTALL_FILES( ${PKGCONFIG_INSTALL_DIR} FILES  fann.pc )
 
-ADD_SUBDIRECTORY( src ) 
+ADD_SUBDIRECTORY( src )
 
 ################# cpack ################
 
@@ -35,7 +41,7 @@ SET(CPACK_PACKAGE_VERSION_MINOR "2")
 SET(CPACK_PACKAGE_VERSION_PATCH "0")
 SET(CPACK_GENERATOR "TGZ;ZIP")
 SET(CPACK_SOURCE_GENERATOR "TGZ;ZIP")
-SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Steffen Nissen") 
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Steffen Nissen")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 IF(WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
