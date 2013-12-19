@@ -1,54 +1,30 @@
-ADD_SUBDIRECTORY( include ) 
+ADD_SUBDIRECTORY( include )
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/include)
 ADD_DEFINITIONS(-D_REENTRANT)
-if (WIN32)
-ADD_DEFINITIONS(-DFANN_DLL_EXPORTS)
-endif (WIN32)
-########### next target ###############
 
-SET(floatfann_LIB_SRCS
-floatfann.c
-)
+IF(WIN32)
+  ADD_DEFINITIONS(-DFANN_DLL_EXPORTS)
+ENDIF(WIN32)
 
-ADD_LIBRARY(floatfann SHARED ${floatfann_LIB_SRCS})
+MACRO(FANN_TARGET cc_file libname)
+  ADD_LIBRARY(${libname} SHARED ${cc_file})
+  ADD_LIBRARY(${libname}_static STATIC ${cc_file})
 
-SET_TARGET_PROPERTIES(floatfann PROPERTIES VERSION ${VERSION} SOVERSION 2 )
-INSTALL(TARGETS floatfann DESTINATION ${LIB_INSTALL_DIR} )
+  TARGET_LINK_LIBRARIES(${libname} m)
+  TARGET_LINK_LIBRARIES(${libname}_static m)
 
+  SET_TARGET_PROPERTIES(${libname} PROPERTIES VERSION ${VERSION} SOVERSION 2 )
+  SET_TARGET_PROPERTIES(${libname}_static PROPERTIES VERSION ${VERSION} SOVERSION 2 )
 
-########### next target ###############
+  INSTALL(TARGETS ${libname} DESTINATION ${LIB_INSTALL_DIR} )
+  INSTALL(TARGETS ${libname}_static DESTINATION ${LIB_INSTALL_DIR} )
+ENDMACRO(FANN_TARGET cc_file libname)
 
-SET(doublefann_LIB_SRCS
-doublefann.c
-)
+########### targets ###############
 
-ADD_LIBRARY(doublefann SHARED ${doublefann_LIB_SRCS})
-
-SET_TARGET_PROPERTIES(doublefann PROPERTIES VERSION ${VERSION} SOVERSION 2 )
-INSTALL(TARGETS doublefann DESTINATION ${LIB_INSTALL_DIR} )
-
-
-########### next target ###############
-
-SET(fixedfann_LIB_SRCS
-fixedfann.c
-)
-
-ADD_LIBRARY(fixedfann SHARED ${fixedfann_LIB_SRCS})
-
-SET_TARGET_PROPERTIES(fixedfann PROPERTIES VERSION ${VERSION} SOVERSION 2 )
-INSTALL(TARGETS fixedfann DESTINATION ${LIB_INSTALL_DIR} )
-
-
-########### next target ###############
-
-SET(fann_LIB_SRCS
-floatfann.c
-)
-
-ADD_LIBRARY(fann SHARED ${fann_LIB_SRCS})
-
-SET_TARGET_PROPERTIES(fann PROPERTIES VERSION ${VERSION} SOVERSION 2 )
-INSTALL(TARGETS fann DESTINATION ${LIB_INSTALL_DIR} )
+FANN_TARGET(floatfann.c fann)
+FANN_TARGET(floatfann.c floatfann)
+FANN_TARGET(doublefann.c doublefann)
+FANN_TARGET(fixedfann.c fixedfann)
 
