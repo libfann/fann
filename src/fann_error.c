@@ -107,6 +107,7 @@ FANN_EXTERNAL void FANN_API fann_print_error(struct fann_error *errdat)
 void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, ...)
 {
 	va_list ap;
+	size_t errstr_max = FANN_ERRSTR_MAX + PATH_MAX - 1;
 	char errstr[FANN_ERRSTR_MAX + PATH_MAX];
 	FILE * error_log = fann_default_error_log;
 
@@ -119,69 +120,69 @@ void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, .
 	case FANN_E_NO_ERROR:
 		return;
 	case FANN_E_CANT_OPEN_CONFIG_R:
-		vsprintf(errstr, "Unable to open configuration file \"%s\" for reading.\n", ap);
+		vsnprintf(errstr, errstr_max, "Unable to open configuration file \"%s\" for reading.\n", ap);
 		break;
 	case FANN_E_CANT_OPEN_CONFIG_W:
-		vsprintf(errstr, "Unable to open configuration file \"%s\" for writing.\n", ap);
+		vsnprintf(errstr, errstr_max, "Unable to open configuration file \"%s\" for writing.\n", ap);
 		break;
 	case FANN_E_WRONG_CONFIG_VERSION:
-		vsprintf(errstr,
+		vsnprintf(errstr, errstr_max,
 				 "Wrong version of configuration file, aborting read of configuration file \"%s\".\n",
 				 ap);
 		break;
 	case FANN_E_CANT_READ_CONFIG:
-		vsprintf(errstr, "Error reading \"%s\" from configuration file \"%s\".\n", ap);
+		vsnprintf(errstr, errstr_max, "Error reading \"%s\" from configuration file \"%s\".\n", ap);
 		break;
 	case FANN_E_CANT_READ_NEURON:
-		vsprintf(errstr, "Error reading neuron info from configuration file \"%s\".\n", ap);
+		vsnprintf(errstr, errstr_max, "Error reading neuron info from configuration file \"%s\".\n", ap);
 		break;
 	case FANN_E_CANT_READ_CONNECTIONS:
-		vsprintf(errstr, "Error reading connections from configuration file \"%s\".\n", ap);
+		vsnprintf(errstr, errstr_max, "Error reading connections from configuration file \"%s\".\n", ap);
 		break;
 	case FANN_E_WRONG_NUM_CONNECTIONS:
-		vsprintf(errstr, "ERROR connections_so_far=%d, total_connections=%d\n", ap);
+		vsnprintf(errstr, errstr_max, "ERROR connections_so_far=%d, total_connections=%d\n", ap);
 		break;
 	case FANN_E_CANT_OPEN_TD_W:
-		vsprintf(errstr, "Unable to open train data file \"%s\" for writing.\n", ap);
+		vsnprintf(errstr, errstr_max, "Unable to open train data file \"%s\" for writing.\n", ap);
 		break;
 	case FANN_E_CANT_OPEN_TD_R:
-		vsprintf(errstr, "Unable to open train data file \"%s\" for writing.\n", ap);
+		vsnprintf(errstr, errstr_max, "Unable to open train data file \"%s\" for writing.\n", ap);
 		break;
 	case FANN_E_CANT_READ_TD:
-		vsprintf(errstr, "Error reading info from train data file \"%s\", line: %d.\n", ap);
+		vsnprintf(errstr, errstr_max, "Error reading info from train data file \"%s\", line: %d.\n", ap);
 		break;
 	case FANN_E_CANT_ALLOCATE_MEM:
-		sprintf(errstr, "Unable to allocate memory.\n");
+		strcpy(errstr, "Unable to allocate memory.\n");
 		break;
 	case FANN_E_CANT_TRAIN_ACTIVATION:
-		sprintf(errstr, "Unable to train with the selected activation function.\n");
+		strcpy(errstr, "Unable to train with the selected activation function.\n");
 		break;
 	case FANN_E_CANT_USE_ACTIVATION:
-		sprintf(errstr, "Unable to use the selected activation function.\n");
+		strcpy(errstr, "Unable to use the selected activation function.\n");
 		break;
 	case FANN_E_TRAIN_DATA_MISMATCH:
-		sprintf(errstr, "Training data must be of equivalent structure.\n");
+		strcpy(errstr, "Training data must be of equivalent structure.\n");
 		break;
 	case FANN_E_CANT_USE_TRAIN_ALG:
-		sprintf(errstr, "Unable to use the selected training algorithm.\n");
+		strcpy(errstr, "Unable to use the selected training algorithm.\n");
 		break;
 	case FANN_E_TRAIN_DATA_SUBSET:
-		vsprintf(errstr, "Subset from %d of length %d not valid in training set of length %d.\n", ap);
+		vsnprintf(errstr, errstr_max, "Subset from %d of length %d not valid in training set of length %d.\n", ap);
 		break;
 	case FANN_E_INDEX_OUT_OF_BOUND:
-		vsprintf(errstr, "Index %d is out of bound.\n", ap);
+		vsnprintf(errstr, errstr_max, "Index %d is out of bound.\n", ap);
 		break;
 	case FANN_E_SCALE_NOT_PRESENT: 
-		sprintf(errstr, "Scaling parameters not present.\n");
+		strcpy(errstr, "Scaling parameters not present.\n");
 		break;
     case FANN_E_INPUT_NO_MATCH:
-    	vsprintf(errstr, "The number of input neurons in the ann (%d) and data (%d) don't match\n", ap);
+		vsnprintf(errstr, errstr_max, "The number of input neurons in the ann (%d) and data (%d) don't match\n", ap);
     	break;
     case FANN_E_OUTPUT_NO_MATCH:
-     	vsprintf(errstr, "The number of output neurons in the ann (%d) and data (%d) don't match\n", ap);
+		vsnprintf(errstr, errstr_max, "The number of output neurons in the ann (%d) and data (%d) don't match\n", ap);
      	break; 
 	case FANN_E_WRONG_PARAMETERS_FOR_CREATE: 
-		sprintf(errstr, "The parameters for create_standard are wrong, either too few parameters provided or a negative/very high value provided.\n");
+		strcpy(errstr, "The parameters for create_standard are wrong, either too few parameters provided or a negative/very high value provided.\n");
 		break;
 	}
 	va_end(ap);
