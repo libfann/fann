@@ -1,4 +1,4 @@
-if (UNIX)
+if (UNIX OR MINGW)
     IF (NOT APPLICATION_NAME)
         MESSAGE(STATUS "${PROJECT_NAME} is used as APPLICATION_NAME")
         SET(APPLICATION_NAME ${PROJECT_NAME})
@@ -122,9 +122,9 @@ if (UNIX)
         CACHE PATH "The ${APPLICATION_NAME} info install dir (default prefix/info)"
         FORCE
     )
-endif (UNIX)
+endif ()
 
-if (WIN32)
+if (MSCV)
 	# Same same
 	SET(BIN_INSTALL_DIR .)
 	SET(SBIN_INSTALL_DIR .)
@@ -134,5 +134,5 @@ if (WIN32)
 	SET(ICON_INSTALL_DIR .)
 	SET(SOUND_INSTALL_DIR .)
 	SET(LOCALE_INSTALL_DIR lang)
-endif (WIN32)
+endif (MSCV)
 

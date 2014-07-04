@@ -7,6 +7,7 @@ SET(CMAKE_MODULE_PATH
 )
 
 SET(VERSION 2.2.0)
+option(BUILD_SHARED_LIBS "build shared/static libs" ON)
 
 INCLUDE(DefineInstallationPaths)
 
