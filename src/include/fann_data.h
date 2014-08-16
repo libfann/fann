@@ -435,7 +435,7 @@ struct fann_layer
 {
 	/* A pointer to the first neuron in the layer 
 	 * When allocated, all the neurons in all the layers are actually
-	 * in one long array, this is because we wan't to easily clear all
+	 * in one long array, this is because we want to easily clear all
 	 * the neurons at once.
 	 */
 	struct fann_neuron *first_neuron;
