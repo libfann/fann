@@ -191,11 +191,11 @@ void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, .
 	{
 		if(errdat->errstr == NULL)
 		{
-			errdat->errstr = malloc(strlen(errstr) + 1);
+			errdat->errstr = (char*)malloc(strlen(errstr) + 1);
 		}
 		else if(strlen(errdat->errstr) < strlen(errstr))
 		{
-			errdat->errstr = realloc(errdat->errstr, strlen(errstr) + 1);
+			errdat->errstr = (char*)realloc(errdat->errstr, strlen(errstr) + 1);
 		}
 		/* allocation failed */
 		if(errdat->errstr == NULL)
