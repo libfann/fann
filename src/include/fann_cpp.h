@@ -962,27 +962,6 @@ public:
 
             bool status = create_standard_array(num_layers, data.get());
             return status;
-
-			//unsigned int *layers = new unsigned int[num_layers];
-			//if(layers == NULL) return false;
-
-			//va_list layer_sizes;
-			//va_start(layer_sizes, num_layers);
-			//bool status = true;
-			//for(int i = 0; i < (int) num_layers; i++)
-			//{
-			//	int arg = va_arg(layer_sizes, unsigned int);
-			//	if(arg < 0 || arg > 1000000)
-			//		status = false;
-			//	layers[i] = arg;
-			//}
-			//va_end(layer_sizes);
-
-			//if(status)
-			//	status = create_standard_array(num_layers, layers);
-
-			//delete layers;
-   //         return status;
         }
 
         /* Method: create_standard_array
@@ -1038,26 +1017,6 @@ public:
             bool status = create_sparse_array(connection_rate, num_layers,
                 data.get());
             return status;
-   //         unsigned int *layers = new unsigned int[num_layers];
-			//if(layers == NULL) return false;
-
-			//va_list layer_sizes;
-			//va_start(layer_sizes, num_layers);
-			//bool status = true;
-			//for(int i = 0; i < (int) num_layers; i++)
-			//{
-			//	int arg = va_arg(layer_sizes, unsigned int);
-			//	if(arg < 0 || arg > 1000000)
-			//		status = false;
-			//	layers[i] = arg;
-			//}
-			//va_end(layer_sizes);
-
-			//if(status)
-	  //          status = create_sparse_array(connection_rate, num_layers, layers);
-
-   //         delete layers;
-   //         return status;
         }
 
         /* Method: create_sparse_array
@@ -1109,27 +1068,6 @@ public:
 
             bool status = create_shortcut_array(num_layers, data.get());
             return status;
-
-			//unsigned int *layers = new unsigned int[num_layers];
-			//if(layers == NULL) return false;
-
-			//va_list layer_sizes;
-			//va_start(layer_sizes, num_layers);
-			//bool status = true;
-			//for(int i = 0; i < (int) num_layers; i++)
-			//{
-			//	int arg = va_arg(layer_sizes, unsigned int);
-			//	if(arg < 0 || arg > 1000000)
-			//		status = false;
-			//	layers[i] = arg;
-			//}
-			//va_end(layer_sizes);
-
-			//if(status)
-			//	status = create_shortcut_array(num_layers, layers);
-
-   //         delete layers;
-   //         return status;
         }
 
         /* Method: create_shortcut_array
