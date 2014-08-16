@@ -1,6 +1,7 @@
 #ifndef FANN_CPP_H_INCLUDED
 #define FANN_CPP_H_INCLUDED
 
+#include <memory>
 /*
  *
  *  Fast Artificial Neural Network (fann) C++ Wrapper
@@ -951,26 +952,37 @@ public:
         */ 
         bool create_standard(unsigned int num_layers, ...)
         {
-			unsigned int *layers = new unsigned int[num_layers];
-			if(layers == NULL) return false;
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
 
-			va_list layer_sizes;
-			va_start(layer_sizes, num_layers);
-			bool status = true;
-			for(int i = 0; i < (int) num_layers; i++)
-			{
-				int arg = va_arg(layer_sizes, unsigned int);
-				if(arg < 0 || arg > 1000000)
-					status = false;
-				layers[i] = arg;
-			}
-			va_end(layer_sizes);
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i=0; i<num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned int);
+            va_end(layers);
 
-			if(status)
-				status = create_standard_array(num_layers, layers);
-
-			delete layers;
+            bool status = create_standard_array(num_layers, data.get());
             return status;
+
+			//unsigned int *layers = new unsigned int[num_layers];
+			//if(layers == NULL) return false;
+
+			//va_list layer_sizes;
+			//va_start(layer_sizes, num_layers);
+			//bool status = true;
+			//for(int i = 0; i < (int) num_layers; i++)
+			//{
+			//	int arg = va_arg(layer_sizes, unsigned int);
+			//	if(arg < 0 || arg > 1000000)
+			//		status = false;
+			//	layers[i] = arg;
+			//}
+			//va_end(layer_sizes);
+
+			//if(status)
+			//	status = create_standard_array(num_layers, layers);
+
+			//delete layers;
+   //         return status;
         }
 
         /* Method: create_standard_array
@@ -1015,26 +1027,37 @@ public:
         */
         bool create_sparse(float connection_rate, unsigned int num_layers, ...)
         {
-			unsigned int *layers = new unsigned int[num_layers];
-			if(layers == NULL) return false;
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
 
-			va_list layer_sizes;
-			va_start(layer_sizes, num_layers);
-			bool status = true;
-			for(int i = 0; i < (int) num_layers; i++)
-			{
-				int arg = va_arg(layer_sizes, unsigned int);
-				if(arg < 0 || arg > 1000000)
-					status = false;
-				layers[i] = arg;
-			}
-			va_end(layer_sizes);
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i=0; i<num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned int);
+            va_end(layers);
 
-			if(status)
-	            status = create_sparse_array(connection_rate, num_layers, layers);
-
-            delete layers;
+            bool status = create_sparse_array(connection_rate, num_layers,
+                data.get());
             return status;
+   //         unsigned int *layers = new unsigned int[num_layers];
+			//if(layers == NULL) return false;
+
+			//va_list layer_sizes;
+			//va_start(layer_sizes, num_layers);
+			//bool status = true;
+			//for(int i = 0; i < (int) num_layers; i++)
+			//{
+			//	int arg = va_arg(layer_sizes, unsigned int);
+			//	if(arg < 0 || arg > 1000000)
+			//		status = false;
+			//	layers[i] = arg;
+			//}
+			//va_end(layer_sizes);
+
+			//if(status)
+	  //          status = create_sparse_array(connection_rate, num_layers, layers);
+
+   //         delete layers;
+   //         return status;
         }
 
         /* Method: create_sparse_array
@@ -1076,26 +1099,37 @@ public:
         */ 
         bool create_shortcut(unsigned int num_layers, ...)
         {
-			unsigned int *layers = new unsigned int[num_layers];
-			if(layers == NULL) return false;
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
 
-			va_list layer_sizes;
-			va_start(layer_sizes, num_layers);
-			bool status = true;
-			for(int i = 0; i < (int) num_layers; i++)
-			{
-				int arg = va_arg(layer_sizes, unsigned int);
-				if(arg < 0 || arg > 1000000)
-					status = false;
-				layers[i] = arg;
-			}
-			va_end(layer_sizes);
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i=0; i<num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned int);
+            va_end(layers);
 
-			if(status)
-				status = create_shortcut_array(num_layers, layers);
-
-            delete layers;
+            bool status = create_shortcut_array(num_layers, data.get());
             return status;
+
+			//unsigned int *layers = new unsigned int[num_layers];
+			//if(layers == NULL) return false;
+
+			//va_list layer_sizes;
+			//va_start(layer_sizes, num_layers);
+			//bool status = true;
+			//for(int i = 0; i < (int) num_layers; i++)
+			//{
+			//	int arg = va_arg(layer_sizes, unsigned int);
+			//	if(arg < 0 || arg > 1000000)
+			//		status = false;
+			//	layers[i] = arg;
+			//}
+			//va_end(layer_sizes);
+
+			//if(status)
+			//	status = create_shortcut_array(num_layers, layers);
+
+   //         delete layers;
+   //         return status;
         }
 
         /* Method: create_shortcut_array

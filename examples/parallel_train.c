@@ -24,19 +24,25 @@ int main(int argc, const char* argv[])
 {
 	const unsigned int max_epochs = 1000;
 	unsigned int num_threads = 1;
+	struct fann_train_data *data;
+	struct fann *ann;
+	long before;
+	float error;
+	unsigned int i;
+
 	if(argc == 2)
 		num_threads = atoi(argv[1]);
 
-	struct fann_train_data *data = fann_read_train_from_file("../datasets/mushroom.train");
-	struct fann *ann = fann_create_standard(3, fann_num_input_train_data(data), 32, fann_num_output_train_data(data));
+	data = fann_read_train_from_file("../datasets/mushroom.train");
+	ann = fann_create_standard(3, fann_num_input_train_data(data), 32, fann_num_output_train_data(data));
 
 	fann_set_activation_function_hidden(ann, FANN_SIGMOID_SYMMETRIC);
 	fann_set_activation_function_output(ann, FANN_SIGMOID);
 
-	long before = GetTickCount();
-	for(int i = 1; i <= max_epochs; i++)
+	before = GetTickCount();
+	for(i = 1; i <= max_epochs; i++)
 	{
-		float error = num_threads > 1 ? fann_train_epoch_irpropm_parallel(ann, data, num_threads) : fann_train_epoch(ann, data);
+		error = num_threads > 1 ? fann_train_epoch_irpropm_parallel(ann, data, num_threads) : fann_train_epoch(ann, data);
 		printf("Epochs     %8d. Current error: %.10f\n", i, error);
 	}
 	printf("ticks %d", GetTickCount()-before);

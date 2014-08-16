@@ -562,8 +562,8 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 #endif
 	}
 
-	ann->num_input = ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1;
-	ann->num_output = ((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron);
+	ann->num_input = (unsigned int)(ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1);
+	ann->num_output = (unsigned int)((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron);
 	if(ann->network_type == FANN_NETTYPE_LAYER)
 	{
 		/* one too many (bias) in the output layer */
@@ -739,8 +739,8 @@ struct fann *fann_create_from_fd_1_1(FILE * conf, const char *configuration_file
 #endif
 	}
 
-	ann->num_input = ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1;
-	ann->num_output = ((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron);
+	ann->num_input = (unsigned int)(ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1);
+	ann->num_output = (unsigned int)((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron);
 	if(ann->network_type == FANN_NETTYPE_LAYER)
 	{
 		/* one too many (bias) in the output layer */

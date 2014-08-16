@@ -3,15 +3,17 @@
  *     Author: Alessandro Pietro Bardelli
  */
 #ifndef DISABLE_PARALLEL_FANN
-#include "parallel_fann.h"
 #include <omp.h>
+#include "parallel_fann.h"
+#include "config.h"
+#include "fann.h"
 
 FANN_EXTERNAL float FANN_API fann_train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {
-	fann_reset_MSE(ann);
 	/*vector<struct fann *> ann_vect(threadnumb);*/
 	struct fann** ann_vect= (struct fann**) malloc(threadnumb * sizeof(struct fann*));
 	int i=0,j=0;
+	fann_reset_MSE(ann);
 
 	//generate copies of the ann
 	omp_set_dynamic(0);
@@ -79,6 +81,8 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_batch_parallel(struct fann *ann, s
 
 FANN_EXTERNAL float FANN_API fann_train_epoch_irpropm_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {
+	struct fann** ann_vect= (struct fann**) malloc(threadnumb * sizeof(struct fann*));
+	int i=0,j=0;
 
 	if(ann->prev_train_slopes == NULL)
 	{
@@ -89,8 +93,6 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_irpropm_parallel(struct fann *ann,
 	fann_reset_MSE(ann);
 
 	/*vector<struct fann *> ann_vect(threadnumb);*/
-	struct fann** ann_vect= (struct fann**) malloc(threadnumb * sizeof(struct fann*));
-	int i=0,j=0;
 
 	//generate copies of the ann
 	omp_set_dynamic(0);
@@ -139,7 +141,7 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_irpropm_parallel(struct fann *ann,
 			#pragma omp for schedule(static)
 				for(i=first_weight; i < (int)past_end; i++)
 				{
-
+					fann_type prev_slope, same_sign;
 		    		const fann_type prev_step = fann_max(prev_steps[i], (fann_type) 0.0001);	// prev_step may not be zero because then the training will stop
 
 		    		fann_type temp_slopes=0.0;
@@ -152,9 +154,9 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_irpropm_parallel(struct fann *ann,
 						train_slopes[i]=0.0;
 					}
 
-		    		const fann_type prev_slope = prev_train_slopes[i];
+		    		prev_slope = prev_train_slopes[i];
 
-		    		const fann_type same_sign = prev_slope * temp_slopes;
+		    		same_sign = prev_slope * temp_slopes;
 
 		    		if(same_sign >= 0.0)
 		    			next_step = fann_min(prev_step * increase_factor, delta_max);
@@ -199,6 +201,8 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_irpropm_parallel(struct fann *ann,
 
 FANN_EXTERNAL float FANN_API fann_train_epoch_quickprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {
+	struct fann** ann_vect= (struct fann**) malloc(threadnumb * sizeof(struct fann*));
+	int i=0,j=0;
 
 	if(ann->prev_train_slopes == NULL)
 	{
@@ -209,8 +213,6 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_quickprop_parallel(struct fann *an
 	fann_reset_MSE(ann);
 
 	/*vector<struct fann *> ann_vect(threadnumb);*/
-	struct fann** ann_vect= (struct fann**) malloc(threadnumb * sizeof(struct fann*));
-	int i=0,j=0;
 
 	//generate copies of the ann
 	omp_set_dynamic(0);
@@ -258,12 +260,12 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_quickprop_parallel(struct fann *an
 			#pragma omp for schedule(static)
 				for(i=first_weight; i < (int)past_end; i++)
 				{
-
-					w = weights[i];
-
 					fann_type temp_slopes=0.0;
 					unsigned int k;
 					fann_type *train_slopes;
+					fann_type prev_step, prev_slope;
+
+					w = weights[i];
 					for(k=0;k<threadnumb;++k)
 					{
 						train_slopes=ann_vect[k]->train_slopes;
@@ -272,8 +274,8 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_quickprop_parallel(struct fann *an
 					}
 					temp_slopes+= decay * w;
 
-					const fann_type prev_step = prev_steps[i];
-					const fann_type prev_slope = prev_train_slopes[i];
+					prev_step = prev_steps[i];
+					prev_slope = prev_train_slopes[i];
 
 					next_step = 0.0;
 
@@ -335,6 +337,9 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_quickprop_parallel(struct fann *an
 
 FANN_EXTERNAL float FANN_API fann_train_epoch_sarprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {
+	struct fann** ann_vect= (struct fann**) malloc(threadnumb * sizeof(struct fann*));
+	int i=0,j=0;
+
 	if(ann->prev_train_slopes == NULL)
 	{
 		fann_clear_train_arrays(ann);
@@ -344,8 +349,6 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_sarprop_parallel(struct fann *ann,
 	fann_reset_MSE(ann);
 
 	/*vector<struct fann *> ann_vect(threadnumb);*/
-	struct fann** ann_vect= (struct fann**) malloc(threadnumb * sizeof(struct fann*));
-	int i=0,j=0;
 
 	//generate copies of the ann
 	omp_set_dynamic(0);
@@ -392,6 +395,7 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_sarprop_parallel(struct fann *ann,
     	const float step_error_threshold_factor = ann->sarprop_step_error_threshold_factor; /* 0.1 */
     	const float step_error_shift = ann->sarprop_step_error_shift; /* ld 3 = 1.585 */
     	const float T = ann->sarprop_temperature;
+		float MSE, RMSE;
 
 
     	//merge of MSEs
@@ -401,8 +405,8 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_sarprop_parallel(struct fann *ann,
     		ann->num_MSE+=ann_vect[i]->num_MSE;
     	}
 
-    	const float MSE = fann_get_MSE(ann);
-    	const float RMSE = (float)sqrt(MSE);
+    	MSE = fann_get_MSE(ann);
+    	RMSE = (float)sqrt(MSE);
 
     	/* for all weights; TODO: are biases included? */
 		omp_set_dynamic(0);
@@ -416,7 +420,7 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_sarprop_parallel(struct fann *ann,
 					const fann_type prev_step  = fann_max(prev_steps[i], (fann_type) 0.000001);	/* prev_step may not be zero because then the training will stop */
 
 					/* calculate SARPROP slope; TODO: better as new error function? (see SARPROP paper)*/
-
+					fann_type prev_slope, same_sign;
 					fann_type temp_slopes=0.0;
 					unsigned int k;
 					fann_type *train_slopes;
@@ -431,9 +435,9 @@ FANN_EXTERNAL float FANN_API fann_train_epoch_sarprop_parallel(struct fann *ann,
 					next_step=0.0;
 
 					/* TODO: is prev_train_slopes[i] 0.0 in the beginning? */
-					const fann_type prev_slope = prev_train_slopes[i];
+					prev_slope = prev_train_slopes[i];
 
-					const fann_type same_sign = prev_slope * temp_slopes;
+					same_sign = prev_slope * temp_slopes;
 
 					if(same_sign > 0.0)
 					{
