@@ -56,15 +56,6 @@ TEST(Create, CreateStandardFourLayers) {
 	TestCreate(net, 4, layers, 17, 50);
 }
 
-TEST(Create, CreateStandardWillFailIfLessParametersAreGiven) {
-    FANN::neural_net net;
-    EXPECT_FALSE(net.create_standard(3, 2, 3));
-}
-
-TEST(Create, CreateStandardWillFailIfLessParametersAreGivenForCLibrary) {
-	EXPECT_EQ(NULL, fann_create_standard(3, 2, 3));
-}
-
 TEST(Create, CreateStandardFourLayersArray) {
 	unsigned int layers[] = {2, 3, 4, 5};
 	FANN::neural_net net;
@@ -93,30 +84,12 @@ TEST(Create, CreateSparseArrayWithMinimalConnectivity) {
 	TestCreate(net, 3, layers, 8, 8);
 }
 
-TEST(Create, CreateSparseWillFailIfLessParametersAreGiven) {
-	FANN::neural_net net;
-	EXPECT_FALSE(net.create_sparse(0.5f, 3, 2, 3));
-}
-
-TEST(Create, CreateSparseWillFailIfLessParametersAreGivenForCLibrary) {
-	EXPECT_EQ(NULL, fann_create_sparse(0.5f, 3, 2, 3));
-}
-
 TEST(Create, CreateShortcutFourLayers) {
 	FANN::neural_net net;
 	ASSERT_TRUE(net.create_shortcut(4, 2, 3, 4, 5));
 	unsigned int layers[] = {2, 3, 4, 5};
 	TestCreate(net, 4, layers, 15, 83);
 	EXPECT_EQ(FANN_NETTYPE_SHORTCUT, net.get_network_type());
-}
-
-TEST(Create, CreateShortcutWillFailIfLessParametersAreGiven) {
-	FANN::neural_net net;
-	EXPECT_FALSE(net.create_shortcut(3, 2, 3));
-}
-
-TEST(Create, CreateShortcutWillFailIfLessParametersAreGivenForCLibrary) {
-	EXPECT_EQ(NULL, fann_create_shortcut(3, 2, 3));
 }
 
 TEST(Create, CreateShortcutArrayFourLayers) {
