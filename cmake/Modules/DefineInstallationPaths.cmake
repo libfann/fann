@@ -122,6 +122,13 @@ if (UNIX OR MINGW)
         CACHE PATH "The ${APPLICATION_NAME} info install dir (default prefix/info)"
         FORCE
     )
+
+    SET(CMAKE_CONFIG_DIR
+      "${LIB_INSTALL_DIR}/cmake/fann"
+      CACHE PATH "config dir"
+      FORCE
+    )
+
 endif ()
 
 if (MSCV)
@@ -135,4 +142,6 @@ if (MSCV)
 	SET(SOUND_INSTALL_DIR .)
 	SET(LOCALE_INSTALL_DIR lang)
 endif (MSCV)
+
+SET(PKGCONFIG_INSTALL_DIR lib/pkgconfig)
 
