@@ -1495,6 +1495,16 @@ FANN_EXTERNAL void FANN_API fann_set_weight(struct fann *ann,
     }
 }
 
+FANN_EXTERNAL void FANN_API fann_get_weights(struct fann *ann, fann_type *weights)
+{
+	memcpy(weights, ann->weights, sizeof(fann_type)*ann->total_connections);
+}
+
+FANN_EXTERNAL void FANN_API fann_set_weights(struct fann *ann, fann_type *weights)
+{
+	memcpy(ann->weights, weights, sizeof(fann_type)*ann->total_connections);
+}
+
 FANN_GET_SET(void *, user_data)
 
 #ifdef FIXEDFANN
