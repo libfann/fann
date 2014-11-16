@@ -527,6 +527,37 @@ FANN_EXTERNAL void FANN_API fann_set_weight_array(struct fann *ann,
 FANN_EXTERNAL void FANN_API fann_set_weight(struct fann *ann,
     unsigned int from_neuron, unsigned int to_neuron, fann_type weight);
 
+/* Function: fann_get_weights
+
+    Get all the network weights.
+
+    Parameters:
+		ann - A previously created neural network structure of
+            type <struct fann> pointer.
+		weights - A fann_type pointer to user data. It is the responsibility
+			of the user to allocate sufficient space to store all the weights.
+
+   This function appears in FANN >= x.y.z
+*/
+FANN_EXTERNAL void FANN_API fann_get_weights(struct fann *ann, fann_type *weights);
+
+
+/* Function: fann_set_weights
+
+    Set network weights.
+
+    Parameters:
+		ann - A previously created neural network structure of
+            type <struct fann> pointer.
+		weights - A fann_type pointer to user data. It is the responsibility
+			of the user to make the weights array sufficient long 
+			to store all the weights.
+
+   This function appears in FANN >= x.y.z
+*/
+FANN_EXTERNAL void FANN_API fann_set_weights(struct fann *ann, fann_type *weights);
+
+
 /* Function: fann_set_user_data
 
     Store a pointer to user defined data. The pointer can be
