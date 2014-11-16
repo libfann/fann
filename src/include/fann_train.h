@@ -403,7 +403,7 @@ FANN_EXTERNAL void FANN_API fann_descale_train( struct fann *ann, struct fann_tr
    Calculate input scaling parameters for future use based on training data.
    
    Parameters:
-   	 ann           - ann for wgich parameters needs to be calculated
+   	 ann           - ann for which parameters needs to be calculated
    	 data          - training data that will be used to calculate scaling parameters
    	 new_input_min - desired lower bound in input data after scaling (not strictly followed)
    	 new_input_max - desired upper bound in input data after scaling (not strictly followed)
@@ -424,10 +424,10 @@ FANN_EXTERNAL int FANN_API fann_set_input_scaling_params(
    Calculate output scaling parameters for future use based on training data.
    
    Parameters:
-   	 ann            - ann for wgich parameters needs to be calculated
+   	 ann            - ann for which parameters needs to be calculated
    	 data           - training data that will be used to calculate scaling parameters
-   	 new_output_min - desired lower bound in input data after scaling (not strictly followed)
-   	 new_output_max - desired upper bound in input data after scaling (not strictly followed)
+   	 new_output_min - desired lower bound in output data after scaling (not strictly followed)
+   	 new_output_max - desired upper bound in output data after scaling (not strictly followed)
    	 
    See also:
    	 <fann_set_input_scaling_params>
@@ -445,12 +445,12 @@ FANN_EXTERNAL int FANN_API fann_set_output_scaling_params(
    Calculate input and output scaling parameters for future use based on training data.
 
    Parameters:
-   	 ann            - ann for wgich parameters needs to be calculated
+   	 ann            - ann for which parameters needs to be calculated
    	 data           - training data that will be used to calculate scaling parameters
    	 new_input_min  - desired lower bound in input data after scaling (not strictly followed)
    	 new_input_max  - desired upper bound in input data after scaling (not strictly followed)
-   	 new_output_min - desired lower bound in input data after scaling (not strictly followed)
-   	 new_output_max - desired upper bound in input data after scaling (not strictly followed)
+   	 new_output_min - desired lower bound in output data after scaling (not strictly followed)
+   	 new_output_max - desired upper bound in output data after scaling (not strictly followed)
    	 
    See also:
    	 <fann_set_input_scaling_params>, <fann_set_output_scaling_params>
