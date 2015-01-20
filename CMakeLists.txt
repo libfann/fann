@@ -1,3 +1,43 @@
+IF(BIICODE)
+	# Initializes block variables
+	INIT_BIICODE_BLOCK()
+	
+	# Output folder for binaries
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin/fann/examples)
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG  ${CMAKE_SOURCE_DIR}/../bin/fann/examples)
+
+	# Copy datasets for examples if exists
+	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/datasets)
+	  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/datasets DESTINATION ${CMAKE_SOURCE_DIR}/../bin/)
+	ENDIF()
+
+	# Include recipes block for CPP11 activation
+	INCLUDE(biicode/cmake/tools)
+
+	# Are examples present?
+	LIST(FIND BII_BLOCK_EXES examples_parallel_train examples_present)
+	SET(examples_present (NOT ${examples_present} EQUAL "-1")) # Depending on examples
+	IF(${examples_present} AND NOT WIN32 AND NOT APPLE) # Linux doesn't have GetTickCount
+		LIST(REMOVE_ITEM BII_BLOCK_EXES examples_parallel_train)		
+	ENDIF()
+
+	ADD_BIICODE_TARGETS()
+	
+	IF(${examples_present})
+	   # This example needs CPP11
+           ACTIVATE_CPP11(lasote_fann_examples_xor_sample)
+	ENDIF()
+
+	TARGET_COMPILE_OPTIONS(${BII_BLOCK_TARGET} INTERFACE -DGTEST_ENABLE_CATCH_EXCEPTIONS_=1)
+
+	IF(MSVC)
+	  TARGET_COMPILE_OPTIONS(${BII_LIB_TARGET} PUBLIC -DFANN_DLL_EXPORTS)
+	ELSE()
+	  IF(${examples_present})
+	    TARGET_LINK_LIBRARIES(${BII_BLOCK_TARGET} INTERFACE gomp)
+	  ENDIF()
+	ENDIF()
+ELSE()
 PROJECT (FANN)
 #SET(CMAKE_VERBOSE_MAKEFILE ON)
 cmake_minimum_required(VERSION 2.8)
@@ -54,3 +94,4 @@ ELSE(WIN32 AND NOT UNIX)
 ENDIF(WIN32 AND NOT UNIX)
 #SET(CPACK_PACKAGE_EXECUTABLES "MyExecutable" "My Executable")
 INCLUDE(CPack)
+ENDIF()
