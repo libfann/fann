@@ -62,10 +62,10 @@ That's it! If everything went right, you should see a lot of text, and FANN shou
 
 * [Get started with biicode](http://web.biicode.com/learn/getting-started/)
 
-* Create new biicode project folder:
+* Create a project folder:
 
 ````
-$ bii init fann_project -l
+$ mkdir fann_project 
 $ cd fann_project
 ````
 
