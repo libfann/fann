@@ -766,7 +766,63 @@ FANN_EXTERNAL float FANN_API fann_get_learning_momentum(struct fann *ann);
  */ 
 FANN_EXTERNAL void FANN_API fann_set_learning_momentum(struct fann *ann, float learning_momentum);
 
+/* Function: fann_get_learning_l1_norm
 
+   Get the learning l1 norm.
+   
+   The learning l1 norm can be used to regulate FANN_TRAIN_INCREMENTAL training.
+   A too high l1 norm will however not benefit training. Setting l1 norm to 0 will
+   be the same as not using the l1 norm parameter. The recommended value of this parameter
+   is between 0.0 and 1.0.
+
+   The default l1 norm is 0.
+   
+   See also:
+   <fann_set_learning_l1_norm>, <fann_set_training_algorithm>
+
+   This function appears in FANN >= 2.0.0.    
+ */ 
+FANN_EXTERNAL float FANN_API fann_get_learning_l1_norm(struct fann *ann);
+
+
+/* Function: fann_set_learning_l1_norm
+
+   Set the learning l1 norm.
+
+   More info available in <fann_get_learning_l1_norm>
+
+   This function appears in FANN >= 2.0.0.    
+ */ 
+FANN_EXTERNAL void FANN_API fann_set_learning_l1_norm(struct fann *ann, float learning_l1_norm);
+
+/* Function: fann_get_learning_l2_norm
+
+   Get the learning l2 norm.
+   
+   The learning l2 norm can be used to regulate FANN_TRAIN_INCREMENTAL training.
+   A too high l2 norm will however not benefit training. Setting l2 norm to 1.0 will
+   be the same as not using the l2 norm parameter. The recommended value of this parameter
+   is between 0.0 and 1.0.
+
+   The default l2 norm is 1.0.
+   
+   See also:
+   <fann_set_learning_l2_norm>, <fann_set_training_algorithm>
+
+   This function appears in FANN >= 2.0.0.    
+ */ 
+FANN_EXTERNAL float FANN_API fann_get_learning_l2_norm(struct fann *ann);
+
+
+/* Function: fann_set_learning_l2_norm
+
+   Set the learning l2 norm.
+
+   More info available in <fann_get_learning_l2_norm>
+
+   This function appears in FANN >= 2.0.0.    
+ */ 
+FANN_EXTERNAL void FANN_API fann_set_learning_l2_norm(struct fann *ann, float learning_l2_norm);
 /* Function: fann_get_activation_function
 
    Get the activation function for neuron number *neuron* in layer number *layer*, 
