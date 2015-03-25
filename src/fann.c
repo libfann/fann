@@ -790,12 +790,20 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 #else
 			neuron_sum = fann_mult(steepness, neuron_sum);
 			
-			max_sum = 150/steepness;
-			if(neuron_sum > max_sum)
-				neuron_sum = max_sum;
-			else if(neuron_sum < -max_sum)
-				neuron_sum = -max_sum;
-			
+			switch (activation_function)
+			{
+				case FANN_LINEAR:
+					break;
+				default:
+
+					max_sum = 150/steepness;
+					if(neuron_sum > max_sum)
+						neuron_sum = max_sum;
+					else if(neuron_sum < -max_sum)
+						neuron_sum = -max_sum;
+					break;
+			}
+
 			neuron_it->sum = neuron_sum;
 
 			fann_activation_switch(activation_function, neuron_sum, neuron_it->value);
