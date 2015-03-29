@@ -113,7 +113,7 @@ if (UNIX)
 endif ()
 
 if (CMAKE_VERSION VERSION_LESS 2.8.8)
-  configure_file (cmake/fann-config.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/fann-config.cmake.cmake @ONLY)
+  configure_file (cmake/fann-config.cmake.in ${CMAKE_CURRENT_BINARY_DIR}/fann-config.cmake @ONLY)
 else ()
 
   include (CMakePackageConfigHelpers)
