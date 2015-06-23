@@ -27,10 +27,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
    training have also proved better at solving some problems.
    
    The basic idea of cascade training is that a number of candidate neurons are trained separate from the 
-   real network, then the most promissing of these candidate neurons is inserted into the neural network. 
+   real network, then the most promising of these candidate neurons is inserted into the neural network. 
    Then the output connections are trained and new candidate neurons is prepared. The candidate neurons are 
-   created as shorcut connected neurons in a new hidden layer, which means that the final neural network
-   will consist of a number of hidden layers with one shorcut connected neuron in each.
+   created as shortcut connected neurons in a new hidden layer, which means that the final neural network
+   will consist of a number of hidden layers with one shortcut connected neuron in each.
 */
 
 /* Group: Cascade Training */
@@ -102,7 +102,7 @@ FANN_EXTERNAL void FANN_API fann_cascadetrain_on_file(struct fann *ann, const ch
    If the cascade output change fraction is low, the output connections will be trained more and if the
    fraction is high they will be trained less.
    
-   The default cascade output change fraction is 0.01, which is equalent to a 1% change in MSE.
+   The default cascade output change fraction is 0.01, which is equivalent to a 1% change in MSE.
 
    See also:
    		<fann_set_cascade_output_change_fraction>, <fann_get_MSE>, <fann_get_cascade_output_stagnation_epochs>
@@ -169,7 +169,7 @@ FANN_EXTERNAL void FANN_API fann_set_cascade_output_stagnation_epochs(struct fan
    If the cascade candidate change fraction is low, the candidate neurons will be trained more and if the
    fraction is high they will be trained less.
    
-   The default cascade candidate change fraction is 0.01, which is equalent to a 1% change in MSE.
+   The default cascade candidate change fraction is 0.01, which is equivalent to a 1% change in MSE.
 
    See also:
    		<fann_set_cascade_candidate_change_fraction>, <fann_get_MSE>, <fann_get_cascade_candidate_stagnation_epochs>

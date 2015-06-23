@@ -100,8 +100,8 @@ namespace FANN
     	
 	    ERRORFUNC_LINEAR - Standard linear error function.
 	    ERRORFUNC_TANH - Tanh error function, usually better 
-		    but can require a lower learning rate. This error function agressively targets outputs that
-		    differ much from the desired, while not targetting outputs that only differ a little that much.
+		    but can require a lower learning rate. This error function aggressively targets outputs that
+		    differ much from the desired, while not targeting outputs that only differ a little that much.
 		    This activation function is not recommended for cascade training and incremental training.
 
 	    See also:
@@ -327,7 +327,7 @@ namespace FANN
         >    unsigned int max_epochs, unsigned int epochs_between_reports,
         >    float desired_error, unsigned int epochs, void *user_data);
     	
-	    The callback can be set by using <neural_net::set_callback> and is very usefull for doing custom 
+	    The callback can be set by using <neural_net::set_callback> and is very useful for doing custom 
 	    things during training. It is recommended to use this function when implementing custom 
 	    training procedures, or when visualizing the training in a GUI etc. The parameters which the
 	    callback function takes is the parameters given to the <neural_net::train_on_data>, plus an epochs
@@ -474,7 +474,7 @@ namespace FANN
            
            Saves the training structure to a fixed point data file.
          
-           This function is very usefull for testing the quality of a fixed point network.
+           This function is very useful for testing the quality of a fixed point network.
            
            Return:
            The function returns true on success and false on failure.
@@ -1246,7 +1246,7 @@ public:
            But it is saved in fixed point format no matter which
            format it is currently in.
 
-           This is usefull for training a network in floating points,
+           This is useful for training a network in floating points,
            and then later executing it in fixed point.
 
            The function returns the bit position of the fix point, which
@@ -1743,7 +1743,7 @@ public:
            
            The steepness of an activation function says something about how fast the activation function 
            goes from the minimum to the maximum. A high value for the activation function will also
-           give a more agressive training.
+           give a more aggressive training.
            
            When training neural networks where the output values should be at the extremes (usually 0 and 1, 
            depending on the activation function), a steep activation function can be used (e.g. 1.0).
@@ -1779,7 +1779,7 @@ public:
            
            The steepness of an activation function says something about how fast the activation function 
            goes from the minimum to the maximum. A high value for the activation function will also
-           give a more agressive training.
+           give a more aggressive training.
            
            When training neural networks where the output values should be at the extremes (usually 0 and 1, 
            depending on the activation function), a steep activation function can be used (e.g. 1.0).

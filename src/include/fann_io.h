@@ -69,7 +69,7 @@ FANN_EXTERNAL int FANN_API fann_save(struct fann *ann, const char *configuration
    But it is saved in fixed point format no matter which
    format it is currently in.
 
-   This is usefull for training a network in floating points,
+   This is useful for training a network in floating points,
    and then later executing it in fixed point.
 
    The function returns the bit position of the fix point, which
@@ -80,7 +80,7 @@ FANN_EXTERNAL int FANN_API fann_save(struct fann *ann, const char *configuration
    A negative value indicates very low precision, and a very
    strong possibility for overflow.
    (the actual fix point will be set to 0, since a negative
-   fix point does not make sence).
+   fix point does not make sense).
 
    Generally, a fix point lower than 6 is bad, and should be avoided.
    The best way to avoid this, is to have less connections to each neuron,

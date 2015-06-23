@@ -31,8 +31,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
    and executed by <fann_run>.
    
    All of this can be done without much knowledge of the internals of ANNs, although the ANNs created will
-   still be powerfull and effective. If you have more knowledge about ANNs, and desire more control, almost
-   every part of the ANNs can be parametized to create specialized and highly optimal ANNs.
+   still be powerful and effective. If you have more knowledge about ANNs, and desire more control, almost
+   every part of the ANNs can be parametrized to create specialized and highly optimal ANNs.
  */
 /* Group: Creation, Destruction & Execution */
 	
@@ -259,7 +259,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut(unsigned int num_layers
 FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_layers,
 															   const unsigned int *layers);
 /* Function: fann_destroy
-   Destroys the entire network and properly freeing all the associated memmory.
+   Destroys the entire network and properly freeing all the associated memory.
 
 	This function appears in FANN >= 1.0.0.
 */ 

@@ -264,8 +264,8 @@ static char const *const FANN_ACTIVATIONFUNC_NAMES[] = {
 	
 	FANN_ERRORFUNC_LINEAR - Standard linear error function.
 	FANN_ERRORFUNC_TANH - Tanh error function, usually better 
-		but can require a lower learning rate. This error function agressively targets outputs that
-		differ much from the desired, while not targetting outputs that only differ a little that much.
+		but can require a lower learning rate. This error function aggressively targets outputs that
+		differ much from the desired, while not targeting outputs that only differ a little that much.
 		This activation function is not recommended for cascade training and incremental training.
 
 	See also:
@@ -377,7 +377,7 @@ struct fann_train_data;
 	>                                             unsigned int epochs_between_reports, 
 	>                                             float desired_error, unsigned int epochs);
 	
-	The callback can be set by using <fann_set_callback> and is very usefull for doing custom 
+	The callback can be set by using <fann_set_callback> and is very useful for doing custom 
 	things during training. It is recommended to use this function when implementing custom 
 	training procedures, or when visualizing the training in a GUI etc. The parameters which the
 	callback function takes is the parameters given to the <fann_train_on_data>, plus an epochs
@@ -513,7 +513,7 @@ struct fann
 	struct fann_layer *last_layer;
 
 	/* Total number of neurons.
-	 * very usefull, because the actual neurons are allocated in one long array
+	 * very useful, because the actual neurons are allocated in one long array
 	 */
 	unsigned int total_neurons;
 
@@ -563,7 +563,7 @@ struct fann
 #endif
 
 	/* Total number of connections.
-	 * very usefull, because the actual connections
+	 * very useful, because the actual connections
 	 * are allocated in one long array
 	 */
 	unsigned int total_connections;

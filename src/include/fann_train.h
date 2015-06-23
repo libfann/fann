@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  	There are many different ways of training neural networks and the FANN library supports
  	a number of different approaches. 
  	
- 	Two fundementally different approaches are the most commonly used:
+ 	Two fundamentally different approaches are the most commonly used:
  	
  		Fixed topology training - The size and topology of the ANN is determined in advance
  			and the training alters the weights in order to minimize the difference between
@@ -234,15 +234,15 @@ FANN_EXTERNAL float FANN_API fann_test_data(struct fann *ann, struct fann_train_
    
    The file must be formatted like:
    >num_train_data num_input num_output
-   >inputdata seperated by space
-   >outputdata seperated by space
+   >inputdata separated by space
+   >outputdata separated by space
    >
    >.
    >.
    >.
    >
-   >inputdata seperated by space
-   >outputdata seperated by space
+   >inputdata separated by space
+   >outputdata separated by space
    
    See also:
    	<fann_train_on_data>, <fann_destroy_train>, <fann_save_train>
@@ -305,7 +305,7 @@ FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_array(unsigned
      num_data      - The number of training data
      num_input     - The number of inputs per training data
      num_output    - The number of ouputs per training data
-     user_function - The user suplied function
+     user_function - The user supplied function
 
    Parameters for the user function:
      num        - The number of the training data set
@@ -663,7 +663,7 @@ FANN_EXTERNAL int FANN_API fann_save_train(struct fann_train_data *data, const c
    
    Saves the training structure to a fixed point data file.
  
-   This function is very usefull for testing the quality of a fixed point network.
+   This function is very useful for testing the quality of a fixed point network.
    
    Return:
    The function returns 0 on success and -1 on failure.
@@ -874,7 +874,7 @@ FANN_EXTERNAL void FANN_API fann_set_activation_function_output(struct fann *ann
    
    The steepness of an activation function says something about how fast the activation function 
    goes from the minimum to the maximum. A high value for the activation function will also
-   give a more agressive training.
+   give a more aggressive training.
    
    When training neural networks where the output values should be at the extremes (usually 0 and 1, 
    depending on the activation function), a steep activation function can be used (e.g. 1.0).
@@ -904,7 +904,7 @@ FANN_EXTERNAL fann_type FANN_API fann_get_activation_steepness(struct fann *ann,
    
    The steepness of an activation function says something about how fast the activation function 
    goes from the minimum to the maximum. A high value for the activation function will also
-   give a more agressive training.
+   give a more aggressive training.
    
    When training neural networks where the output values should be at the extremes (usually 0 and 1, 
    depending on the activation function), a steep activation function can be used (e.g. 1.0).
