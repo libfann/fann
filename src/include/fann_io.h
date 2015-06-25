@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /* Function: fann_create_from_file
    
-   Constructs a backpropagation neural network from a configuration file, which have been saved by <fann_save>.
+   Constructs a backpropagation neural network from a configuration file, which has been saved by <fann_save>.
    
    See also:
    	<fann_save>, <fann_save_to_fixed>
@@ -48,9 +48,9 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_from_file(const char *configurat
    parameters associated with the neural network.
    
    These three parameters (<fann_set_callback>, <fann_set_error_log>,
-   <fann_set_user_data>) are *NOT* saved  to the file because they cannot safely be
+   <fann_set_user_data>) are *NOT* saved to the file because they cannot safely be
    ported to a different location. Also temporary parameters generated during training
-   like <fann_get_MSE> is not saved.
+   like <fann_get_MSE> are not saved.
    
    Return:
    The function returns 0 on success and -1 on failure.
