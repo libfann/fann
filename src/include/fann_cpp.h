@@ -143,7 +143,7 @@ namespace FANN
 		    this algorithm, while other more advanced problems will not train very well.
 	    TRAIN_BATCH -  Standard backpropagation algorithm, where the weights are updated after 
 		    calculating the mean square error for the whole training set. This means that the weights 
-		    are only updated once during a epoch. For this reason some problems, will train slower with 
+		    are only updated once during an epoch. For this reason some problems, will train slower with
 		    this algorithm. But since the mean square error is calculated more correctly than in 
 		    incremental training, some problems will reach a better solutions with this algorithm.
 	    TRAIN_RPROP - A more advanced batch training algorithm which achieves good results 
@@ -153,7 +153,7 @@ namespace FANN
 		    training algorithm works. The RPROP training algorithm is described by 
 		    [Riedmiller and Braun, 1993], but the actual learning algorithm used here is the 
 		    iRPROP- training algorithm which is described by [Igel and Husken, 2000] which 
-    	    is an variety of the standard RPROP training algorithm.
+		    is a variant of the standard RPROP training algorithm.
 	    TRAIN_QUICKPROP - A more advanced batch training algorithm which achieves good results 
 		    for many problems. The quickprop training algorithm uses the learning_rate parameter 
 		    along with other more advanced parameters, but it is only recommended to change these 
@@ -1649,7 +1649,7 @@ public:
            
            When choosing an activation function it is important to note that the activation 
            functions have different range. FANN::SIGMOID is e.g. in the 0 - 1 range while 
-           FANN::SIGMOID_SYMMETRIC is in the -1 - 1 range and FANN::LINEAR is unbound.
+           FANN::SIGMOID_SYMMETRIC is in the -1 - 1 range and FANN::LINEAR is unbounded.
            
            Information about the individual activation functions is available at <FANN::activation_function_enum>.
            

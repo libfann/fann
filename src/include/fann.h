@@ -159,7 +159,7 @@ extern "C"
 			
 	Example:
 		> // Creating an ANN with 2 input neurons, 1 output neuron, 
-		> // and two hidden neurons with 8 and 9 neurons
+		> // and two hidden layers with 8 and 9 neurons
 		> struct fann *ann = fann_create_standard(4, 2, 8, 9, 1);
 		
 	See also:
@@ -175,7 +175,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_standard(unsigned int num_layers
 
 	Example:
 		> // Creating an ANN with 2 input neurons, 1 output neuron, 
-		> // and two hidden neurons with 8 and 9 neurons
+		> // and two hidden layers with 8 and 9 neurons
 		> unsigned int layers[4] = {2, 8, 9, 1};
 		> struct fann *ann = fann_create_standard_array(4, layers);
 
