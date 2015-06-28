@@ -3215,7 +3215,7 @@ public:
 
            The number of activation functions in the <get_cascade_activation_functions> array.
 
-           The default number of activation functions is 6.
+           The default number of activation functions is 10.
 
            See also:
    		        <get_cascade_activation_functions>, <set_cascade_activation_functions>,
