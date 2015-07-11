@@ -99,7 +99,7 @@ enum fann_errno_enum
    
    If log_file is NULL, no errors will be printed.
    
-   If errdata is NULL, the default log will be set. The default log is the log used when creating 
+   If errdat is NULL, the default log will be set. The default log is the log used when creating 
    <struct fann> and <struct fann_data>. This default log will also be the default for all new structs
    that are created.
    
