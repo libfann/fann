@@ -1,3 +1,15 @@
+FIND_PACKAGE(OpenMP)
+IF(OPENMP_FOUND)
+  OPTION(DISABLE_PARALLEL_FANN "Disable parallel fann functions" OFF)
+ENDIF(OPENMP_FOUND)
+
+IF(NOT OPENMP_FOUND OR DISABLE_PARALLEL_FANN)
+  ADD_DEFINITIONS(-DDISABLE_PARALLEL_FANN)
+ELSE()
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+ENDIF(NOT OPENMP_FOUND OR DISABLE_PARALLEL_FANN)
+
 ADD_SUBDIRECTORY( include ) 
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src/include)
@@ -9,6 +21,7 @@ endif (WIN32)
 
 SET(floatfann_LIB_SRCS
 floatfann.c
+parallel_floatfann_cpp.cpp
 )
 
 ADD_LIBRARY(floatfann ${floatfann_LIB_SRCS})
@@ -23,6 +36,7 @@ INSTALL(TARGETS floatfann LIBRARY DESTINATION ${LIB_INSTALL_DIR}
 
 SET(doublefann_LIB_SRCS
 doublefann.c
+parallel_doublefann_cpp.cpp
 )
 
 ADD_LIBRARY(doublefann ${doublefann_LIB_SRCS})
@@ -53,6 +67,7 @@ INSTALL(TARGETS fixedfann LIBRARY DESTINATION ${LIB_INSTALL_DIR}
 
 SET(fann_LIB_SRCS
 floatfann.c
+parallel_floatfann_cpp.cpp
 )
 
 ADD_LIBRARY(fann ${fann_LIB_SRCS})
