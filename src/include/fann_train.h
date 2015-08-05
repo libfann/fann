@@ -299,7 +299,12 @@ FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_array(unsigned
    Creates the training data struct from a user supplied function.
    As the training data are numerable (data 1, data 2...), the user must write
    a function that receives the number of the training data set (input,output)
-   and returns the set.
+   and returns the set.  fann_create_train_from_callback will call the user
+   supplied function 'num_data' times, one input-output pair each time. Each
+   time the user supplied function is called, the time of the call will be passed
+   as the 'num' parameter and the user supplied function must write the input
+   and output to the corresponding parameters.
+   
 
    Parameters:
      num_data      - The number of training data
