@@ -224,7 +224,8 @@ enum fann_activationfunc_enum
 	FANN_SIN_SYMMETRIC,
 	FANN_COS_SYMMETRIC,
 	FANN_SIN,
-	FANN_COS
+	FANN_COS,
+	FANN_SIGMOID_SYMMETRIC_LECUN
 };
 
 /* Constant: FANN_ACTIVATIONFUNC_NAMES
@@ -256,7 +257,8 @@ static char const *const FANN_ACTIVATIONFUNC_NAMES[] = {
 	"FANN_SIN_SYMMETRIC",
 	"FANN_COS_SYMMETRIC",
 	"FANN_SIN",
-	"FANN_COS"
+	"FANN_COS",
+	"FANN_SIGMOID_SYMMETRIC_LECUN"
 };
 
 /* Enum: fann_errorfunc_enum

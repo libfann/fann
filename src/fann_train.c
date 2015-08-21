@@ -46,6 +46,8 @@ fann_type fann_activation_derived(unsigned int activation_function,
 		case FANN_SIGMOID_STEPWISE:
 			value = fann_clip(value, 0.01f, 0.99f);
 			return (fann_type) fann_sigmoid_derive(steepness, value);
+		case FANN_SIGMOID_SYMMETRIC_LECUN:
+			return (fann_type) fann_sigmoid_symmetric_lecun_derive(steepness, value);
 		case FANN_SIGMOID_SYMMETRIC:
 		case FANN_SIGMOID_SYMMETRIC_STEPWISE:
 			value = fann_clip(value, -0.98f, 0.98f);

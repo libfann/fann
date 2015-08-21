@@ -46,6 +46,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define fann_sigmoid_symmetric_real(sum) (2.0f/(1.0f + exp(-2.0f * sum)) - 1.0f)
 #define fann_sigmoid_symmetric_derive(steepness, value) steepness * (1.0f - (value*value))
 
+/* FANN_SIGMOID_SYMMETRIC_LECUN */
+#define fann_sigmoid_symmetric_lecun_real(sum) sqrt(3.f) * (2.0f/(1.0f + exp(-2.0f * sum)) - 1.0f)
+#define fann_sigmoid_symmetric_lecun_derive(steepness, value) steepness * ( sqrt(3.f) - (value*value)/sqrt(3.f) )
+
 /* FANN_GAUSSIAN */
 /* #define fann_gaussian(steepness, sum) (exp(-sum * steepness * sum * steepness)) */
 #define fann_gaussian_real(sum) (exp(-sum * sum))
@@ -97,6 +101,8 @@ switch(activation_function) \
 	case FANN_SIGMOID: \
 		result = (fann_type)fann_sigmoid_real(value); \
         break; \
+	case FANN_SIGMOID_SYMMETRIC_LECUN: \
+		result = (fann_type)fann_sigmoid_symmetric_lecun_real(value); \
 	case FANN_SIGMOID_SYMMETRIC: \
 		result = (fann_type)fann_sigmoid_symmetric_real(value); \
         break; \
