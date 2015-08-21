@@ -9,7 +9,7 @@ using namespace std;
 namespace parallel_fann {
 // TODO rewrite all these functions in c++ using fann_cpp interface
 
-float fann_train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
+float train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {
 	fann_reset_MSE(ann);
 	vector<struct fann *> ann_vect(threadnumb);
@@ -78,7 +78,7 @@ float fann_train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *
 }
 
 
-float fann_train_epoch_irpropm_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
+float train_epoch_irpropm_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {
 
 	if(ann->prev_train_slopes == NULL)
@@ -196,7 +196,7 @@ float fann_train_epoch_irpropm_parallel(struct fann *ann, struct fann_train_data
 }
 
 
-float fann_train_epoch_quickprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
+float train_epoch_quickprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {
 
 	if(ann->prev_train_slopes == NULL)
@@ -330,7 +330,7 @@ float fann_train_epoch_quickprop_parallel(struct fann *ann, struct fann_train_da
 }
 
 
-float fann_train_epoch_sarprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
+float train_epoch_sarprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {
 	if(ann->prev_train_slopes == NULL)
 	{
@@ -485,7 +485,7 @@ float fann_train_epoch_sarprop_parallel(struct fann *ann, struct fann_train_data
 	return fann_get_MSE(ann);
 }
 
-float fann_train_epoch_incremental_mod(struct fann *ann, struct fann_train_data *data)
+float train_epoch_incremental_mod(struct fann *ann, struct fann_train_data *data)
 {
 	unsigned int i;
 
@@ -501,7 +501,7 @@ float fann_train_epoch_incremental_mod(struct fann *ann, struct fann_train_data 
 
 //the following versions returns also the outputs via the predicted_outputs parameter
 
-float fann_train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb,vector< vector<fann_type> >& predicted_outputs)
+float train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb,vector< vector<fann_type> >& predicted_outputs)
 {
 	fann_reset_MSE(ann);
 	predicted_outputs.resize(data->num_data,vector<fann_type> (data->num_output));
@@ -577,7 +577,7 @@ float fann_train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *
 }
 
 
-float fann_train_epoch_irpropm_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb, vector< vector<fann_type> >& predicted_outputs)
+float train_epoch_irpropm_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb, vector< vector<fann_type> >& predicted_outputs)
 {
 
 	if(ann->prev_train_slopes == NULL)
@@ -699,7 +699,7 @@ float fann_train_epoch_irpropm_parallel(struct fann *ann, struct fann_train_data
 }
 
 
-float fann_train_epoch_quickprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb, vector< vector<fann_type> >& predicted_outputs)
+float train_epoch_quickprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb, vector< vector<fann_type> >& predicted_outputs)
 {
 
 	if(ann->prev_train_slopes == NULL)
@@ -838,7 +838,7 @@ float fann_train_epoch_quickprop_parallel(struct fann *ann, struct fann_train_da
 }
 
 
-float fann_train_epoch_sarprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb, vector< vector<fann_type> >& predicted_outputs)
+float train_epoch_sarprop_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb, vector< vector<fann_type> >& predicted_outputs)
 {
 
 	if(ann->prev_train_slopes == NULL)
@@ -1000,7 +1000,7 @@ float fann_train_epoch_sarprop_parallel(struct fann *ann, struct fann_train_data
 }
 
 
-float fann_train_epoch_incremental_mod(struct fann *ann, struct fann_train_data *data, vector< vector<fann_type> >& predicted_outputs)
+float train_epoch_incremental_mod(struct fann *ann, struct fann_train_data *data, vector< vector<fann_type> >& predicted_outputs)
 {
 
 	predicted_outputs.resize(data->num_data,vector<fann_type> (data->num_output));
@@ -1024,7 +1024,7 @@ float fann_train_epoch_incremental_mod(struct fann *ann, struct fann_train_data 
 	return fann_get_MSE(ann);
 }
 
-float fann_test_data_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
+float test_data_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {
 	if(fann_check_input_output_sizes(ann, data) == -1)
 		return 0;
@@ -1064,7 +1064,7 @@ float fann_test_data_parallel(struct fann *ann, struct fann_train_data *data, co
 	return fann_get_MSE(ann);
 }
 
-float fann_test_data_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb, vector< vector<fann_type> >& predicted_outputs)
+float test_data_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb, vector< vector<fann_type> >& predicted_outputs)
 {
 	if(fann_check_input_output_sizes(ann, data) == -1)
 		return 0;
