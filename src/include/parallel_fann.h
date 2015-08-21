@@ -7,7 +7,7 @@
 #ifndef PARALLEL_FANN_H_
 #define PARALLEL_FANN_H_
 
-#include <fann.h>
+#include "fann.h"
 
 FANN_EXTERNAL float FANN_API fann_train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb);
 
