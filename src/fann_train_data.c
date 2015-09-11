@@ -1154,7 +1154,7 @@ FANN_EXTERNAL void FANN_API fann_descale_train( struct fann *ann, struct fann_tr
 				); 																						\
 	for( cur_neuron = 0; cur_neuron < ann->num_##where##put; cur_neuron++ )								\
 		ann->scale_deviation_##where[ cur_neuron ] =													\
-			(float)sqrt( ann->scale_deviation_##where[ cur_neuron ] / (float)data->num_data ); 			\
+			sqrtf( ann->scale_deviation_##where[ cur_neuron ] / (float)data->num_data ); 			\
 	/* Calculate factor: (new_max-new_min)/(old_max(1)-old_min(-1)) */									\
 	/* Looks like we dont need whole array of factors? */												\
 	for( cur_neuron = 0; cur_neuron < ann->num_##where##put; cur_neuron++ )								\

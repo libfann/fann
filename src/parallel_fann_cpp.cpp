@@ -398,7 +398,7 @@ float fann_train_epoch_sarprop_parallel(struct fann *ann, struct fann_train_data
     	}
 
     	const float MSE = fann_get_MSE(ann);
-    	const float RMSE = (float)sqrt(MSE);
+    	const float RMSE = sqrtf(MSE);
 
     	/* for all weights; TODO: are biases included? */
 		omp_set_dynamic(0);
