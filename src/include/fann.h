@@ -229,7 +229,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 
 /* Function: fann_create_shortcut
 
-	Creates a standard backpropagation neural network, which is not fully connected and which
+	Creates a standard backpropagation neural network, which is fully connected and which
 	also has shortcut connections.
 
  	Shortcut connections are connections that skip layers. A fully connected network with shortcut 
