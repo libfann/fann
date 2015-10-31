@@ -1,9 +1,8 @@
 Format: 1.52
 
 
-# You can add a title and sub-title to your menu like this:
-# Title: [project name]
-# SubTitle: [subtitle]
+Title: FANN
+SubTitle: Fast Artificial Neural Network Library
 
 # You can add a footer to your documentation like this:
 # Footer: [text]
@@ -46,13 +45,19 @@ Format: 1.52
 # --------------------------------------------------------------------------
 
 
-File: FANN Cascade Training  (fann_cascade.h)
-File: FANN Creation/Execution  (fann.h)
-File: FANN Datatypes  (fann_data.h)
-File: FANN Error Handling  (fann_error.h)
-File: FANN File Input/Output  (fann_io.h)
-File: FANN Training  (fann_train.h)
-File: FANN Wrapper for C++  (fann_cpp.h)
+Link: Github  (https://github.com/libfann/fann)
+Link: FANN Webpage  (http://leenissen.dk/fann/wp/)
+
+Group: Reference Manual  {
+
+   File: FANN Creation/Execution  (fann.h)
+   File: FANN Datatypes  (fann_data.h)
+   File: FANN Training  (fann_train.h)
+   File: FANN Cascade Training  (fann_cascade.h)
+   File: FANN Error Handling  (fann_error.h)
+   File: FANN File Input/Output  (fann_io.h)
+   File: FANN Wrapper for C++  (fann_cpp.h)
+   }  # Group: Reference Manual
 
 Group: Index  {
 
