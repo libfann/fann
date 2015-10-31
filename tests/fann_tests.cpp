@@ -20,7 +20,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include <stdio.h>
 #include "gtest/gtest.h"
 
-#include "fann.h"
+#include "doublefann.h"
 #include "fann_cpp.h"
 
 // Create
@@ -89,7 +89,7 @@ TEST(Create, CreateShortcutFourLayers) {
 	ASSERT_TRUE(net.create_shortcut(4, 2, 3, 4, 5));
 	unsigned int layers[] = {2, 3, 4, 5};
 	TestCreate(net, 4, layers, 15, 83);
-	EXPECT_EQ(FANN_NETTYPE_SHORTCUT, net.get_network_type());
+	EXPECT_EQ(FANN::SHORTCUT, net.get_network_type());
 }
 
 TEST(Create, CreateShortcutArrayFourLayers) {
@@ -97,7 +97,7 @@ TEST(Create, CreateShortcutArrayFourLayers) {
 	unsigned int layers[] = {2, 3, 4, 5};
 	ASSERT_TRUE(net.create_shortcut_array(4, layers));
 	TestCreate(net, 4, layers, 15, 83);
-	EXPECT_EQ(FANN_NETTYPE_SHORTCUT, net.get_network_type());
+	EXPECT_EQ(FANN::SHORTCUT, net.get_network_type());
 }
 
 TEST(CreateTrain, CreateTrainDataFromPointerArrays) {
