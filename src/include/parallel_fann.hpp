@@ -7,7 +7,7 @@
 #define PARALLEL_FANN_HPP_
 #include <omp.h>
 #include <vector>
-#include <fann.h>
+#include "fann.h"
 
 namespace parallel_fann {
 float train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb);
