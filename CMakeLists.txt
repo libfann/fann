@@ -140,7 +140,6 @@ install (FILES
  )
 
 
-
-
+ADD_SUBDIRECTORY( lib/googletest )
 
 ENDIF()
