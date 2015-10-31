@@ -790,12 +790,20 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 #else
 			neuron_sum = fann_mult(steepness, neuron_sum);
 			
-			max_sum = 150/steepness;
-			if(neuron_sum > max_sum)
-				neuron_sum = max_sum;
-			else if(neuron_sum < -max_sum)
-				neuron_sum = -max_sum;
-			
+			switch (activation_function)
+			{
+				case FANN_LINEAR:
+					break;
+				default:
+
+					max_sum = 150/steepness;
+					if(neuron_sum > max_sum)
+						neuron_sum = max_sum;
+					else if(neuron_sum < -max_sum)
+						neuron_sum = -max_sum;
+					break;
+			}
+
 			neuron_it->sum = neuron_sum;
 
 			fann_activation_switch(activation_function, neuron_sum, neuron_it->value);
@@ -900,6 +908,8 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
 
     copy->learning_rate = orig->learning_rate;
     copy->learning_momentum = orig->learning_momentum;
+    copy->learning_l1_norm = orig->learning_l1_norm;
+    copy->learning_l2_norm = orig->learning_l2_norm;
     copy->connection_rate = orig->connection_rate;
     copy->network_type = orig->network_type;
     copy->num_MSE = orig->num_MSE;
@@ -1288,6 +1298,8 @@ FANN_EXTERNAL void FANN_API fann_print_parameters(struct fann *ann)
 	printf("Bit fail limit                       :%8.3f\n", ann->bit_fail_limit);
 	printf("Learning rate                        :%8.3f\n", ann->learning_rate);
 	printf("Learning momentum                    :%8.3f\n", ann->learning_momentum);
+	printf("Learning l1 norm                     :%8.3f\n", ann->learning_l1_norm);
+	printf("Learning l2 norm                     :%8.3f\n", ann->learning_l2_norm);
 	printf("Quickprop decay                      :%11.6f\n", ann->quickprop_decay);
 	printf("Quickprop mu                         :%8.3f\n", ann->quickprop_mu);
 	printf("RPROP increase factor                :%8.3f\n", ann->rprop_increase_factor);
@@ -1589,6 +1601,8 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
 	ann->errstr = NULL;
 	ann->learning_rate = 0.7f;
 	ann->learning_momentum = 0.0;
+	ann->learning_l1_norm = 0.0;
+	ann->learning_l2_norm = 1.0;
 	ann->total_neurons = 0;
 	ann->total_connections = 0;
 	ann->num_input = 0;

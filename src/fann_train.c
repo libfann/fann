@@ -377,7 +377,9 @@ void fann_update_weights(struct fann *ann)
 
 	/* store some variabels local for fast access */
 	const float learning_rate = ann->learning_rate;
-    const float learning_momentum = ann->learning_momentum;        
+    const float learning_momentum = ann->learning_momentum;  
+    const float learning_l1_norm = ann->learning_l1_norm; 
+    const float learning_l2_norm = ann->learning_l2_norm;       
 	struct fann_neuron *first_neuron = ann->first_layer->first_neuron;
 	struct fann_layer *first_layer = ann->first_layer;
 	const struct fann_layer *last_layer = ann->last_layer;
@@ -422,6 +424,15 @@ void fann_update_weights(struct fann *ann)
 				for(i = 0; i != num_connections; i++)
 				{
 					delta_w = tmp_error * prev_neurons[i].value + learning_momentum * weights_deltas[i];
+					weights[i] *= learning_l2_norm ;
+					if(fann_abs(weights[i])  <= learning_l1_norm)
+					{
+						weights[i] = 0.0 ;
+					}
+					else
+					{
+						weights[i] -= learning_l1_norm * (weights[i] / fann_abs(weights[i])) ;
+					}
 					weights[i] += delta_w ;
 					weights_deltas[i] = delta_w;
 				}
@@ -438,6 +449,15 @@ void fann_update_weights(struct fann *ann)
 				for(i = 0; i != num_connections; i++)
 				{
 					delta_w = tmp_error * prev_neurons[i].value + learning_momentum * weights_deltas[i];
+					weights[i] *= learning_l2_norm ;
+					if(fann_abs(weights[i])  <= learning_l1_norm)
+					{
+						weights[i]= 0.0 ;
+					}
+					else
+					{
+						weights[i] -= learning_l1_norm * (weights[i] / fann_abs(weights[i])) ;
+					}
 					weights[i] += delta_w;
 					weights_deltas[i] = delta_w;
 				}
@@ -1045,3 +1065,5 @@ FANN_GET_SET(float, sarprop_temperature)
 FANN_GET_SET(enum fann_stopfunc_enum, train_stop_function)
 FANN_GET_SET(fann_type, bit_fail_limit)
 FANN_GET_SET(float, learning_momentum)
+FANN_GET_SET(float, learning_l1_norm)
+FANN_GET_SET(float, learning_l2_norm)

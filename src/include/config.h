@@ -2,7 +2,7 @@
 /* #undef PACKAGE */
 
 /* Version number of package */
-#define VERSION "2.2.0"
+/* #undef VERSION */
 
 /* Define for the x86_64 CPU famyly */
 /* #undef X86_64 */

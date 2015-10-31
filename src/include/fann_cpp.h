@@ -2651,13 +2651,97 @@ public:
 
            More info available in <get_learning_momentum>
 
-           This function appears in FANN >= 2.0.0.   	
+           This function appears in FANN >= 2.0.0.      
          */ 
         void set_learning_momentum(float learning_momentum)
         {
             if (ann != NULL)
             {
                 fann_set_learning_momentum(ann, learning_momentum);
+            }
+        }
+
+        /* Method: get_learning_l1_norm
+
+           Get the learning l1 norm.
+           
+           The learning l1 norm can be used to regulate FANN::TRAIN_INCREMENTAL training.
+           A too high l1 norm will however not benefit training. Setting l1 norm to 0 will
+           be the same as not using the l1 norm parameter. The recommended value of this parameter
+           is between 0.0 and 1.0.
+
+           The default l1 norm is 0.
+           
+           See also:
+           <set_learning_l1_norm>, <set_training_algorithm>
+
+           This function appears in FANN >= 2.0.0.      
+         */ 
+        float get_learning_l1_norm()
+        {
+            float learning_l1_norm = 0.0f;
+            if (ann != NULL)
+            {
+                learning_l1_norm = fann_get_learning_l1_norm(ann);
+            }
+            return learning_l1_norm;
+        }
+
+        /* Method: set_learning_l1_norm
+
+           Set the learning l1 norm.
+
+           More info available in <get_learning_l1_norm>
+
+           This function appears in FANN >= 2.0.0.   	
+         */ 
+        void set_learning_l1_norm(float learning_l1_norm)
+        {
+            if (ann != NULL)
+            {
+                fann_set_learning_l1_norm(ann, learning_l1_norm);
+            }
+        }
+
+        /* Method: get_learning_l2_norm
+
+           Get the learning l2 norm.
+           
+           The learning l2 norm can be used to regulate FANN::TRAIN_INCREMENTAL training.
+           A too high l2 norm will however not benefit training. Setting l2 norm to 1.0 will
+           be the same as not using the l2 norm parameter. The recommended value of this parameter
+           is between 0.0 and 1.0.
+
+           The default l2 norm is 0.
+           
+           See also:
+           <set_learning_l2_norm>, <set_training_algorithm>
+
+           This function appears in FANN >= 2.0.0.      
+         */ 
+        float get_learning_l2_norm()
+        {
+            float learning_l2_norm = 1.0f;
+            if (ann != NULL)
+            {
+                learning_l2_norm = fann_get_learning_l2_norm(ann);
+            }
+            return learning_l2_norm;
+        }
+
+        /* Method: set_learning_l2_norm
+
+           Set the learning l2 norm.
+
+           More info available in <get_learning_l2_norm>
+
+           This function appears in FANN >= 2.0.0.      
+         */ 
+        void set_learning_l2_norm(float learning_l2_norm)
+        {
+            if (ann != NULL)
+            {
+                fann_set_learning_l2_norm(ann, learning_l2_norm);
             }
         }
 
@@ -2670,7 +2754,7 @@ public:
            The default stop function is FANN::STOPFUNC_MSE
            
            See also:
-   	        <get_train_stop_function>, <get_bit_fail_limit>
+            <get_train_stop_function>, <get_bit_fail_limit>
               
            This function appears in FANN >= 2.0.0.
          */ 
