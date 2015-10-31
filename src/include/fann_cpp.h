@@ -159,6 +159,9 @@ namespace FANN
 		    along with other more advanced parameters, but it is only recommended to change these 
 		    advanced parameters, for users with insight in how the quickprop training algorithm works.
 		    The quickprop training algorithm is described by [Fahlman, 1988].
+		FANN_TRAIN_SARPROP - THE SARPROP ALGORITHM: A SIMULATED ANNEALING ENHANCEMENT TO RESILIENT BACK PROPAGATION
+            http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.47.8197&rep=rep1&type=pdf
+
     	
 	    See also:
 		    <neural_net::set_training_algorithm>, <neural_net::get_training_algorithm>
@@ -168,7 +171,7 @@ namespace FANN
         TRAIN_BATCH,
         TRAIN_RPROP,
         TRAIN_QUICKPROP,
-	TRAIN_SARPROP
+	    TRAIN_SARPROP
     };
 
     /* Enum: activation_function_enum

@@ -68,6 +68,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 		along with other more advanced parameters, but it is only recommended to change these 
 		advanced parameters, for users with insight in how the quickprop training algorithm works.
 		The quickprop training algorithm is described by [Fahlman, 1988].
+	FANN_TRAIN_SARPROP - THE SARPROP ALGORITHM: A SIMULATED ANNEALING ENHANCEMENT TO RESILIENT BACK PROPAGATION
+    http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.47.8197&rep=rep1&type=pdf
 	
 	See also:
 		<fann_set_training_algorithm>, <fann_get_training_algorithm>
