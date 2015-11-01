@@ -43,8 +43,7 @@
 #endif
 #endif
 
-
-FILE * fann_default_error_log = (FILE *)-1;
+FANN_EXTERNAL extern FILE * FANN_API fann_default_error_log = (FILE *)-1;
 
 /* resets the last error number
  */

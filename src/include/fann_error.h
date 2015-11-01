@@ -162,6 +162,6 @@ FANN_EXTERNAL char *FANN_API fann_get_errstr(struct fann_error *errdat);
  */ 
 FANN_EXTERNAL void FANN_API fann_print_error(struct fann_error *errdat);
 
-extern FILE * fann_default_error_log;
+FANN_EXTERNAL extern FILE * fann_default_error_log;
 
 #endif
