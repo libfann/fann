@@ -368,7 +368,7 @@ namespace FANN
     public:
         /* Constructor: training_data
         
-            Default constructor creates an empty neural net.
+            Default constructor creates an empty training data.
             Use <read_train_from_file>, <set_train_data> or <create_train_from_callback> to initialize.
         */
         training_data() : train_data(NULL)
@@ -382,11 +382,7 @@ namespace FANN
         */
         training_data(const training_data &data)
         {
-            destroy_train();
-            if (data.train_data != NULL)
-            {
-                train_data = fann_duplicate_train_data(data.train_data);
-            }
+            train_data = fann_duplicate_train_data(data.train_data);
         }
 
         /* Destructor: ~training_data
@@ -594,17 +590,18 @@ namespace FANN
             }
         }
 
-        /* Grant access to the encapsulated data since many situations
-            and applications creates the data from sources other than files
-            or uses the training data for testing and related functions */
-
         /* Method: get_input
+            Grant access to the encapsulated data since many situations
+            and applications creates the data from sources other than files
+            or uses the training data for testing and related functions
         
             Returns:
                 A pointer to the array of input training data
 
             See also:
                 <get_output>, <set_train_data>
+
+           This function appears in FANN >= 2.0.0.
         */
         fann_type **get_input()
         {
@@ -619,12 +616,18 @@ namespace FANN
         }
 
         /* Method: get_output
-        
+
+            Grant access to the encapsulated data since many situations
+            and applications creates the data from sources other than files
+            or uses the training data for testing and related functions
+
             Returns:
                 A pointer to the array of output training data
 
             See also:
                 <get_input>, <set_train_data>
+
+           This function appears in FANN >= 2.0.0.
         */
         fann_type **get_output()
         {
@@ -636,6 +639,37 @@ namespace FANN
             {
                 return train_data->output;
             }
+        }
+
+        /* Method: get_train_input
+            Gets the training input data at the given position
+
+            Returns:
+                A pointer to the array of input training data at the given position
+
+            See also:
+                <get_train_output>, <set_train_data>
+
+           This function appears in FANN >= 2.3.0.
+        */
+        fann_type *get_train_input(unsigned int position) {
+            return fann_get_train_input(train_data, position);
+        }
+
+        /* Method: get_train_output
+            Gets the training output data at the given position
+
+            Returns:
+                A pointer to the array of output training data at the given position
+
+            See also:
+                <get_train_input>
+
+           This function appears in FANN >= 2.3.0.
+        */
+        fann_type *get_train_output(unsigned int position)
+        {
+            return fann_get_train_output(train_data, position);
         }
 
         /* Method: set_train_data
@@ -739,9 +773,55 @@ public:
             train_data = fann_create_train_from_callback(num_data, num_input, num_output, user_function);
         }
 
+        /* Function: get_min_input
+
+           Get the minimum value of all in the input data
+
+           This function appears in FANN >= 2.3.0
+        */
+        fann_type get_min_input(){
+            return fann_get_min_train_input(train_data);
+        }
+
+        /* Function: get_max_input
+
+           Get the maximum value of all in the input data
+
+           This function appears in FANN >= 2.3.0
+        */
+        fann_type get_max_input(){
+            return fann_get_max_train_input(train_data);
+        }
+
+        /* Function: get_min_output
+
+           Get the minimum value of all in the output data
+
+           This function appears in FANN >= 2.3.0
+        */
+        fann_type get_min_output(){
+            return fann_get_min_train_output(train_data);
+        }
+
+        /* Function: get_max_output
+
+           Get the maximum value of all in the output data
+
+           This function appears in FANN >= 2.3.0
+        */
+        fann_type get_max_output(){
+            return fann_get_max_train_output(train_data);
+        }
+
         /* Method: scale_input_train_data
            
            Scales the inputs in the training data to the specified range.
+
+           A simplified scaling method, which is mostly useful in examples where it's known that all the
+           data will be in one range and it should be transformed to another range.
+
+           It is not recommended to use this on subsets of data as the complete input range might not be
+           available in that subset.
 
            See also:
    	        <scale_output_train_data>, <scale_train_data>, <fann_scale_input_train_data>
@@ -760,6 +840,12 @@ public:
            
            Scales the outputs in the training data to the specified range.
 
+           A simplified scaling method, which is mostly useful in examples where it's known that all the
+           data will be in one range and it should be transformed to another range.
+
+           It is not recommended to use this on subsets of data as the complete input range might not be
+           available in that subset.
+
            See also:
    	        <scale_input_train_data>, <scale_train_data>, <fann_scale_output_train_data>
 
@@ -776,7 +862,13 @@ public:
         /* Method: scale_train_data
            
            Scales the inputs and outputs in the training data to the specified range.
-           
+
+           A simplified scaling method, which is mostly useful in examples where it's known that all the
+           data will be in one range and it should be transformed to another range.
+
+           It is not recommended to use this on subsets of data as the complete input range might not be
+           available in that subset.
+
            See also:
    	        <scale_output_train_data>, <scale_input_train_data>, <fann_scale_train_data>
 

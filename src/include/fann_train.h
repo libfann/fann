@@ -373,6 +373,40 @@ FANN_EXTERNAL fann_type * FANN_API fann_get_train_output(struct fann_train_data 
 FANN_EXTERNAL void FANN_API fann_shuffle_train_data(struct fann_train_data *train_data);
 
 #ifndef FIXEDFANN
+
+/* Function: fann_get_min_train_input
+
+   Get the minimum value of all in the input data
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL fann_type FANN_API fann_get_min_train_input(struct fann_train_data *train_data);
+
+/* Function: fann_get_max_train_input
+
+   Get the maximum value of all in the input data
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL fann_type FANN_API fann_get_max_train_input(struct fann_train_data *train_data);
+
+/* Function: fann_get_min_train_output
+
+   Get the minimum value of all in the output data
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL fann_type FANN_API fann_get_min_train_output(struct fann_train_data *train_data);
+
+/* Function: fann_get_max_train_output
+
+   Get the maximum value of all in the output data
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL fann_type FANN_API fann_get_max_train_output(struct fann_train_data *train_data);
+
+
 /* Function: fann_scale_train
 
    Scale input and output data based on previously calculated parameters.
@@ -547,8 +581,14 @@ FANN_EXTERNAL void FANN_API fann_descale_output( struct fann *ann, fann_type *ou
    
    Scales the inputs in the training data to the specified range.
 
+   A simplified scaling method, which is mostly useful in examples where it's known that all the
+   data will be in one range and it should be transformed to another range.
+
+   It is not recommended to use this on subsets of data as the complete input range might not be
+   available in that subset.
+
    See also:
-   	<fann_scale_output_train_data>, <fann_scale_train_data>
+   	<fann_scale_output_train_data>, <fann_scale_train_data>, <fann_scala_input>
 
    This function appears in FANN >= 2.0.0.
  */ 
@@ -559,6 +599,12 @@ FANN_EXTERNAL void FANN_API fann_scale_input_train_data(struct fann_train_data *
 /* Function: fann_scale_output_train_data
    
    Scales the outputs in the training data to the specified range.
+
+   A simplified scaling method, which is mostly useful in examples where it's known that all the
+   data will be in one range and it should be transformed to another range.
+
+   It is not recommended to use this on subsets of data as the complete input range might not be
+   available in that subset.
 
    See also:
    	<fann_scale_input_train_data>, <fann_scale_train_data>
@@ -572,7 +618,13 @@ FANN_EXTERNAL void FANN_API fann_scale_output_train_data(struct fann_train_data 
 /* Function: fann_scale_train_data
    
    Scales the inputs and outputs in the training data to the specified range.
-   
+
+   A simplified scaling method, which is mostly useful in examples where it's known that all the
+   data will be in one range and it should be transformed to another range.
+
+   It is not recommended to use this on subsets of data as the complete input range might not be
+   available in that subset.
+
    See also:
    	<fann_scale_output_train_data>, <fann_scale_input_train_data>
 
