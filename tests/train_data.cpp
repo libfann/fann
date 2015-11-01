@@ -54,6 +54,18 @@ TEST_F(FannTest, CreateTrainDataFromFile) {
     AssertTrainData(dataCopy, numData, numInput, numOutput, inputValue, outputValue);
 }
 
+void callBack(unsigned int pos, unsigned int numInput, unsigned int numOutput, fann_type *input, fann_type *output) {
+    for(unsigned int i = 0; i < numInput; i++)
+        input[i] = (fann_type) 1.2;
+    for(unsigned int i = 0; i < numOutput; i++)
+        output[i] = (fann_type) 2.3;
+}
+
+TEST_F(FannTest, CreateTrainDataFromCallback) {
+    data.create_train_from_callback(numData, numInput, numOutput, callBack);
+    AssertTrainData(data, numData, numInput, numOutput, 1.2, 2.3);
+}
+
 TEST_F(FannTest, ShuffleTrainData) {
     //only really ensures that the data doesn't get corrupted, a more complete test would need to check
     //that this was indeed a permutation of the original data
@@ -69,22 +81,33 @@ TEST_F(FannTest, MergeTrainData) {
     AssertTrainData(data, numData*2, numInput, numOutput, inputValue, outputValue);
 }
 
+TEST_F(FannTest, SubsetTrainData) {
+    data.set_train_data(numData, numInput, inputData, numOutput, outputData);
+    //call merge 2 times to get 8 data samples
+    data.merge_train_data(data);
+    data.merge_train_data(data);
+
+    data.subset_train_data(2, 5);
+
+    AssertTrainData(data, 5, numInput, numOutput, inputValue, outputValue);
+}
+
 TEST_F(FannTest, ScaleOutputData) {
     fann_type input[] = {0.0, 1.0, 0.5, 0.0, 1.0, 0.5};
     fann_type output[] = {0.0, 1.0};
     data.set_train_data(2, 3, input, 1, output);
 
+    EXPECT_DOUBLE_EQ(0.0, data.get_min_input());
+    EXPECT_DOUBLE_EQ(1.0, data.get_max_input());
+    EXPECT_DOUBLE_EQ(0.0, data.get_min_output());
+    EXPECT_DOUBLE_EQ(1.0, data.get_max_output());
+
     data.scale_output_train_data(-1.0, 2.0);
 
-    for(unsigned int i = 0; i < 2; i++) {
-        fann_type *train_input = data.get_train_input(i);
-        EXPECT_DOUBLE_EQ(0.0, train_input[0]);
-        EXPECT_DOUBLE_EQ(1.0, train_input[1]);
-        EXPECT_DOUBLE_EQ(0.5, train_input[2]);
-    }
-
-    EXPECT_DOUBLE_EQ(-1.0, data.get_train_output(0)[0]);
-    EXPECT_DOUBLE_EQ(2.0, data.get_train_output(0)[1]);
+    EXPECT_DOUBLE_EQ(0.0, data.get_min_input());
+    EXPECT_DOUBLE_EQ(1.0, data.get_max_input());
+    EXPECT_DOUBLE_EQ(-1.0, data.get_min_output());
+    EXPECT_DOUBLE_EQ(2.0, data.get_max_output());
 }
 
 TEST_F(FannTest, ScaleInputData) {
@@ -92,17 +115,16 @@ TEST_F(FannTest, ScaleInputData) {
     fann_type output[] = {0.0, 1.0};
     data.set_train_data(2, 3, input, 1, output);
 
+    EXPECT_DOUBLE_EQ(0.0, data.get_min_input());
+    EXPECT_DOUBLE_EQ(1.0, data.get_max_input());
+    EXPECT_DOUBLE_EQ(0.0, data.get_min_output());
+    EXPECT_DOUBLE_EQ(1.0, data.get_max_output());
+
     data.scale_input_train_data(-1.0, 2.0);
-
-    for(unsigned int i = 0; i < 2; i++) {
-        fann_type *train_input = data.get_train_input(i);
-        EXPECT_DOUBLE_EQ(-1.0, train_input[0]);
-        EXPECT_DOUBLE_EQ(2.0, train_input[1]);
-        EXPECT_DOUBLE_EQ(0.5, train_input[2]);
-    }
-
-    EXPECT_DOUBLE_EQ(0.0, data.get_train_output(0)[0]);
-    EXPECT_DOUBLE_EQ(1.0, data.get_train_output(0)[1]);
+    EXPECT_DOUBLE_EQ(-1.0, data.get_min_input());
+    EXPECT_DOUBLE_EQ(2.0, data.get_max_input());
+    EXPECT_DOUBLE_EQ(0.0, data.get_min_output());
+    EXPECT_DOUBLE_EQ(1.0, data.get_max_output());
 }
 
 TEST_F(FannTest, ScaleData) {
