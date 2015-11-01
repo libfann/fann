@@ -35,16 +35,14 @@ namespace FANN {
     Encapsulation of a training data set <struct fann_train_data> and
     associated C API functions.
     */
-    class training_data
-    {
+    class training_data {
     public:
         /* Constructor: training_data
 
             Default constructor creates an empty training data.
             Use <read_train_from_file>, <set_train_data> or <create_train_from_callback> to initialize.
         */
-        training_data() : train_data(NULL)
-        {
+        training_data() : train_data(NULL) {
         }
 
         /* Constructor: training_data
@@ -52,8 +50,7 @@ namespace FANN {
             Copy constructor constructs a copy of the training data.
             Corresponds to the C API <fann_duplicate_train_data> function.
         */
-        training_data(const training_data &data)
-        {
+        training_data(const training_data &data) {
             train_data = fann_duplicate_train_data(data.train_data);
         }
 
@@ -68,8 +65,8 @@ namespace FANN {
 #ifdef USE_VIRTUAL_DESTRUCTOR
         virtual
 #endif
-        ~training_data()
-        {
+
+        ~training_data() {
             destroy_train();
         }
 
@@ -80,10 +77,8 @@ namespace FANN {
             See also:
                 <~training_data>
         */
-        void destroy_train()
-        {
-            if (train_data != NULL)
-            {
+        void destroy_train() {
+            if (train_data != NULL) {
                 fann_destroy_train(train_data);
                 train_data = NULL;
             }
@@ -109,8 +104,7 @@ namespace FANN {
 
             This function appears in FANN >= 1.0.0
         */
-        bool read_train_from_file(const std::string &filename)
-        {
+        bool read_train_from_file(const std::string &filename) {
             destroy_train();
             train_data = fann_read_train_from_file(filename.c_str());
             return (train_data != NULL);
@@ -128,14 +122,11 @@ namespace FANN {
 
            This function appears in FANN >= 1.0.0.
          */
-        bool save_train(const std::string &filename)
-        {
-            if (train_data == NULL)
-            {
+        bool save_train(const std::string &filename) {
+            if (train_data == NULL) {
                 return false;
             }
-            if (fann_save_train(train_data, filename.c_str()) == -1)
-            {
+            if (fann_save_train(train_data, filename.c_str()) == -1) {
                 return false;
             }
             return true;
@@ -155,14 +146,11 @@ namespace FANN {
 
            This function appears in FANN >= 1.0.0.
          */
-        bool save_train_to_fixed(const std::string &filename, unsigned int decimal_point)
-        {
-            if (train_data == NULL)
-            {
+        bool save_train_to_fixed(const std::string &filename, unsigned int decimal_point) {
+            if (train_data == NULL) {
                 return false;
             }
-            if (fann_save_train_to_fixed(train_data, filename.c_str(), decimal_point) == -1)
-            {
+            if (fann_save_train_to_fixed(train_data, filename.c_str(), decimal_point) == -1) {
                 return false;
             }
             return true;
@@ -175,10 +163,8 @@ namespace FANN {
 
            This function appears in FANN >= 1.1.0.
          */
-        void shuffle_train_data()
-        {
-            if (train_data != NULL)
-            {
+        void shuffle_train_data() {
+            if (train_data != NULL) {
                 fann_shuffle_train_data(train_data);
             }
         }
@@ -189,11 +175,9 @@ namespace FANN {
 
            This function appears in FANN >= 1.1.0.
          */
-        void merge_train_data(const training_data &data)
-        {
+        void merge_train_data(const training_data &data) {
             fann_train_data *new_data = fann_merge_train_data(train_data, data.train_data);
-            if (new_data != NULL)
-            {
+            if (new_data != NULL) {
                 destroy_train();
                 train_data = new_data;
             }
@@ -208,14 +192,11 @@ namespace FANN {
 
            This function appears in FANN >= 2.0.0.
          */
-        unsigned int length_train_data()
-        {
-            if (train_data == NULL)
-            {
+        unsigned int length_train_data() {
+            if (train_data == NULL) {
                 return 0;
             }
-            else
-            {
+            else {
                 return fann_length_train_data(train_data);
             }
         }
@@ -229,14 +210,11 @@ namespace FANN {
 
            This function appears in FANN >= 2.0.0.
          */
-        unsigned int num_input_train_data()
-        {
-            if (train_data == NULL)
-            {
+        unsigned int num_input_train_data() {
+            if (train_data == NULL) {
                 return 0;
             }
-            else
-            {
+            else {
                 return fann_num_input_train_data(train_data);
             }
         }
@@ -250,14 +228,11 @@ namespace FANN {
 
            This function appears in FANN >= 2.0.0.
          */
-        unsigned int num_output_train_data()
-        {
-            if (train_data == NULL)
-            {
+        unsigned int num_output_train_data() {
+            if (train_data == NULL) {
                 return 0;
             }
-            else
-            {
+            else {
                 return fann_num_output_train_data(train_data);
             }
         }
@@ -275,14 +250,11 @@ namespace FANN {
 
            This function appears in FANN >= 2.0.0.
         */
-        fann_type **get_input()
-        {
-            if (train_data == NULL)
-            {
+        fann_type **get_input() {
+            if (train_data == NULL) {
                 return NULL;
             }
-            else
-            {
+            else {
                 return train_data->input;
             }
         }
@@ -301,14 +273,11 @@ namespace FANN {
 
            This function appears in FANN >= 2.0.0.
         */
-        fann_type **get_output()
-        {
-            if (train_data == NULL)
-            {
+        fann_type **get_output() {
+            if (train_data == NULL) {
                 return NULL;
             }
-            else
-            {
+            else {
                 return train_data->output;
             }
         }
@@ -339,8 +308,7 @@ namespace FANN {
 
            This function appears in FANN >= 2.3.0.
         */
-        fann_type *get_train_output(unsigned int position)
-        {
+        fann_type *get_train_output(unsigned int position) {
             return fann_get_train_output(train_data, position);
         }
 
@@ -364,8 +332,7 @@ namespace FANN {
         */
         void set_train_data(unsigned int num_data,
                             unsigned int num_input, fann_type **input,
-                            unsigned int num_output, fann_type **output)
-        {
+                            unsigned int num_output, fann_type **output) {
             set_train_data(fann_create_train_pointer_array(num_data, num_input, input, num_output, output));
         }
 
@@ -389,8 +356,7 @@ namespace FANN {
         */
         void set_train_data(unsigned int num_data,
                             unsigned int num_input, fann_type *input,
-                            unsigned int num_output, fann_type *output)
-        {
+                            unsigned int num_output, fann_type *output) {
             set_train_data(fann_create_train_array(num_data, num_input, input, num_output, output));
         }
 
@@ -398,8 +364,7 @@ namespace FANN {
         /* Set the training data to the struct fann_training_data pointer.
             The struct has to be allocated with malloc to be compatible
             with fann_destroy. */
-        void set_train_data(struct fann_train_data *data)
-        {
+        void set_train_data(struct fann_train_data *data) {
             destroy_train();
             train_data = data;
         }
@@ -435,12 +400,11 @@ namespace FANN {
         void create_train_from_callback(unsigned int num_data,
                                         unsigned int num_input,
                                         unsigned int num_output,
-                                        void (FANN_API *user_function)( unsigned int,
-        unsigned int,
-        unsigned int,
-        fann_type * ,
-        fann_type * ))
-        {
+                                        void (FANN_API *user_function)(unsigned int,
+                                                                       unsigned int,
+                                                                       unsigned int,
+                                                                       fann_type *,
+                                                                       fann_type *)) {
             destroy_train();
             train_data = fann_create_train_from_callback(num_data, num_input, num_output, user_function);
         }
@@ -451,7 +415,7 @@ namespace FANN {
 
            This function appears in FANN >= 2.3.0
         */
-        fann_type get_min_input(){
+        fann_type get_min_input() {
             return fann_get_min_train_input(train_data);
         }
 
@@ -461,7 +425,7 @@ namespace FANN {
 
            This function appears in FANN >= 2.3.0
         */
-        fann_type get_max_input(){
+        fann_type get_max_input() {
             return fann_get_max_train_input(train_data);
         }
 
@@ -471,7 +435,7 @@ namespace FANN {
 
            This function appears in FANN >= 2.3.0
         */
-        fann_type get_min_output(){
+        fann_type get_min_output() {
             return fann_get_min_train_output(train_data);
         }
 
@@ -481,7 +445,7 @@ namespace FANN {
 
            This function appears in FANN >= 2.3.0
         */
-        fann_type get_max_output(){
+        fann_type get_max_output() {
             return fann_get_max_train_output(train_data);
         }
 
@@ -500,10 +464,8 @@ namespace FANN {
 
            This function appears in FANN >= 2.0.0.
          */
-        void scale_input_train_data(fann_type new_min, fann_type new_max)
-        {
-            if (train_data != NULL)
-            {
+        void scale_input_train_data(fann_type new_min, fann_type new_max) {
+            if (train_data != NULL) {
                 fann_scale_input_train_data(train_data, new_min, new_max);
             }
         }
@@ -523,10 +485,8 @@ namespace FANN {
 
            This function appears in FANN >= 2.0.0.
          */
-        void scale_output_train_data(fann_type new_min, fann_type new_max)
-        {
-            if (train_data != NULL)
-            {
+        void scale_output_train_data(fann_type new_min, fann_type new_max) {
+            if (train_data != NULL) {
                 fann_scale_output_train_data(train_data, new_min, new_max);
             }
         }
@@ -546,10 +506,8 @@ namespace FANN {
 
            This function appears in FANN >= 2.0.0.
          */
-        void scale_train_data(fann_type new_min, fann_type new_max)
-        {
-            if (train_data != NULL)
-            {
+        void scale_train_data(fann_type new_min, fann_type new_max) {
+            if (train_data != NULL) {
                 fann_scale_train_data(train_data, new_min, new_max);
             }
         }
@@ -572,10 +530,8 @@ namespace FANN {
 
            This function appears in FANN >= 2.0.0.
          */
-        void subset_train_data(unsigned int pos, unsigned int length)
-        {
-            if (train_data != NULL)
-            {
+        void subset_train_data(unsigned int pos, unsigned int length) {
+            if (train_data != NULL) {
                 struct fann_train_data *temp = fann_subset_train_data(train_data, pos, length);
                 destroy_train();
                 train_data = temp;
@@ -589,7 +545,7 @@ namespace FANN {
         friend class neural_net;
 
         /* Pointer to the encapsulated training data */
-        struct fann_train_data* train_data;
+        struct fann_train_data *train_data;
     };
 
 }

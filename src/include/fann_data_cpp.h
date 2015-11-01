@@ -38,8 +38,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 			only to be used during execution, and not during training).
 */
 
-namespace FANN
-{
+namespace FANN {
     /* Enum: error_function_enum
 	    Error function used during training.
 
@@ -70,8 +69,7 @@ namespace FANN
 	    See also:
 		    <neural_net::set_train_stop_function>, <neural_net::get_train_stop_function>
     */
-    enum stop_function_enum
-    {
+    enum stop_function_enum {
         STOPFUNC_MSE = FANN_STOPFUNC_MSE,
         STOPFUNC_BIT
     };
@@ -242,8 +240,7 @@ namespace FANN
 
        This enumeration appears in FANN >= 2.1.0
     */
-    enum network_type_enum
-    {
+    enum network_type_enum {
         LAYER = FANN_NETTYPE_LAYER,
         SHORTCUT
     };
@@ -265,6 +262,7 @@ namespace FANN
 
     /* Forward declaration of class neural_net and training_data */
     class neural_net;
+
     class training_data;
 
     /* Type: callback_type
@@ -297,9 +295,9 @@ namespace FANN
 	    See also:
 		    <neural_net::set_callback>, <fann_callback_type>
      */
-    typedef int (*callback_type) (neural_net &net, training_data &train,
-                                  unsigned int max_epochs, unsigned int epochs_between_reports,
-                                  float desired_error, unsigned int epochs, void *user_data);
+    typedef int (*callback_type)(neural_net &net, training_data &train,
+                                 unsigned int max_epochs, unsigned int epochs_between_reports,
+                                 float desired_error, unsigned int epochs, void *user_data);
 }
 
 #endif //FANN_FANN_DATA_CPP_H_H
