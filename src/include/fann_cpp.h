@@ -3,7 +3,6 @@
 
 #include <memory>
 /*
- *
  *  Fast Artificial Neural Network (fann) C++ Wrapper
  *  Copyright (C) 2004-2006 created by freegoldbar (at) yahoo dot com
  *
