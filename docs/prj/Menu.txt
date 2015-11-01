@@ -56,7 +56,9 @@ Group: Reference Manual  {
    File: FANN Cascade Training  (fann_cascade.h)
    File: FANN Error Handling  (fann_error.h)
    File: FANN File Input/Output  (fann_io.h)
-   File: FANN Wrapper for C++  (fann_cpp.h)
+   File: FANN C++ Wrapper  (fann_cpp.h)
+   File: FANN C++ Training Data  (fann_training_data_cpp.h)
+   File: FANN C++ Datatypes  (fann_data_cpp.h)
    }  # Group: Reference Manual
 
 Group: Index  {
