@@ -459,6 +459,8 @@ namespace FANN {
            It is not recommended to use this on subsets of data as the complete input range might not be
            available in that subset.
 
+           For more powerful scaling, please consider <neural_net::scale_train>
+
            See also:
    	        <scale_output_train_data>, <scale_train_data>, <fann_scale_input_train_data>
 
@@ -480,6 +482,8 @@ namespace FANN {
            It is not recommended to use this on subsets of data as the complete input range might not be
            available in that subset.
 
+           For more powerful scaling, please consider <neural_net::scale_train>
+
            See also:
    	        <scale_input_train_data>, <scale_train_data>, <fann_scale_output_train_data>
 
@@ -500,6 +504,8 @@ namespace FANN {
 
            It is not recommended to use this on subsets of data as the complete input range might not be
            available in that subset.
+
+           For more powerful scaling, please consider <neural_net::scale_train>
 
            See also:
    	        <scale_output_train_data>, <scale_input_train_data>, <fann_scale_train_data>

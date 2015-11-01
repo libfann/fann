@@ -97,11 +97,6 @@ TEST_F(FannTest, ScaleOutputData) {
     fann_type output[] = {0.0, 1.0};
     data.set_train_data(2, 3, input, 1, output);
 
-    EXPECT_DOUBLE_EQ(0.0, data.get_min_input());
-    EXPECT_DOUBLE_EQ(1.0, data.get_max_input());
-    EXPECT_DOUBLE_EQ(0.0, data.get_min_output());
-    EXPECT_DOUBLE_EQ(1.0, data.get_max_output());
-
     data.scale_output_train_data(-1.0, 2.0);
 
     EXPECT_DOUBLE_EQ(0.0, data.get_min_input());
@@ -114,11 +109,6 @@ TEST_F(FannTest, ScaleInputData) {
     fann_type input[] = {0.0, 1.0, 0.5, 0.0, 1.0, 0.5};
     fann_type output[] = {0.0, 1.0};
     data.set_train_data(2, 3, input, 1, output);
-
-    EXPECT_DOUBLE_EQ(0.0, data.get_min_input());
-    EXPECT_DOUBLE_EQ(1.0, data.get_max_input());
-    EXPECT_DOUBLE_EQ(0.0, data.get_min_output());
-    EXPECT_DOUBLE_EQ(1.0, data.get_max_output());
 
     data.scale_input_train_data(-1.0, 2.0);
     EXPECT_DOUBLE_EQ(-1.0, data.get_min_input());

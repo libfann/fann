@@ -587,6 +587,8 @@ FANN_EXTERNAL void FANN_API fann_descale_output( struct fann *ann, fann_type *ou
    It is not recommended to use this on subsets of data as the complete input range might not be
    available in that subset.
 
+   For more powerful scaling, please consider <fann_scale_train>
+
    See also:
    	<fann_scale_output_train_data>, <fann_scale_train_data>, <fann_scala_input>
 
@@ -606,6 +608,8 @@ FANN_EXTERNAL void FANN_API fann_scale_input_train_data(struct fann_train_data *
    It is not recommended to use this on subsets of data as the complete input range might not be
    available in that subset.
 
+   For more powerful scaling, please consider <fann_scale_train>
+
    See also:
    	<fann_scale_input_train_data>, <fann_scale_train_data>
 
@@ -624,6 +628,8 @@ FANN_EXTERNAL void FANN_API fann_scale_output_train_data(struct fann_train_data 
 
    It is not recommended to use this on subsets of data as the complete input range might not be
    available in that subset.
+
+   For more powerful scaling, please consider <fann_scale_train>
 
    See also:
    	<fann_scale_output_train_data>, <fann_scale_input_train_data>
