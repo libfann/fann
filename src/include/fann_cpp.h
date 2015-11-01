@@ -60,32 +60,6 @@
  *       get_output and set_train_data. Finally fann_duplicate_train_data
  *       has been replaced by a copy constructor.
  *
- *  Note: Changes
- *
- *  Version 2.2.0:
- *     - General update to fann C library 2.2.0 with support for new functionality
- *
- *  Version 2.1.0:
- *     - General update to fann C library 2.1.0 with support for new functionality
- *     - Due to changes in the C API the C++ API is not fully backward compatible:
- *        The create methods have changed names and parameters.
- *        The training callback function has different parameters and a set_callback.
- *        Some <training_data> methods have updated names.
- *        Get activation function and steepness is available for neurons, not layers.
- *     - Extensions are now part of fann so there is no fann_extensions.h
- *
- *  Version 1.2.0:
- *     - Changed char pointers to const std::string references
- *     - Added const_casts where the C API required it
- *     - Initialized enums from the C enums instead of numeric constants
- *     - Added a method set_train_data that copies and allocates training
- *     - data in a way that is compatible with the way the C API deallocates
- *     - the data thus making it possible to change training data.
- *     - The get_rprop_increase_factor method did not return its value
- *
- *  Version 1.0.0:
- *     - Initial version
- *
  */
 
 #include <stdarg.h>
