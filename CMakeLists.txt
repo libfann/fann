@@ -141,7 +141,6 @@ install (FILES
 
 ################# compile tests ################
 
-#include_directories("${CMAKE_CURRENT_BINARY_DIR}/lib/googletest/include;${CMAKE_CURRENT_BINARY_DIR}/src/include")
 ADD_SUBDIRECTORY( lib/googletest )
 ADD_SUBDIRECTORY( tests )
 
