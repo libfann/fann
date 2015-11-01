@@ -4,22 +4,9 @@ void FannTest::SetUp() {
     //ensure random generator is seeded at a known value to ensure reproducible results
     srand(0);
     fann_disable_seed_rand();
-
-    numData = 2;
-    numInput = 3;
-    numOutput = 1;
-    inputValue = 1.1;
-    outputValue = 2.2;
-
-    inputData = new fann_type *[numData];
-    outputData = new fann_type *[numData];
-
-    InitializeTrainDataStructure(numData, numInput, numOutput, inputValue, outputValue, inputData, outputData);
 }
 
 void FannTest::TearDown() {
-    delete(inputData);
-    delete(outputData);
     net.destroy();
     data.destroy_train();
 }
@@ -70,35 +57,68 @@ void FannTest::AssertWeights(fann_type min, fann_type max,
     EXPECT_NEAR(avg, totalWeight / (fann_type) net.get_total_connections(), 0.1);
 }
 
-
-void FannTest::InitializeTrainDataStructure(unsigned int numData,
-                                            unsigned int numInput,
-                                            unsigned int numOutput,
-                                            fann_type inputValue, fann_type outputValue,
-                                            fann_type **inputData,
-                                            fann_type **outputData) {
-    for (unsigned int i = 0; i < numData; i++) {
-        inputData[i] = new fann_type[numInput];
-        outputData[i] = new fann_type[numOutput];
-        for (unsigned int j = 0; j < numInput; j++)
-            inputData[i][j] = inputValue;
-        for (unsigned int j = 0; j < numOutput; j++)
-            outputData[i][j] = outputValue;
-    }
+TEST_F(FannTest, CreateStandardThreeLayers) {
+    ASSERT_TRUE(net.create_standard(3, 2, 3, 4));
+    unsigned int layers[] = {2, 3, 4};
+    AssertCreateAndCopy(3, layers, 11, 25);
 }
 
-
-void FannTest::AssertTrainData(FANN::training_data &trainingData, unsigned int numData, unsigned int numInput,
-                               unsigned int numOutput, fann_type inputValue, fann_type outputValue) {
-    EXPECT_EQ(numData, trainingData.length_train_data());
-    EXPECT_EQ(numInput, trainingData.num_input_train_data());
-    EXPECT_EQ(numOutput, trainingData.num_output_train_data());
-
-    for (int i = 0; i < numData; i++) {
-        for (int j = 0; j < numInput; j++)
-                EXPECT_DOUBLE_EQ(inputValue, trainingData.get_input()[i][j]);
-        for (int j = 0; j < numOutput; j++)
-                EXPECT_DOUBLE_EQ(outputValue, trainingData.get_output()[i][j]);
-    }
+TEST_F(FannTest, CreateStandardFourLayers) {
+    ASSERT_TRUE(net.create_standard(4, 2, 3, 4, 5));
+    unsigned int layers[] = {2, 3, 4, 5};
+    AssertCreateAndCopy(4, layers, 17, 50);
 }
 
+TEST_F(FannTest, CreateStandardFourLayersArray) {
+    unsigned int layers[] = {2, 3, 4, 5};
+    ASSERT_TRUE(net.create_standard_array(4, layers));
+    AssertCreateAndCopy(4, layers, 17, 50);
+}
+
+TEST_F(FannTest, CreateSparseFourLayers) {
+    ASSERT_TRUE(net.create_sparse(0.5f, 4, 2, 3, 4, 5));
+    unsigned int layers[] = {2, 3, 4, 5};
+    AssertCreateAndCopy(4, layers, 17, 31);
+}
+
+TEST_F(FannTest, CreateSparseArrayFourLayers) {
+    unsigned int layers[] = {2, 3, 4, 5};
+    ASSERT_TRUE(net.create_sparse_array(0.5f, 4, layers));
+    AssertCreateAndCopy(4, layers, 17, 31);
+}
+
+TEST_F(FannTest, CreateSparseArrayWithMinimalConnectivity) {
+    unsigned int layers[] = {2, 2, 2};
+    ASSERT_TRUE(net.create_sparse_array(0.01f, 3, layers));
+    AssertCreateAndCopy(3, layers, 8, 8);
+}
+
+TEST_F(FannTest, CreateShortcutFourLayers) {
+    ASSERT_TRUE(net.create_shortcut(4, 2, 3, 4, 5));
+    unsigned int layers[] = {2, 3, 4, 5};
+    AssertCreateAndCopy(4, layers, 15, 83);
+    EXPECT_EQ(FANN::SHORTCUT, net.get_network_type());
+}
+
+TEST_F(FannTest, CreateShortcutArrayFourLayers) {
+    unsigned int layers[] = {2, 3, 4, 5};
+    ASSERT_TRUE(net.create_shortcut_array(4, layers));
+    AssertCreateAndCopy(4, layers, 15, 83);
+    EXPECT_EQ(FANN::SHORTCUT, net.get_network_type());
+}
+
+TEST_F(FannTest, CreateFromFile) {
+    ASSERT_TRUE(net.create_standard(3, 2, 3, 4));
+    ASSERT_TRUE(net.save("tmpfile"));
+    net.destroy();
+    ASSERT_TRUE(net.create_from_file("tmpfile"));
+
+    unsigned int layers[] = {2, 3, 4};
+    AssertCreateAndCopy(3, layers, 11, 25);
+}
+
+TEST_F(FannTest, RandomizeWeights) {
+    net.create_standard(2, 20, 10);
+    net.randomize_weights(-1.0, 1.0);
+    AssertWeights(-1.0, 1.0, 0);
+}

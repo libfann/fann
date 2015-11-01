@@ -19,11 +19,13 @@
       <sourceFolder url="file://$MODULE_DIR$/src/parallel_doublefann_cpp.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/parallel_floatfann_cpp.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/tests/create_net.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/fann_test.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/fann_test.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/fann_test_data.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/fann_test_data.h" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/fann_test_train.cpp" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/tests/fann_test_train.h" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/main.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/tests/train_data.cpp" isTestSource="false" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
