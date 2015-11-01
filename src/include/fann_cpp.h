@@ -3671,6 +3671,36 @@ public:
             fann_print_error(reinterpret_cast<struct fann_error *>(ann));
         }
 
+        /* Function: disable_seed_rand
+
+           Disables the automatic random generator seeding that happens in FANN.
+
+           Per default FANN will always seed the random generator when creating a new network,
+           unless FANN_NO_SEED is defined during compilation of the library. This method can
+           disable this at runtime.
+
+           This function appears in FANN >= 2.3.0
+        */
+        void disable_seed_rand()
+        {
+            fann_disable_seed_rand();
+        }
+
+        /* Function: enable_seed_rand
+
+           Enables the automatic random generator seeding that happens in FANN.
+
+           Per default FANN will always seed the random generator when creating a new network,
+           unless FANN_NO_SEED is defined during compilation of the library. This method can
+           disable this at runtime.
+
+           This function appears in FANN >= 2.3.0
+        */
+        void enable_seed_rand()
+        {
+            fann_enable_seed_rand();
+        }
+
         /*********************************************************************/
 
     private:

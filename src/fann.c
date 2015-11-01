@@ -139,10 +139,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 		connection_rate = 1;
 	}
 
-	/* seed random */
-#ifndef FANN_NO_SEED
 	fann_seed_rand();
-#endif
 
 	/* allocate the general structure */
 	ann = fann_allocate_structure(num_layers);
@@ -441,10 +438,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_
 #ifdef FIXEDFANN
 	unsigned int multiplier;
 #endif
-	/* seed random */
-#ifndef FANN_NO_SEED
 	fann_seed_rand();
-#endif
 
 	/* allocate the general structure */
 	ann = fann_allocate_structure(num_layers);
@@ -1813,6 +1807,21 @@ void fann_allocate_connections(struct fann *ann)
 	}
 }
 
+#ifdef FANN_NO_SEED
+int FANN_SEED_RAND = 0;
+#else
+int FANN_SEED_RAND = 1;
+#endif
+
+FANN_EXTERNAL void FANN_API fann_disable_seed_rand()
+{
+    FANN_SEED_RAND = 0;
+}
+
+FANN_EXTERNAL void FANN_API fann_enable_seed_rand()
+{
+    FANN_SEED_RAND = 1;
+}
 
 /* INTERNAL FUNCTION
    Seed the random function.
@@ -1844,10 +1853,14 @@ void fann_seed_rand()
 		}
 		fclose(fp);
 	}
-	srand(foo);
+    if(FANN_SEED_RAND) {
+        srand(foo);
+    }
 #else
 	/* COMPAT_TIME REPLACEMENT */
-	srand(GetTickCount());
+    if(FANN_SEED_RAND) {
+    	srand(GetTickCount());
+    }
 #endif
 }
 
