@@ -22,10 +22,16 @@ protected:
     void AssertWeights(fann_type expected_min_weight, fann_type expected_max_weight,
                            fann_type expected_avg_weight);
 
+    void AssertTrainData(unsigned int num_data, unsigned int num_input, unsigned int num_output, fann_type input_value,
+                         fann_type output_value);
+
     virtual void SetUp();
 
     virtual void TearDown();
 
+    void InitializeTrainDataStructure(unsigned int num_data, unsigned int num_input, unsigned int num_output,
+                                      float input_value, float output_value, fann_type **input,
+                                      fann_type **output);
 };
 
 #endif //FANN_FANN_TESTFIXTURE_H

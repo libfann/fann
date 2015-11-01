@@ -25,37 +25,31 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "fann_test.h"
 
 TEST_F(FannTest, CreateTrainDataFromPointerArrays) {
-    fann_type **input = new fann_type *[2];
-    fann_type **output = new fann_type *[2];
-    for (int i = 0; i < 2; i++) {
-        input[i] = new fann_type[3];
-        output[i] = new fann_type[1];
-        for (int j = 0; j < 3; j++) {
-            input[i][j] = 1.1f;
-        }
-        output[i][0] = 2.2f;
-    }
+    unsigned int num_data = 2;
+    unsigned int num_input = 3;
+    unsigned int num_output = 1;
+    float input_value = 1.1f;
+    float output_value = 2.2f;
+    fann_type **input = new fann_type *[num_data];
+    fann_type **output = new fann_type *[num_data];
 
-    data.set_train_data(2, 3, input, 1, output);
+    InitializeTrainDataStructure(num_data, num_input, num_output, input_value, output_value, input, output);
 
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < 3; j++) {
-            EXPECT_EQ(1.1f, data.get_input()[i][j]);
-        }
-        EXPECT_EQ(2.2f, data.get_output()[i][0]);
-    }
+    data.set_train_data(num_data, num_input, input, num_output, output);
+
+    AssertTrainData(num_data, num_input, num_output, input_value, output_value);
 }
 
 TEST_F(FannTest, CreateTrainDataFromArrays) {
-    fann_type input[] = {1.1f, 1.1f, 1.1f, 1.1f, 1.1f, 1.1f};
-    fann_type output[] = {2.2f, 2.2f};
+    unsigned int num_data = 2;
+    unsigned int num_input = 3;
+    unsigned int num_output = 1;
+    float input_value = 1.1f;
+    float output_value = 2.2f;
 
-    data.set_train_data(2, 3, input, 1, output);
+    fann_type input[] = {input_value, input_value, input_value, input_value, input_value, input_value};
+    fann_type output[] = {output_value, output_value};
+    data.set_train_data(num_data, num_input, input, num_output, output);
 
-    for (int i = 0; i < 2; i++) {
-        for (int j = 0; j < 3; j++) {
-            EXPECT_EQ(1.1f, data.get_input()[i][j]);
-        }
-        EXPECT_EQ(2.2f, data.get_output()[i][0]);
-    }
+    AssertTrainData(num_data, num_input, num_output, input_value, output_value);
 }
