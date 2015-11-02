@@ -103,6 +103,7 @@ switch(activation_function) \
         break; \
 	case FANN_SIGMOID_SYMMETRIC_LECUN: \
 		result = (fann_type)fann_sigmoid_symmetric_lecun_real(value); \
+	break; \
 	case FANN_SIGMOID_SYMMETRIC: \
 		result = (fann_type)fann_sigmoid_symmetric_real(value); \
         break; \
