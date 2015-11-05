@@ -449,7 +449,7 @@ namespace FANN {
         fann_type get_max_output() {
             return fann_get_max_train_output(train_data);
         }
-#endif // FIXEDFANN
+#endif /* FIXEDFANN */
 
         /* Method: scale_input_train_data
 

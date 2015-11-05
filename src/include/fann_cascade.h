@@ -556,6 +556,6 @@ FANN_EXTERNAL unsigned int FANN_API fann_get_cascade_num_candidate_groups(struct
 FANN_EXTERNAL void FANN_API fann_set_cascade_num_candidate_groups(struct fann *ann, 
 															 unsigned int cascade_num_candidate_groups);
 
-#endif // FIXEDFANN
+#endif  /* FIXEDFANN */
 
 #endif

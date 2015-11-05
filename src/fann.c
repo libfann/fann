@@ -904,6 +904,8 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
     copy->train_stop_function = orig->train_stop_function;
 	copy->training_algorithm = orig->training_algorithm;
     copy->callback = orig->callback;
+	copy->user_data = orig->user_data;
+#ifndef FIXEDFANN
     copy->cascade_output_change_fraction = orig->cascade_output_change_fraction;
     copy->cascade_output_stagnation_epochs = orig->cascade_output_stagnation_epochs;
     copy->cascade_candidate_change_fraction = orig->cascade_candidate_change_fraction;
@@ -913,7 +915,6 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
     copy->cascade_weight_multiplier = orig->cascade_weight_multiplier;
     copy->cascade_max_out_epochs = orig->cascade_max_out_epochs;
     copy->cascade_max_cand_epochs = orig->cascade_max_cand_epochs;
-	copy->user_data = orig->user_data;
 
    /* copy cascade activation functions */
     copy->cascade_activation_functions_count = orig->cascade_activation_functions_count;
@@ -958,6 +959,7 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
         }
         memcpy(copy->cascade_candidate_scores,orig->cascade_candidate_scores,fann_get_cascade_num_candidates(copy) * sizeof(fann_type));
     }
+#endif /* FIXEDFANN */
 
     copy->quickprop_decay = orig->quickprop_decay;
     copy->quickprop_mu = orig->quickprop_mu;
