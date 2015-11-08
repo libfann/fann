@@ -35,6 +35,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /* Group: Cascade Training */
 
+#ifndef FIXEDFANN
 /* Function: fann_cascadetrain_on_data
 
    Trains on an entire dataset, for a period of time using the Cascade2 training algorithm.
@@ -555,5 +556,6 @@ FANN_EXTERNAL unsigned int FANN_API fann_get_cascade_num_candidate_groups(struct
 FANN_EXTERNAL void FANN_API fann_set_cascade_num_candidate_groups(struct fann *ann, 
 															 unsigned int cascade_num_candidate_groups);
 
+#endif  /* FIXEDFANN */
 
 #endif

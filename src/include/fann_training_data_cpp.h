@@ -409,6 +409,7 @@ namespace FANN {
             train_data = fann_create_train_from_callback(num_data, num_input, num_output, user_function);
         }
 
+#ifndef FIXEDFANN
         /* Function: get_min_input
 
            Get the minimum value of all in the input data
@@ -448,6 +449,7 @@ namespace FANN {
         fann_type get_max_output() {
             return fann_get_max_train_output(train_data);
         }
+#endif /* FIXEDFANN */
 
         /* Method: scale_input_train_data
 
