@@ -37,7 +37,7 @@ void FannTestData::InitializeTrainDataStructure(unsigned int numData,
     }
 }
 
-void FannTestData::AssertTrainData(FANN::training_data &trainingData, unsigned int numData, unsigned int numInput,
+void FannTestData::AssertTrainData(training_data &trainingData, unsigned int numData, unsigned int numInput,
                                    unsigned int numOutput, fann_type inputValue, fann_type outputValue) {
     EXPECT_EQ(numData, trainingData.length_train_data());
     EXPECT_EQ(numInput, trainingData.num_input_train_data());
@@ -68,7 +68,7 @@ TEST_F(FannTestData, CreateTrainDataFromArrays) {
 
 TEST_F(FannTestData, CreateTrainDataFromCopy) {
     data.set_train_data(numData, numInput, inputData, numOutput, outputData);
-    FANN::training_data dataCopy(data);
+    training_data dataCopy(data);
 
     AssertTrainData(dataCopy, numData, numInput, numOutput, inputValue, outputValue);
 }
@@ -76,7 +76,7 @@ TEST_F(FannTestData, CreateTrainDataFromCopy) {
 TEST_F(FannTestData, CreateTrainDataFromFile) {
     data.set_train_data(numData, numInput, inputData, numOutput, outputData);
     data.save_train("tmpFile");
-    FANN::training_data dataCopy;
+    training_data dataCopy;
     dataCopy.read_train_from_file("tmpFile");
 
     AssertTrainData(dataCopy, numData, numInput, numOutput, inputValue, outputValue);
@@ -104,7 +104,7 @@ TEST_F(FannTestData, ShuffleTrainData) {
 
 TEST_F(FannTestData, MergeTrainData) {
     data.set_train_data(numData, numInput, inputData, numOutput, outputData);
-    FANN::training_data dataCopy(data);
+    training_data dataCopy(data);
     data.merge_train_data(dataCopy);
     AssertTrainData(data, numData*2, numInput, numOutput, inputValue, outputValue);
 }

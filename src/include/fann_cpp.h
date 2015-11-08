@@ -2,6 +2,7 @@
 #define FANN_CPP_H_INCLUDED
 
 #include <memory>
+#include <iterator>
 /*
  *  Fast Artificial Neural Network (fann) C++ Wrapper
  *  Copyright (C) 2004-2006 created by freegoldbar (at) yahoo dot com
@@ -103,6 +104,39 @@ namespace FANN {
                     ann = fann_create_shortcut_array(num_layers, layers);
                     break;
             }
+            assert(ann != NULL);
+        }
+
+        /* Constructor: neural_net(network_type_enum net_type, InputIterator layersBeginIterator, InputIterator layersEndIterator)
+
+            Creates a neural network of the desired <network_type_enum> net_type, based on iterator to the layers.
+
+            Parameters:
+                net_type - The desired network type of the neural network
+                layersBeginIterator - begin iterator to the collection of unsigned int layers
+                layersEndIterator - end iterator to the collection of unsigned int layers
+
+            Example:
+              >vector<unsigned int> layers{2, 3, 4, 5};
+              >neural_net net(LAYER, layers.begin(), layers.end());
+
+            This function appears in FANN >= 2.3.0.
+         */
+        template <class InputIterator>
+        neural_net(network_type_enum net_type, InputIterator layersBeginIterator, InputIterator layersEndIterator) {
+            unsigned int num_layers = static_cast<unsigned int>(std::distance(layersBeginIterator, layersEndIterator));
+            unsigned int *layers = new unsigned int[num_layers];
+            std::copy(layersBeginIterator, layersEndIterator, layers);
+
+            switch (net_type){
+                case LAYER:
+                    ann = fann_create_standard_array(num_layers, layers);
+                    break;
+                case SHORTCUT:
+                    ann = fann_create_shortcut_array(num_layers, layers);
+                    break;
+            }
+            delete[] layers;
             assert(ann != NULL);
         }
 

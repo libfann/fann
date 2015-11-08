@@ -12,7 +12,7 @@ void FannTestTrain::TearDown() {
 }
 
 TEST_F(FannTestTrain, TrainOnDateSimpleXor) {
-    net.create_standard(3, 2, 3, 1);
+    neural_net net(LAYER, 3, 2, 3, 1);
 
     data.set_train_data(4, 2, xorInput, 1, xorOutput);
     net.train_on_data(data, 100, 100, 0.001);
@@ -22,7 +22,7 @@ TEST_F(FannTestTrain, TrainOnDateSimpleXor) {
 }
 
 TEST_F(FannTestTrain, TrainSimpleIncrementalXor) {
-    net.create_standard(3, 2, 3, 1);
+    neural_net net(LAYER, 3, 2, 3, 1);
 
     for(int i = 0; i < 100000; i++) {
         net.train((fann_type[]) {0.0, 0.0}, (fann_type[]) {0.0});

@@ -1,4 +1,7 @@
+#include <vector>
 #include "fann_test.h"
+
+using namespace std;
 
 void FannTest::SetUp() {
     //ensure random generator is seeded at a known value to ensure reproducible results
@@ -11,7 +14,7 @@ void FannTest::TearDown() {
     data.destroy_train();
 }
 
-void FannTest::AssertCreate(neural_net &net, unsigned int numLayers, unsigned int *layers,
+void FannTest::AssertCreate(neural_net &net, unsigned int numLayers, const unsigned int *layers,
                             unsigned int neurons, unsigned int connections) {
     EXPECT_EQ(numLayers, net.get_num_layers());
     EXPECT_EQ(layers[0], net.get_num_input());
@@ -29,7 +32,7 @@ void FannTest::AssertCreate(neural_net &net, unsigned int numLayers, unsigned in
     AssertWeights(net, -0.09, 0.09, 0.0);
 }
 
-void FannTest::AssertCreateAndCopy(neural_net &net, unsigned int numLayers, unsigned int *layers, unsigned int neurons,
+void FannTest::AssertCreateAndCopy(neural_net &net, unsigned int numLayers, const unsigned int *layers, unsigned int neurons,
                                    unsigned int connections) {
     AssertCreate(net, numLayers, layers, neurons, connections);
     neural_net net_copy(net);
@@ -77,6 +80,12 @@ TEST_F(FannTest, CreateStandardFourLayersArrayUsingCreateMethod) {
     unsigned int layers[] = {2, 3, 4, 5};
     ASSERT_TRUE(net.create_standard_array(4, layers));
     AssertCreateAndCopy(net, 4, layers, 17, 50);
+}
+
+TEST_F(FannTest, CreateStandardFourLayersVector) {
+    vector<unsigned int> layers{2, 3, 4, 5};
+    neural_net net(LAYER, layers.begin(), layers.end());
+    AssertCreateAndCopy(net, 4, layers.data(), 17, 50);
 }
 
 TEST_F(FannTest, CreateSparseFourLayers) {
