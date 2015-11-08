@@ -30,9 +30,11 @@
  *  The Fann Wrapper for C++ provides two classes: <neural_net>
  *  and <training_data>. To use the wrapper include
  *  doublefann.h, floatfann.h or fixedfann.h before the
- *  fann_cpp.h header file. To get started see xor_sample.cpp
- *  in the examples directory. The license is LGPL. Copyright (C)
- *  2004-2006 created by <freegoldbar@yahoo.com>.
+ *  fann_cpp.h header file.
+ *
+ *  To get started see xor_sample.cpp in the examples directory.
+ *  The license is LGPL. Copyright (C) 2004-2006 created by <freegoldbar@yahoo.com>.
+ *
  *
  *  Note:  Notes and differences from C API
  *
@@ -47,11 +49,10 @@
  *       except that the struct fann *ann/struct fann_train_data *data
  *       arguments are encapsulated so they are not present in the
  *       method signatures or are translated into class references.
- *  -  The various create methods return a boolean set to true to
- *       indicate that the neural network was created, false otherwise.
- *       The same goes for the read_train_from_file method.
+ *  -  C++ style constructors have been implemented to make network creation
+ *       easier
  *  -  The neural network and training data is automatically cleaned
- *       up in the destructors and create/read methods.
+ *       up in the destructors
  *  -  To make the destructors virtual define USE_VIRTUAL_DESTRUCTOR
  *       before including the header file.
  *  -  Additional methods are available on the training_data class to
