@@ -6,19 +6,20 @@
 #include "doublefann.h"
 #include "fann_cpp.h"
 
+using namespace FANN;
 
 class FannTest : public testing::Test {
 protected:
-    FANN::neural_net net;
-    FANN::training_data data;
+    neural_net net;
+    training_data data;
 
-    void AssertCreateAndCopy(unsigned int numLayers, unsigned int *layers, unsigned int neurons,
+    void AssertCreateAndCopy(neural_net &net, unsigned int numLayers, unsigned int *layers, unsigned int neurons,
                              unsigned int connections);
 
-    void AssertCreate(FANN::neural_net &net, unsigned int numLayers, unsigned int *layers,
+    void AssertCreate(neural_net &net, unsigned int numLayers, unsigned int *layers,
                       unsigned int neurons, unsigned int connections);
 
-    void AssertWeights(fann_type min, fann_type max, fann_type avg);
+    void AssertWeights(neural_net &net, fann_type min, fann_type max, fann_type avg);
 
     virtual void SetUp();
 

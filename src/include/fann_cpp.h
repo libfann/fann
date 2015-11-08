@@ -77,10 +77,162 @@ namespace FANN {
     */
     class neural_net {
     public:
-        /* Constructor: neural_net
-        
-            Default constructor creates an empty neural net.
+        /* Constructor: neural_net(network_type_enum net_type, unsigned int num_layers, const unsigned int *layers)
+
+            Creates a neural network of the desired <network_type_enum> net_type, based on array of layers.
+
+            Parameters:
+                net_type - The desired network type of the neural network
+                num_layers - The total number of layers including the input and the output layer.
+                layers - array of the layer sizes
+
+            NOTE: if layers does not have the same size as num_layers, the result is undefined
+
+            Example:
+              >FANN::neural_net net(LAYER, 3, (unsigned int[]) {2, 3, 1});
+
+            This function appears in FANN >= 2.3.0.
+         */
+        neural_net(network_type_enum net_type, unsigned int num_layers, const unsigned int *layers) {
+            switch (net_type){
+                case LAYER:
+                    ann = fann_create_standard_array(num_layers, layers);
+                    break;
+                case SHORTCUT:
+                    ann = fann_create_shortcut_array(num_layers, layers);
+                    break;
+            }
+            assert(ann != NULL);
+        }
+
+        /* Constructor: neural_net(network_type_enum net_type, unsigned int num_layers, ...)
+
+	        Creates a neural network of the desired <network_type_enum> net_type.
+
+	        Parameters:
+		        num_layers - The total number of layers including the input and the output layer.
+		        ... - Integer values determining the number of neurons in each layer starting with the
+			        input layer and ending with the output layer.
+
+            Example:
+                >const unsigned int num_layers = 3;
+                >const unsigned int num_input = 2;
+                >const unsigned int num_hidden = 3;
+                >const unsigned int num_output = 1;
+                >
+                >FANN::neural_net net(num_layers, num_input, num_hidden, num_output);
+
+	        This function appears in FANN >= 2.3.0.
+        */
+        neural_net(network_type_enum net_type, unsigned int num_layers, ...) {
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
+
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i = 0; i < num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned
+                        int);
+            va_end(layers);
+
+            switch (net_type){
+                case LAYER:
+                    ann = fann_create_standard_array(num_layers, data.get());
+                    break;
+                case SHORTCUT:
+                    ann = fann_create_shortcut_array(num_layers, data.get());
+                    break;
+            }
+            assert(ann != NULL);
+        }
+
+
+        /* Constructor: neural_net(float connection_rate, unsigned int num_layers, ...)
+
+	        Creates a standard backpropagation neural network, which is sparsely connected, this will default the <network_type_enum> to <LAYER>
+
+	        Parameters:
+		        connection_rate - The connection rate controls how many connections there will be in the
+   			        network. If the connection rate is set to 1, the network will be fully
+   			        connected, but if it is set to 0.5 only half of the connections will be set.
+			        A connection rate of 1 will yield the same result as <fann_create_standard>
+		        num_layers - The total number of layers including the input and the output layer.
+		        ... - Integer values determining the number of neurons in each layer starting with the
+			        input layer and ending with the output layer.
+
+	        This function appears in FANN >= 2.3.0.
+        */
+        neural_net(float connection_rate, unsigned int num_layers, ...) {
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
+
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i = 0; i < num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned int);
+            va_end(layers);
+
+            ann = fann_create_sparse_array(connection_rate, num_layers, data.get());
+            assert(ann != NULL);
+        }
+
+        /* Constructor: neural_net(float connection_rate, unsigned int num_layers, const unsigned int *layers)
+
+	        Creates a standard backpropagation neural network, which is sparsely connected, this will default the <network_type_enum> to <LAYER>
+
+	        Parameters:
+		        connection_rate - The connection rate controls how many connections there will be in the
+   			        network. If the connection rate is set to 1, the network will be fully
+   			        connected, but if it is set to 0.5 only half of the connections will be set.
+			        A connection rate of 1 will yield the same result as <fann_create_standard>
+		        num_layers - The total number of layers including the input and the output layer.
+		        layers - Integer values determining the number of neurons in each layer starting with the
+			        input layer and ending with the output layer.
+
+	        This function appears in FANN >= 2.3.0.
+        */
+        neural_net(float connection_rate, unsigned int num_layers, const unsigned int *layers) {
+            ann = fann_create_sparse_array(connection_rate, num_layers, layers);
+            assert(ann != NULL);
+        }
+
+
+        /* Constructor: neural_net(const std::string &configuration_file)
+
+           Constructs a backpropagation neural network from a configuration file,
+           which have been saved by <save>.
+
+           See also:
+   	        <save>, <save_to_fixed>
+
+           This function appears in FANN >= 2.3.0.
+         */
+        neural_net(const std::string &configuration_file) {
+            ann = fann_create_from_file(configuration_file.c_str());
+            assert(ann != NULL);
+        }
+
+        /* Constructor neural_net(const neural_net &other)
+
+            Creates a copy the other neural_net.
+            */
+        neural_net(const neural_net &other) : ann(NULL) {
+            copy_from_struct_fann(other.ann);
+        }
+
+        /* Constructor: neural_net(struct fann *other)
+
+           Creates a copy the other neural_net.
+            */
+        neural_net(struct fann *other) {
+            copy_from_struct_fann(other);
+        }
+
+        /* Constructor: neural_net() - DEPRECATED
+
+            Creates an empty neural net.
             Use one of the create functions to create the neural network.
+
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
 
             See also:
 		        <create_standard>, <create_sparse>, <create_shortcut>,
@@ -89,31 +241,12 @@ namespace FANN {
         neural_net() : ann(NULL) {
         }
 
-        /* Constructor neural_net
-
-            Creates a copy the other neural_net.
-
-            See also:
-                    <copy_from_struct_fann>
-            */
-        neural_net(const neural_net &other) : ann(NULL) {
-            copy_from_struct_fann(other.ann);
-        }
-
-        /* Constructor: neural_net
-
-           Creates a copy the other neural_net.
-
-           See also:
-                    <copy_from_struct_fann>
-            */
-        neural_net(struct fann *other) {
-            copy_from_struct_fann(other);
-        }
-
-        /* Method: copy_from_struct_fann
+        /* Method: copy_from_struct_fann - DEPRECATED
 
            Set the internal fann struct to a copy of other
+
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
         */
         void copy_from_struct_fann(struct fann *other) {
             destroy();
@@ -155,7 +288,7 @@ namespace FANN {
             }
         }
 
-        /* Method: create_standard
+        /* Method: create_standard - DEPRECATED
         	
 	        Creates a standard fully connected backpropagation neural network.
 
@@ -180,6 +313,9 @@ namespace FANN {
                 >FANN::neural_net net;
                 >net.create_standard(num_layers, num_input, num_hidden, num_output);
 
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
 	        See also:
 		        <create_standard_array>, <create_sparse>, <create_shortcut>,
 		        <fann_create_standard_array>
@@ -200,10 +336,13 @@ namespace FANN {
             return status;
         }
 
-        /* Method: create_standard_array
+        /* Method: create_standard_array - DEPRECATED
 
            Just like <create_standard>, but with an array of layer sizes
            instead of individual parameters.
+
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
 
 	        See also:
 		        <create_standard>, <create_sparse>, <create_shortcut>,
@@ -217,7 +356,7 @@ namespace FANN {
             return (ann != NULL);
         }
 
-        /* Method: create_sparse
+        /* Method: create_sparse - DEPRECATED
 
 	        Creates a standard backpropagation neural network, which is not fully connected.
 
@@ -232,6 +371,9 @@ namespace FANN {
         			
 	        Returns:
 		        Boolean true if the network was created, false otherwise.
+
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
 
 	        See also:
 		        <create_standard>, <create_sparse_array>, <create_shortcut>,
@@ -254,13 +396,16 @@ namespace FANN {
             return status;
         }
 
-        /* Method: create_sparse_array
+        /* Method: create_sparse_array - DEPRECATED
            Just like <create_sparse>, but with an array of layer sizes
            instead of individual parameters.
 
            See <create_sparse> for a description of the parameters.
 
-	        See also:
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
+           See also:
 		        <create_standard>, <create_sparse>, <create_shortcut>,
 		        <fann_create_sparse_array>
 
@@ -273,7 +418,7 @@ namespace FANN {
             return (ann != NULL);
         }
 
-        /* Method: create_shortcut
+        /* Method: create_shortcut - DEPRECATED
 
 	        Creates a standard backpropagation neural network, which is fully connected and which
 	        also has shortcut connections.
@@ -283,6 +428,9 @@ namespace FANN {
 	        Including direct connections from the input layer to the output layer.
 
 	        See <create_standard> for a description of the parameters.
+
+            NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+            an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
 
 	        See also:
 		        <create_standard>, <create_sparse>, <create_shortcut_array>,
@@ -304,14 +452,17 @@ namespace FANN {
             return status;
         }
 
-        /* Method: create_shortcut_array
+        /* Method: create_shortcut_array - DEPRECATED
 
            Just like <create_shortcut>, but with an array of layer sizes
            instead of individual parameters.
 
 	        See <create_standard_array> for a description of the parameters.
 
-	        See also:
+            NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+            an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
+ 	        See also:
 		        <create_standard>, <create_sparse>, <create_shortcut>,
 		        <fann_create_shortcut_array>
 
@@ -415,11 +566,14 @@ namespace FANN {
             }
         }
 
-        /* Method: create_from_file
+        /* Method: create_from_file - DEPRECATED
            
            Constructs a backpropagation neural network from a configuration file,
            which have been saved by <save>.
-           
+
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
            See also:
    	        <save>, <save_to_fixed>, <fann_create_from_file>
            	

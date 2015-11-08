@@ -5,12 +5,12 @@
 
 class FannTestTrain : public FannTest {
 protected:
-    double xorInput[8] = {
+    fann_type xorInput[8] = {
             0.0, 0.0,
             0.0, 1.0,
             1.0, 0.0,
             1.0, 1.0};
-    double xorOutput[4] = {
+    fann_type xorOutput[4] = {
             0.0,
             1.0,
             1.0,

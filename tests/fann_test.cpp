@@ -11,7 +11,7 @@ void FannTest::TearDown() {
     data.destroy_train();
 }
 
-void FannTest::AssertCreate(FANN::neural_net &net, unsigned int numLayers, unsigned int *layers,
+void FannTest::AssertCreate(neural_net &net, unsigned int numLayers, unsigned int *layers,
                             unsigned int neurons, unsigned int connections) {
     EXPECT_EQ(numLayers, net.get_num_layers());
     EXPECT_EQ(layers[0], net.get_num_input());
@@ -26,19 +26,18 @@ void FannTest::AssertCreate(FANN::neural_net &net, unsigned int numLayers, unsig
     EXPECT_EQ(neurons, net.get_total_neurons());
     EXPECT_EQ(connections, net.get_total_connections());
 
-    AssertWeights(-0.09, 0.09, 0.0);
+    AssertWeights(net, -0.09, 0.09, 0.0);
 }
 
-void FannTest::AssertCreateAndCopy(unsigned int numLayers, unsigned int *layers, unsigned int neurons,
+void FannTest::AssertCreateAndCopy(neural_net &net, unsigned int numLayers, unsigned int *layers, unsigned int neurons,
                                    unsigned int connections) {
     AssertCreate(net, numLayers, layers, neurons, connections);
-    FANN::neural_net net_copy(net);
+    neural_net net_copy(net);
     AssertCreate(net_copy, numLayers, layers, neurons, connections);
 }
 
-void FannTest::AssertWeights(fann_type min, fann_type max,
-                             fann_type avg) {
-    FANN::connection *connections = new FANN::connection[net.get_total_connections()];
+void FannTest::AssertWeights(neural_net &net, fann_type min, fann_type max, fann_type avg) {
+    connection *connections = new connection[net.get_total_connections()];
     net.get_connection_array(connections);
 
     fann_type minWeight = connections[0].weight;
@@ -58,67 +57,103 @@ void FannTest::AssertWeights(fann_type min, fann_type max,
 }
 
 TEST_F(FannTest, CreateStandardThreeLayers) {
-    ASSERT_TRUE(net.create_standard(3, 2, 3, 4));
-    unsigned int layers[] = {2, 3, 4};
-    AssertCreateAndCopy(3, layers, 11, 25);
+    neural_net net(LAYER, 3, 2, 3, 4);
+    AssertCreateAndCopy(net, 3, (unsigned int[]) {2, 3, 4}, 11, 25);
 }
 
-TEST_F(FannTest, CreateStandardFourLayers) {
-    ASSERT_TRUE(net.create_standard(4, 2, 3, 4, 5));
-    unsigned int layers[] = {2, 3, 4, 5};
-    AssertCreateAndCopy(4, layers, 17, 50);
+TEST_F(FannTest, CreateStandardThreeLayersUsingCreateMethod) {
+    ASSERT_TRUE(net.create_standard(3, 2, 3, 4));
+    unsigned int layers[] = {2, 3, 4};
+    AssertCreateAndCopy(net, 3, layers, 11, 25);
 }
 
 TEST_F(FannTest, CreateStandardFourLayersArray) {
     unsigned int layers[] = {2, 3, 4, 5};
+    neural_net net(LAYER, 4, layers);
+    AssertCreateAndCopy(net, 4, layers, 17, 50);
+}
+
+TEST_F(FannTest, CreateStandardFourLayersArrayUsingCreateMethod) {
+    unsigned int layers[] = {2, 3, 4, 5};
     ASSERT_TRUE(net.create_standard_array(4, layers));
-    AssertCreateAndCopy(4, layers, 17, 50);
+    AssertCreateAndCopy(net, 4, layers, 17, 50);
 }
 
 TEST_F(FannTest, CreateSparseFourLayers) {
+    neural_net net(0.5, 4, 2, 3, 4, 5);
+    AssertCreateAndCopy(net, 4, (unsigned int[]){2, 3, 4, 5}, 17, 31);
+}
+
+TEST_F(FannTest, CreateSparseFourLayersUsingCreateMethod) {
     ASSERT_TRUE(net.create_sparse(0.5f, 4, 2, 3, 4, 5));
-    unsigned int layers[] = {2, 3, 4, 5};
-    AssertCreateAndCopy(4, layers, 17, 31);
+    AssertCreateAndCopy(net, 4, (unsigned int[]){2, 3, 4, 5}, 17, 31);
 }
 
 TEST_F(FannTest, CreateSparseArrayFourLayers) {
     unsigned int layers[] = {2, 3, 4, 5};
+    neural_net net(0.5f, 4, layers);
+    AssertCreateAndCopy(net, 4, layers, 17, 31);
+}
+
+TEST_F(FannTest, CreateSparseArrayFourLayersUsingCreateMethod) {
+    unsigned int layers[] = {2, 3, 4, 5};
     ASSERT_TRUE(net.create_sparse_array(0.5f, 4, layers));
-    AssertCreateAndCopy(4, layers, 17, 31);
+    AssertCreateAndCopy(net, 4, layers, 17, 31);
 }
 
 TEST_F(FannTest, CreateSparseArrayWithMinimalConnectivity) {
     unsigned int layers[] = {2, 2, 2};
-    ASSERT_TRUE(net.create_sparse_array(0.01f, 3, layers));
-    AssertCreateAndCopy(3, layers, 8, 8);
+    neural_net net(0.01f, 3, layers);
+    AssertCreateAndCopy(net, 3, layers, 8, 8);
 }
 
 TEST_F(FannTest, CreateShortcutFourLayers) {
+    neural_net net(SHORTCUT, 4, 2, 3, 4, 5);
+    AssertCreateAndCopy(net, 4, (unsigned int[]){2, 3, 4, 5}, 15, 83);
+    EXPECT_EQ(SHORTCUT, net.get_network_type());
+}
+
+TEST_F(FannTest, CreateShortcutFourLayersUsingCreateMethod) {
     ASSERT_TRUE(net.create_shortcut(4, 2, 3, 4, 5));
-    unsigned int layers[] = {2, 3, 4, 5};
-    AssertCreateAndCopy(4, layers, 15, 83);
-    EXPECT_EQ(FANN::SHORTCUT, net.get_network_type());
+    AssertCreateAndCopy(net, 4, (unsigned int[]){2, 3, 4, 5}, 15, 83);
+    EXPECT_EQ(SHORTCUT, net.get_network_type());
 }
 
 TEST_F(FannTest, CreateShortcutArrayFourLayers) {
     unsigned int layers[] = {2, 3, 4, 5};
+    neural_net net(SHORTCUT, 4, layers);
+    AssertCreateAndCopy(net, 4, layers, 15, 83);
+    EXPECT_EQ(SHORTCUT, net.get_network_type());
+}
+
+TEST_F(FannTest, CreateShortcutArrayFourLayersUsingCreateMethod) {
+    unsigned int layers[] = {2, 3, 4, 5};
     ASSERT_TRUE(net.create_shortcut_array(4, layers));
-    AssertCreateAndCopy(4, layers, 15, 83);
-    EXPECT_EQ(FANN::SHORTCUT, net.get_network_type());
+    AssertCreateAndCopy(net, 4, layers, 15, 83);
+    EXPECT_EQ(SHORTCUT, net.get_network_type());
 }
 
 TEST_F(FannTest, CreateFromFile) {
     ASSERT_TRUE(net.create_standard(3, 2, 3, 4));
-    ASSERT_TRUE(net.save("tmpfile"));
-    net.destroy();
+    neural_net netToBeSaved(LAYER, 3, 2, 3, 4);
+    ASSERT_TRUE(netToBeSaved.save("tmpfile"));
+
+    neural_net netToBeLoaded("tmpfile");
+    AssertCreateAndCopy(netToBeLoaded, 3, (unsigned int[]){2, 3, 4}, 11, 25);
+}
+
+TEST_F(FannTest, CreateFromFileUsingCreateMethod) {
+    ASSERT_TRUE(net.create_standard(3, 2, 3, 4));
+    neural_net inputNet(LAYER, 3, 2, 3, 4);
+    ASSERT_TRUE(inputNet.save("tmpfile"));
+
     ASSERT_TRUE(net.create_from_file("tmpfile"));
 
-    unsigned int layers[] = {2, 3, 4};
-    AssertCreateAndCopy(3, layers, 11, 25);
+    AssertCreateAndCopy(net, 3, (unsigned int[]){2, 3, 4}, 11, 25);
 }
 
 TEST_F(FannTest, RandomizeWeights) {
-    net.create_standard(2, 20, 10);
+    neural_net net(LAYER, 2, 20, 10);
     net.randomize_weights(-1.0, 1.0);
-    AssertWeights(-1.0, 1.0, 0);
+    AssertWeights(net, -1.0, 1.0, 0);
 }
