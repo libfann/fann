@@ -5,3 +5,4 @@ compiler:
 
 script:
     - cmake .
+    - make
