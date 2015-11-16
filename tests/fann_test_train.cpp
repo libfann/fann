@@ -25,10 +25,10 @@ TEST_F(FannTestTrain, TrainSimpleIncrementalXor) {
     neural_net net(LAYER, 3, 2, 3, 1);
 
     for(int i = 0; i < 100000; i++) {
-        net.train((fann_type[]) {0.0, 0.0}, (fann_type[]) {0.0});
-        net.train((fann_type[]) {1.0, 0.0}, (fann_type[]) {1.0});
-        net.train((fann_type[]) {0.0, 1.0}, (fann_type[]) {1.0});
-        net.train((fann_type[]) {1.0, 1.0}, (fann_type[]) {0.0});
+        net.train((fann_type*) (const fann_type[]) {0.0, 0.0}, (fann_type*) (const fann_type[]) {0.0});
+        net.train((fann_type*) (const fann_type[]) {1.0, 0.0}, (fann_type*) (const fann_type[]) {1.0});
+        net.train((fann_type*) (const fann_type[]) {0.0, 1.0}, (fann_type*) (const fann_type[]) {1.0});
+        net.train((fann_type*) (const fann_type[]) {1.0, 1.0}, (fann_type*) (const fann_type[]) {0.0});
     }
 
     EXPECT_LT(net.get_MSE(), 0.01);
