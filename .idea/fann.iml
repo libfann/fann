@@ -16,8 +16,6 @@
       <sourceFolder url="file://$MODULE_DIR$/src/fixedfann.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/floatfann.c" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src/include/CMakeLists.txt" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/parallel_doublefann_cpp.cpp" isTestSource="false" />
-      <sourceFolder url="file://$MODULE_DIR$/src/parallel_floatfann_cpp.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/CMakeLists.txt" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/fann_test.cpp" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/tests/fann_test.h" isTestSource="false" />

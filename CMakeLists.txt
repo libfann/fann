@@ -3,12 +3,12 @@ IF(BIICODE)
 	INIT_BIICODE_BLOCK()
 	
 	# Output folder for binaries
-	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/../bin/fann/examples)
-	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG  ${CMAKE_SOURCE_DIR}/../bin/fann/examples)
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../bin/fann/examples)
+	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG  ${CMAKE_CURRENT_SOURCE_DIR}/../bin/fann/examples)
 
 	# Copy datasets for examples if exists
 	if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/datasets)
-	  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/datasets DESTINATION ${CMAKE_SOURCE_DIR}/../bin/)
+	  file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/datasets DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/../bin/)
 	ENDIF()
 
 	# Include recipes block for CPP11 activation
@@ -46,7 +46,7 @@ endif ()
 
 project (FANN)
 
-list (APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 set (FANN_VERSION_MAJOR 2)
 set (FANN_VERSION_MINOR 2)
@@ -85,7 +85,7 @@ SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSIO
 IF(WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
-#  SET(CPACK_PACKAGE_ICON "${CMake_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
+#  SET(CPACK_PACKAGE_ICON "${CMAKE_CURRENT_SOURCE_DIR}/Utilities/Release\\\\InstallIcon.bmp")
 #  SET(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
 #  SET(CPACK_NSIS_DISPLAY_NAME "${CPACK_PACKAGE_INSTALL_DIRECTORY} My Famous Project")
   SET(CPACK_NSIS_HELP_LINK "http:\\\\\\\\leenissen.dk/fann/")
