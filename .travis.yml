@@ -20,5 +20,7 @@ addons:
 before_script:
   - cmake .
 
-script: make
+script:
+  - make
+  - ./tests/fann_tests
 
