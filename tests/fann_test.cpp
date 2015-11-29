@@ -54,9 +54,9 @@ void FannTest::AssertWeights(neural_net &net, fann_type min, fann_type max, fann
         totalWeight += connections[i].weight;
     }
 
-    EXPECT_NEAR(min, minWeight, 0.01);
-    EXPECT_NEAR(max, maxWeight, 0.01);
-    EXPECT_NEAR(avg, totalWeight / (fann_type) net.get_total_connections(), 0.1);
+    EXPECT_NEAR(min, minWeight, 0.05);
+    EXPECT_NEAR(max, maxWeight, 0.05);
+    EXPECT_NEAR(avg, totalWeight / (fann_type) net.get_total_connections(), 0.5);
 }
 
 TEST_F(FannTest, CreateStandardThreeLayers) {
