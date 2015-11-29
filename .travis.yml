@@ -4,7 +4,6 @@ language: cpp
 
 compiler:
   - gcc
-  - clang
 
 addons:
   apt:
