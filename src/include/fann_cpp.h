@@ -868,6 +868,8 @@ namespace FANN {
             }
         }
 
+#ifndef FIXEDFANN
+
         /* Method: set_callback
            
            Sets the callback function for use during training. The user_data is passed to
@@ -899,6 +901,8 @@ namespace FANN {
                     fann_set_callback(ann, NULL);
             }
         }
+
+#endif  /* NOT FIXEDFANN */
 
         /* Method: print_parameters
 
@@ -2906,6 +2910,8 @@ namespace FANN {
             neural_net *net; // This pointer for the neural network
         } user_context;
 
+#ifndef FIXEDFANN
+
         // Internal callback used to convert from pointers to class references
         static int FANN_API internal_callback(struct fann *ann, struct fann_train_data *train,
                                               unsigned int max_epochs, unsigned int epochs_between_reports,
@@ -2926,6 +2932,8 @@ namespace FANN {
                 return -1; // This should not occur except if out of memory
             }
         }
+
+#endif  /* NOT FIXEDFANN */
 
     protected:
         // Pointer the encapsulated fann neural net structure
