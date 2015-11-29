@@ -63,6 +63,7 @@
  *
  */
 
+#include <assert.h>
 #include <stdarg.h>
 #include <string>
 #include "fann_data_cpp.h"
