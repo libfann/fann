@@ -127,7 +127,7 @@ static char const *const FANN_TRAIN_NAMES[] = {
 	 * Can NOT be used during training.
 
    FANN_THRESHOLD_SYMMETRIC - Threshold activation function.
-	 * x < 0 -> y = 0, x >= 0 -> y = 1
+	 * x < 0 -> y = -1, x >= 0 -> y = 1
 	 * Can NOT be used during training.
 
    FANN_SIGMOID - Sigmoid activation function.
