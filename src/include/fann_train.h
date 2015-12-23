@@ -212,6 +212,7 @@ FANN_EXTERNAL void FANN_API fann_train_on_file(struct fann *ann, const char *fil
 	This function appears in FANN >= 1.2.0.
  */ 
 FANN_EXTERNAL float FANN_API fann_train_epoch(struct fann *ann, struct fann_train_data *data);
+FANN_EXTERNAL float FANN_API fann_train_epoch_lw(struct fann *ann, struct fann_train_data *data, fann_type* label_weight);
 #endif	/* NOT FIXEDFANN */
 
 /* Function: fann_test_data

@@ -156,6 +156,55 @@ fann_type fann_update_MSE(struct fann *ann, struct fann_neuron* neuron, fann_typ
 	return neuron_diff;
 }
 
+fann_type fann_update_MSE_lw(struct fann *ann, struct fann_neuron* neuron, fann_type neuron_diff, fann_type label_weight)
+{
+	float neuron_diff2;
+	
+	switch (neuron->activation_function)
+	{
+		case FANN_LINEAR_PIECE_SYMMETRIC:
+		case FANN_THRESHOLD_SYMMETRIC:
+		case FANN_SIGMOID_SYMMETRIC:
+		case FANN_SIGMOID_SYMMETRIC_STEPWISE:
+		case FANN_ELLIOT_SYMMETRIC:
+		case FANN_GAUSSIAN_SYMMETRIC:
+		case FANN_SIN_SYMMETRIC:
+		case FANN_COS_SYMMETRIC:
+			neuron_diff /= (fann_type)2.0;
+			break;
+		case FANN_THRESHOLD:
+		case FANN_LINEAR:
+		case FANN_SIGMOID:
+		case FANN_SIGMOID_STEPWISE:
+		case FANN_GAUSSIAN:
+		case FANN_GAUSSIAN_STEPWISE:
+		case FANN_ELLIOT:
+		case FANN_LINEAR_PIECE:
+		case FANN_SIN:
+		case FANN_COS:
+			break;
+	}
+
+#ifdef FIXEDFANN
+		neuron_diff2 =
+			(neuron_diff / (float) ann->multiplier) * (neuron_diff / (float) ann->multiplier);
+#else
+		neuron_diff2 = (float) (neuron_diff * neuron_diff);
+#endif
+
+	ann->MSE_value += neuron_diff2 * label_weight;
+
+	/*printf("neuron_diff %f = (%f - %f)[/2], neuron_diff2=%f, sum=%f, MSE_value=%f, num_MSE=%d\n", neuron_diff, *desired_output, neuron_value, neuron_diff2, last_layer_begin->sum, ann->MSE_value, ann->num_MSE); */
+	if(fann_abs(neuron_diff) >= ann->bit_fail_limit)
+	{
+		ann->num_bit_fail++;
+	}
+	
+	return neuron_diff;
+}
+
+
+
 /* Tests the network.
  */
 FANN_EXTERNAL fann_type *FANN_API fann_test(struct fann *ann, fann_type * input,
@@ -283,6 +332,66 @@ void fann_compute_MSE(struct fann *ann, fann_type * desired_output)
 		ann->num_MSE++;
 	}
 }
+
+void fann_compute_MSE_lw(struct fann *ann, fann_type * desired_output, fann_type label_weight)
+{
+	fann_type neuron_value, neuron_diff, *error_it = 0, *error_begin = 0;
+	struct fann_neuron *last_layer_begin = (ann->last_layer - 1)->first_neuron;
+	const struct fann_neuron *last_layer_end = last_layer_begin + ann->num_output;
+	const struct fann_neuron *first_neuron = ann->first_layer->first_neuron;
+
+	/* if no room allocated for the error variabels, allocate it now */
+	if(ann->train_errors == NULL)
+	{
+		ann->train_errors = (fann_type *) calloc(ann->total_neurons, sizeof(fann_type));
+		if(ann->train_errors == NULL)
+		{
+			fann_error((struct fann_error *) ann, FANN_E_CANT_ALLOCATE_MEM);
+			return;
+		}
+	}
+	else
+	{
+		/* clear the error variabels */
+		memset(ann->train_errors, 0, (ann->total_neurons) * sizeof(fann_type));
+	}
+	error_begin = ann->train_errors;
+
+#ifdef DEBUGTRAIN
+	printf("\ncalculate errors\n");
+#endif
+	/* calculate the error and place it in the output layer */
+	error_it = error_begin + (last_layer_begin - first_neuron);
+
+	for(; last_layer_begin != last_layer_end; last_layer_begin++)
+	{
+		neuron_value = last_layer_begin->value;
+		neuron_diff = *desired_output - neuron_value;
+
+		neuron_diff = fann_update_MSE_lw(ann, last_layer_begin, neuron_diff, label_weight);
+
+		if(ann->train_error_function)
+		{						/* TODO make switch when more functions */
+			if(neuron_diff < -.9999999)
+				neuron_diff = -17.0;
+			else if(neuron_diff > .9999999)
+				neuron_diff = 17.0;
+			else
+				neuron_diff = (fann_type) log((1.0 + neuron_diff) / (1.0 - neuron_diff));
+		}
+
+		*error_it = fann_activation_derived(last_layer_begin->activation_function,
+											last_layer_begin->activation_steepness, neuron_value,
+											last_layer_begin->sum) * neuron_diff * label_weight;
+
+		desired_output++;
+		error_it++;
+
+		ann->num_MSE++;
+	}
+}
+
+
 
 /* INTERNAL FUNCTION
    Propagate the error backwards from the output layer.
