@@ -48,7 +48,7 @@ rundebugtest: $(DEBUG_TARGETS)
 compiletest:
 	gcc -O3 -ggdb -DDISABLE_PARALLEL_FANN -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wshadow -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -std=c99 -I../src/ -I../src/include/ ../src/floatfann.c xor_train.c -o xor_train -lm
 	gcc -O3 -ggdb -DDISABLE_PARALLEL_FANN -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wshadow -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -std=c99 -DFIXEDFANN -I../src/ -I../src/include/ ../src/fixedfann.c xor_test.c -o xor_test -lm
-	g++ -O3 -ggdb -DDISABLE_PARALLEL_FANN -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -std=c99 -I../src/ -I../src/include/ ../src/floatfann.c xor_train.c -o xor_train -lm
+	gcc -O3 -ggdb -DDISABLE_PARALLEL_FANN -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -std=c99 -I../src/ -I../src/include/ ../src/floatfann.c xor_train.c -o xor_train -lm
 	g++ -O3 -ggdb -DDISABLE_PARALLEL_FANN -DDEBUG -Wall -Wformat-security -Wfloat-equal -Wpointer-arith -Wcast-qual -Wsign-compare -pedantic -std=c++11 -I../src/ -I../src/include/ ../src/floatfann.c -lm xor_sample.cpp -o xor_train
 
 quickcompiletest:
