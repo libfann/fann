@@ -214,6 +214,8 @@ void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, .
 	{
 		fprintf(error_log, "FANN Error %d: %s", errno_f, errstr);
 	}
+	
+	exit(1);
 }
 
 /* INTERNAL FUNCTION
