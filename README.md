@@ -50,7 +50,7 @@ Then run CMake
 
 `cmake .`
 
-After that, you'll need to use elevated priviledges to install the library:
+After that, you'll need to use elevated privileges to install the library:
 
 `sudo make install`
 
