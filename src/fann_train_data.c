@@ -152,6 +152,32 @@ float fann_train_epoch_irpropm(struct fann *ann, struct fann_train_data *data)
 	return fann_get_MSE(ann);
 }
 
+float fann_train_epoch_irpropm_gradient(struct fann *ann, struct fann_train_data *data, fann_type (*errorFunction)(fann_type*,fann_type*,int,void*), void* errorFuncdata)
+{
+	unsigned int i;
+
+	if(ann->prev_train_slopes == NULL)
+	{
+		fann_clear_train_arrays(ann);
+	}
+
+	fann_reset_MSE(ann);
+
+	for(i = 0; i < data->num_data; i++)
+	{
+		fann_run(ann, data->input[i]);
+		fann_compute_MSE_gradient(ann, data->input[i], errorFunction, errorFuncdata);
+		fann_backpropagate_MSE(ann);
+		fann_update_slopes_batch(ann, ann->first_layer + 1, ann->last_layer - 1);
+	}
+
+	fann_update_weights_irpropm(ann, 0, ann->total_connections);
+
+	return fann_get_MSE(ann);
+}
+
+
+
 float fann_train_epoch_irpropm_lw(struct fann *ann, struct fann_train_data *data, fann_type* label_weight)
 {
 	unsigned int i;

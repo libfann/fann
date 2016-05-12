@@ -333,6 +333,57 @@ void fann_compute_MSE(struct fann *ann, fann_type * desired_output)
 	}
 }
 
+void fann_compute_MSE_gradient(struct fann *ann, fann_type * input, fann_type (*errorFunction)(fann_type*,fann_type*,int,void*), void* errorFuncdata)
+{
+	fann_type neuron_value, neuron_diff, *error_it = 0, *error_begin = 0;
+	struct fann_neuron *last_layer_begin = (ann->last_layer - 1)->first_neuron;
+	const struct fann_neuron *last_layer_end = last_layer_begin + ann->num_output;
+	const struct fann_neuron *first_neuron = ann->first_layer->first_neuron;
+
+	/* if no room allocated for the error variabels, allocate it now */
+	if(ann->train_errors == NULL)
+	{
+		ann->train_errors = (fann_type *) calloc(ann->total_neurons, sizeof(fann_type));
+		if(ann->train_errors == NULL)
+		{
+			fann_error((struct fann_error *) ann, FANN_E_CANT_ALLOCATE_MEM);
+			return;
+		}
+	}
+	else
+	{
+		/* clear the error variabels */
+		memset(ann->train_errors, 0, (ann->total_neurons) * sizeof(fann_type));
+	}
+	error_begin = ann->train_errors;
+
+#ifdef DEBUGTRAIN
+	printf("\ncalculate errors\n");
+#endif
+	/* calculate the error and place it in the output layer */
+	error_it = error_begin + (last_layer_begin - first_neuron);
+
+	int i=0;
+	for(; last_layer_begin != last_layer_end; last_layer_begin++)
+	{
+		neuron_value = last_layer_begin->value;
+		//neuron_diff = -(2.f*neuron_value + *desired_output);
+		neuron_diff = errorFunction(input, ann->output, i, errorFuncdata);
+
+		*error_it = fann_activation_derived(last_layer_begin->activation_function,
+											last_layer_begin->activation_steepness, neuron_value,
+											last_layer_begin->sum) * neuron_diff;
+		//printf("DEBUG _mse_grad %lf %lf %lf %lf\n", *error_it, neuron_diff, last_layer_begin->activation_function, last_layer_begin->activation_steepness );
+		//desired_output++;
+		error_it++;
+
+		ann->num_MSE++;
+		i++;
+	}
+}
+
+
+
 void fann_compute_MSE_lw(struct fann *ann, fann_type * desired_output, fann_type label_weight)
 {
 	fann_type neuron_value, neuron_diff, *error_it = 0, *error_begin = 0;
@@ -474,6 +525,93 @@ void fann_backpropagate_MSE(struct fann *ann)
 		
 	}
 }
+
+void fann_backpropagate_MSE_firstlayer(struct fann *ann)
+{
+	fann_type tmp_error;
+	unsigned int i;
+	struct fann_layer *layer_it;
+	struct fann_neuron *neuron_it, *last_neuron;
+	struct fann_neuron **connections;
+
+	fann_type *error_begin = ann->train_errors;
+	fann_type *error_prev_layer;
+	fann_type *weights;
+	const struct fann_neuron *first_neuron = ann->first_layer->first_neuron;
+	const struct fann_layer *second_layer = ann->first_layer + 1;
+	const struct fann_layer *first_layer = ann->first_layer;
+	struct fann_layer *last_layer = ann->last_layer;
+
+	/* go through all the layers, from last to first.
+	 * And propagate the error backwards */
+	for(layer_it = last_layer - 1; layer_it > first_layer; --layer_it)
+	{
+		last_neuron = layer_it->last_neuron;
+
+		/* for each connection in this layer, propagate the error backwards */
+		if(ann->connection_rate >= 1)
+		{
+			if(ann->network_type == FANN_NETTYPE_LAYER)
+			{
+				error_prev_layer = error_begin + ((layer_it - 1)->first_neuron - first_neuron);
+			}
+			else
+			{
+				error_prev_layer = error_begin;
+			}
+
+			for(neuron_it = layer_it->first_neuron; neuron_it != last_neuron; neuron_it++)
+			{
+
+				tmp_error = error_begin[neuron_it - first_neuron];
+				weights = ann->weights + neuron_it->first_con;
+				for(i = neuron_it->last_con - neuron_it->first_con; i--;)
+				{
+					/*printf("i = %d\n", i);
+					 * printf("error_prev_layer[%d] = %f\n", i, error_prev_layer[i]);
+					 * printf("weights[%d] = %f\n", i, weights[i]); */
+					error_prev_layer[i] += tmp_error * weights[i];
+				}
+			}
+		}
+		else
+		{
+			for(neuron_it = layer_it->first_neuron; neuron_it != last_neuron; neuron_it++)
+			{
+
+				tmp_error = error_begin[neuron_it - first_neuron];
+				weights = ann->weights + neuron_it->first_con;
+				connections = ann->connections + neuron_it->first_con;
+				for(i = neuron_it->last_con - neuron_it->first_con; i--;)
+				{
+					error_begin[connections[i] - first_neuron] += tmp_error * weights[i];
+				}
+			}
+		}
+
+		/* then calculate the actual errors in the previous layer */
+		error_prev_layer = error_begin + ((layer_it - 1)->first_neuron - first_neuron);
+		last_neuron = (layer_it - 1)->last_neuron;
+
+		if(layer_it != second_layer){
+			for(neuron_it = (layer_it - 1)->first_neuron; neuron_it != last_neuron; neuron_it++)
+			{
+				*error_prev_layer *= fann_activation_derived(neuron_it->activation_function, 
+					neuron_it->activation_steepness, neuron_it->value, neuron_it->sum);
+				error_prev_layer++;
+			}
+		} else {
+			//for(neuron_it = (layer_it - 1)->first_neuron; neuron_it != last_neuron; neuron_it++)
+			//{
+			//	printf("\n%f %f %d\n", neuron_it->value, neuron_it->activation_steepness, neuron_it->activation_function);
+			//}
+		
+		}
+		
+	}
+}
+
+
 
 /* INTERNAL FUNCTION
    Update weights for incremental training

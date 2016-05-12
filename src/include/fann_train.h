@@ -213,6 +213,9 @@ FANN_EXTERNAL void FANN_API fann_train_on_file(struct fann *ann, const char *fil
  */ 
 FANN_EXTERNAL float FANN_API fann_train_epoch(struct fann *ann, struct fann_train_data *data);
 FANN_EXTERNAL float FANN_API fann_train_epoch_lw(struct fann *ann, struct fann_train_data *data, fann_type* label_weight);
+FANN_EXTERNAL float FANN_API fann_train_epoch_irpropm_gradient(struct fann *ann, struct fann_train_data *data, fann_type (*errorFunction)(fann_type*,fann_type*,int,void*),void*);
+FANN_EXTERNAL void FANN_API fann_compute_MSE_gradient(struct fann *, fann_type *, fann_type (*errorFunction)(fann_type*,fann_type*,int,void*), void*);
+FANN_EXTERNAL void FANN_API fann_backpropagate_MSE_firstlayer(struct fann *);
 #endif	/* NOT FIXEDFANN */
 
 /* Function: fann_test_data
