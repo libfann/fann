@@ -1446,6 +1446,74 @@ FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann, struct f
     }
 }
 
+FANN_EXTERNAL fann_type FANN_API fann_get_l1_norm(struct fann *ann)
+{
+    struct fann_neuron *first_neuron;
+    struct fann_layer *layer_it;
+    struct fann_neuron *neuron_it;
+    unsigned int idx;
+    unsigned int source_index;
+    fann_type l1_term;
+
+    first_neuron = ann->first_layer->first_neuron;
+
+    source_index = 0;
+    l1_term = 0.f;
+    
+    /* The following assumes that the last unused bias has no connections */
+
+    /* for each layer */
+    for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++){
+        /* for each neuron */
+        for(neuron_it = layer_it->first_neuron; neuron_it != layer_it->last_neuron; neuron_it++){
+            /* for each connection */
+            for (idx = neuron_it->first_con; idx < neuron_it->last_con; idx++){
+                /* Assign the source, destination and weight */
+                l1_term += fabs(ann->weights[source_index]);
+
+                source_index++;
+            }
+        }
+    }
+
+    return l1_term;
+}
+
+FANN_EXTERNAL fann_type FANN_API fann_get_l2_norm(struct fann *ann)
+{
+    struct fann_neuron *first_neuron;
+    struct fann_layer *layer_it;
+    struct fann_neuron *neuron_it;
+    unsigned int idx;
+    unsigned int source_index;
+    fann_type l2_term;
+
+    first_neuron = ann->first_layer->first_neuron;
+
+    source_index = 0;
+    l2_term = 0.f;
+    
+    /* The following assumes that the last unused bias has no connections */
+
+    /* for each layer */
+    for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++){
+        /* for each neuron */
+        for(neuron_it = layer_it->first_neuron; neuron_it != layer_it->last_neuron; neuron_it++){
+            /* for each connection */
+            for (idx = neuron_it->first_con; idx < neuron_it->last_con; idx++){
+                /* Assign the source, destination and weight */
+                l2_term += ann->weights[source_index] * ann->weights[source_index];
+
+                source_index++;
+            }
+        }
+    }
+
+    return sqrt(l2_term);
+}
+
+
+
 FANN_EXTERNAL void FANN_API fann_set_weight_array(struct fann *ann,
     struct fann_connection *connections, unsigned int num_connections)
 {
