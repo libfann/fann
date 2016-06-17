@@ -306,6 +306,7 @@ FANN_EXTERNAL void FANN_API fann_train_on_file(struct fann *ann, const char *fil
 
 	if(data == NULL)
 	{
+		ann->errno_f = FANN_E_CANT_READ_TD;
 		return;
 	}
 	fann_train_on_data(ann, data, max_epochs, epochs_between_reports, desired_error);

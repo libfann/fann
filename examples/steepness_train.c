@@ -29,6 +29,11 @@ void train_on_steepness_file(struct fann *ann, char *filename,
 	unsigned int i;
 
 	struct fann_train_data *data = fann_read_train_from_file(filename);
+	if(data == NULL)
+	{
+		ann->errno_f = FANN_E_CANT_READ_TD;
+		return;
+	}
 
 	if(epochs_between_reports)
 	{
