@@ -181,6 +181,7 @@ int fann_save_internal_fd(struct fann *ann, FILE * conf, const char *configurati
 	fprintf(conf, "network_type=%u\n", ann->network_type);
 	
 	fprintf(conf, "learning_momentum=%f\n", ann->learning_momentum);
+	fprintf(conf, "learning_l2_norm=%f\n", ann->learning_l2_norm);
 	fprintf(conf, "training_algorithm=%u\n", ann->training_algorithm);
 	fprintf(conf, "train_error_function=%u\n", ann->train_error_function);
 	fprintf(conf, "train_stop_function=%u\n", ann->train_stop_function);
@@ -443,6 +444,7 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 	fann_scanf("%u", "network_type", &tmpVal);
 	ann->network_type = (enum fann_nettype_enum)tmpVal;
 	fann_scanf("%f", "learning_momentum", &ann->learning_momentum);
+	fann_scanf("%f", "learning_l2_norm", &ann->learning_l2_norm);
 	fann_scanf("%u", "training_algorithm", &tmpVal);
 	ann->training_algorithm = (enum fann_train_enum)tmpVal;
 	fann_scanf("%u", "train_error_function", &tmpVal);

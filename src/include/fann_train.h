@@ -769,7 +769,8 @@ FANN_EXTERNAL float FANN_API fann_get_learning_momentum(struct fann *ann);
    This function appears in FANN >= 2.0.0.   	
  */ 
 FANN_EXTERNAL void FANN_API fann_set_learning_momentum(struct fann *ann, float learning_momentum);
-
+FANN_EXTERNAL float FANN_API fann_get_learning_l2_norm(struct fann *ann);
+FANN_EXTERNAL void FANN_API fann_set_learning_l2_norm(struct fann *ann, float learning_l2_norm);
 
 /* Function: fann_get_activation_function
 

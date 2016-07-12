@@ -2686,6 +2686,23 @@ public:
             }
         }
 
+	float get_learning_l2_norm()
+	{
+	        float learning_l2_norm = 0.0f;
+	        if (ann != NULL)
+	        {
+	        	learning_l2_norm = fann_get_learning_l2_norm(ann);
+	        }
+		return learning_l2_norm;
+	}
+
+	void set_learning_l2_norm(float learning_l2_norm)
+	{
+		if (ann != NULL)
+		{
+			fann_set_learning_l2_norm(ann, learning_l2_norm);
+		}
+	}
         /* Method: get_train_stop_function
 
            Returns the the stop function used during training.

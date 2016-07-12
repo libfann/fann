@@ -978,7 +978,7 @@ void fann_update_weights_irpropm(struct fann *ann, unsigned int first_weight, un
 	for(; i != past_end; i++)
 	{
 		prev_step = fann_max(prev_steps[i], (fann_type) 0.0001);	/* prev_step may not be zero because then the training will stop */
-		slope = train_slopes[i];
+		slope = train_slopes[i] - ann->learning_l2_norm * weights[i];
 		prev_slope = prev_train_slopes[i];
 
 		same_sign = prev_slope * slope;
@@ -1294,3 +1294,5 @@ FANN_GET_SET(float, sarprop_temperature)
 FANN_GET_SET(enum fann_stopfunc_enum, train_stop_function)
 FANN_GET_SET(fann_type, bit_fail_limit)
 FANN_GET_SET(float, learning_momentum)
+FANN_GET_SET(float, learning_l2_norm)
+

@@ -491,6 +491,7 @@ struct fann
 
 	/* The learning momentum used for backpropagation algorithm. */
 	float learning_momentum;
+	float learning_l2_norm;
 
 	/* the connection rate of the network
 	 * between 0 and 1, 1 meaning fully connected
