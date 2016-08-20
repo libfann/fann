@@ -227,8 +227,8 @@ enum fann_activationfunc_enum
 	FANN_COS_SYMMETRIC,
 	FANN_SIN,
 	FANN_COS,
-    FANN_RELU,
-    FANN_LEAKY_RELU
+	FANN_RELU,
+	FANN_LEAKY_RELU
 };
 
 /* Constant: FANN_ACTIVATIONFUNC_NAMES
@@ -261,8 +261,8 @@ static char const *const FANN_ACTIVATIONFUNC_NAMES[] = {
 	"FANN_COS_SYMMETRIC",
 	"FANN_SIN",
 	"FANN_COS",
-    "FANN_RELU",
-    "FANN_LEAKY_RELU"
+	"FANN_RELU",
+	"FANN_LEAKY_RELU"
 };
 
 /* Enum: fann_errorfunc_enum

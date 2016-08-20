@@ -145,14 +145,14 @@ switch(activation_function) \
 		result = (fann_type)fann_cos_real(value); \
         break; \
 	case FANN_GAUSSIAN_STEPWISE: \
-        result = 0; \
-        break; \
-    case FANN_RELU: \
-        result = (fann_type)fann_relu_real(value); \
-        break; \
-    case FANN_LEAKY_RELU: \
-        result = (fann_type)fann_leaky_relu_real(value); \
-        break; \
+		result = 0; \
+		break; \
+	case FANN_RELU: \
+		result = (fann_type)fann_relu_real(value); \
+		break; \
+	case FANN_LEAKY_RELU: \
+		result = (fann_type)fann_leaky_relu_real(value); \
+		break; \
 }
 
 #endif
