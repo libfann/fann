@@ -21,6 +21,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include <limits.h>
 
 #include "config.h"
 #include "fann.h"
@@ -539,7 +540,9 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 	/* determine how many neurons there should be in each layer */
 	for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++)
 	{
-		if(fscanf(conf, "%u ", &layer_size) != 1)
+		if(fscanf(conf, "%u ", &layer_size) != 1 ||
+		   layer_size == 0 || layer_size > INT_MAX ||
+		   layer_size > INT_MAX - ann->total_neurons)
 		{
 			fann_error((struct fann_error *) ann, FANN_E_CANT_READ_CONFIG, "layer_sizes", configuration_file);
 			fann_destroy(ann);
