@@ -46,6 +46,13 @@ endif ()
 
 project (FANN)
 
+INCLUDE(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
+
+IF(NOT COMPILER_SUPPORTS_CXX11)
+  message(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Tests will not be compiled. To enable tests use a compiler that supports C++11.")
+ENDIF()
+
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 set (FANN_VERSION_MAJOR 2)
@@ -142,6 +149,9 @@ install (FILES
 ################# compile tests ################
 
 ADD_SUBDIRECTORY( lib/googletest )
-ADD_SUBDIRECTORY( tests )
+
+if(COMPILER_SUPPORTS_CXX11)
+  ADD_SUBDIRECTORY( tests )
+endif()
 
 ENDIF()
