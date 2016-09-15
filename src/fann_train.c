@@ -74,6 +74,10 @@ fann_type fann_activation_derived(unsigned int activation_function,
 			return (fann_type) fann_cos_derive(steepness, sum);
 		case FANN_THRESHOLD:
 			fann_error(NULL, FANN_E_CANT_TRAIN_ACTIVATION);
+		case FANN_RELU:
+			return (fann_type) fann_relu_derive(steepness, sum);
+		case FANN_LEAKY_RELU:
+			return (fann_type) fann_leaky_relu_derive(steepness, sum);
 	}
 	return 0;
 }
@@ -135,6 +139,8 @@ fann_type fann_update_MSE(struct fann *ann, struct fann_neuron* neuron, fann_typ
 		case FANN_LINEAR_PIECE:
 		case FANN_SIN:
 		case FANN_COS:
+		case FANN_RELU:
+		case FANN_LEAKY_RELU:
 			break;
 	}
 

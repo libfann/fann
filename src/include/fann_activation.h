@@ -86,6 +86,13 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define fann_cos_real(sum) (cos(sum)/2.0f+0.5f)
 #define fann_cos_derive(steepness, sum) (steepness*-sin(steepness*sum)/2.0f)
 
+/* FANN_RELU */
+#define fann_relu_real(sum) (sum > 0.0 ? sum : 0.0)
+#define fann_relu_derive(steepness, sum) (sum > 0.0 ? steepness : 0.0)
+
+#define fann_leaky_relu_real(sum) (sum > 0.0 ? sum : (sum / 100.0))
+#define fann_leaky_relu_derive(steepness, sum) (sum > 0.0 ? steepness : (steepness / 100.0))
+
 #define fann_activation_switch(activation_function, value, result) \
 switch(activation_function) \
 { \
@@ -146,6 +153,12 @@ switch(activation_function) \
 	case FANN_GAUSSIAN_STEPWISE: \
         result = 0; \
         break; \
+	case FANN_RELU: \
+	result = (fann_type)fann_relu_real(value); \
+	break; \
+	case FANN_LEAKY_RELU: \
+	result = (fann_type)fann_leaky_relu_real(value); \
+	break; \
 }
 
 #endif
