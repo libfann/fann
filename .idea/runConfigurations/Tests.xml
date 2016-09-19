@@ -1,0 +1,6 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Tests" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" WORKING_DIR="" PASS_PARENT_ENVS="FALSE" PROJECT_NAME="FANN" TARGET_NAME="fann_tests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="FANN" RUN_TARGET_NAME="fann_tests" TEST_MODE="SUITE_TEST">
+    <envs />
+    <method />
+  </configuration>
+</component>

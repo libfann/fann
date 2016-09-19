@@ -1,6 +1,6 @@
 /*
 Fast Artificial Neural Network Library (fann)
-Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -24,9 +24,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /* Section: FANN Datatypes
 
-   The two main datatypes used in the fann library is <struct fann>, 
+   The two main datatypes used in the fann library are <struct fann>, 
    which represents an artificial neural network, and <struct fann_train_data>,
-   which represent training data.
+   which represents training data.
  */
 
 
@@ -42,19 +42,19 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /* Enum: fann_train_enum
 	The Training algorithms used when training on <struct fann_train_data> with functions like
-	<fann_train_on_data> or <fann_train_on_file>. The incremental training looks alters the weights
+	<fann_train_on_data> or <fann_train_on_file>. The incremental training alters the weights
 	after each time it is presented an input pattern, while batch only alters the weights once after
 	it has been presented to all the patterns.
 
 	FANN_TRAIN_INCREMENTAL -  Standard backpropagation algorithm, where the weights are 
 		updated after each training pattern. This means that the weights are updated many 
-		times during a single epoch. For this reason some problems, will train very fast with 
+		times during a single epoch. For this reason some problems will train very fast with 
 		this algorithm, while other more advanced problems will not train very well.
 	FANN_TRAIN_BATCH -  Standard backpropagation algorithm, where the weights are updated after 
 		calculating the mean square error for the whole training set. This means that the weights 
-		are only updated once during a epoch. For this reason some problems, will train slower with 
+		are only updated once during an epoch. For this reason some problems will train slower with 
 		this algorithm. But since the mean square error is calculated more correctly than in 
-		incremental training, some problems will reach a better solutions with this algorithm.
+		incremental training, some problems will reach better solutions with this algorithm.
 	FANN_TRAIN_RPROP - A more advanced batch training algorithm which achieves good results 
 		for many problems. The RPROP training algorithm is adaptive, and does therefore not 
 		use the learning_rate. Some other parameters can however be set to change the way the 
@@ -62,12 +62,14 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 		training algorithm works. The RPROP training algorithm is described by 
 		[Riedmiller and Braun, 1993], but the actual learning algorithm used here is the 
 		iRPROP- training algorithm which is described by [Igel and Husken, 2000] which 
-    	is an variety of the standard RPROP training algorithm.
+		is a variant of the standard RPROP training algorithm.
 	FANN_TRAIN_QUICKPROP - A more advanced batch training algorithm which achieves good results 
 		for many problems. The quickprop training algorithm uses the learning_rate parameter 
 		along with other more advanced parameters, but it is only recommended to change these 
 		advanced parameters, for users with insight in how the quickprop training algorithm works.
 		The quickprop training algorithm is described by [Fahlman, 1988].
+	FANN_TRAIN_SARPROP - THE SARPROP ALGORITHM: A SIMULATED ANNEALING ENHANCEMENT TO RESILIENT BACK PROPAGATION
+    http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.47.8197&rep=rep1&type=pdf
 	
 	See also:
 		<fann_set_training_algorithm>, <fann_get_training_algorithm>
@@ -125,7 +127,7 @@ static char const *const FANN_TRAIN_NAMES[] = {
 	 * Can NOT be used during training.
 
    FANN_THRESHOLD_SYMMETRIC - Threshold activation function.
-	 * x < 0 -> y = 0, x >= 0 -> y = 1
+	 * x < 0 -> y = -1, x >= 0 -> y = 1
 	 * Can NOT be used during training.
 
    FANN_SIGMOID - Sigmoid activation function.
@@ -270,8 +272,8 @@ static char const *const FANN_ACTIVATIONFUNC_NAMES[] = {
 	
 	FANN_ERRORFUNC_LINEAR - Standard linear error function.
 	FANN_ERRORFUNC_TANH - Tanh error function, usually better 
-		but can require a lower learning rate. This error function agressively targets outputs that
-		differ much from the desired, while not targetting outputs that only differ a little that much.
+		but can require a lower learning rate. This error function aggressively targets outputs that
+		differ much from the desired, while not targeting outputs that only differ a little that much.
 		This activation function is not recommended for cascade training and incremental training.
 
 	See also:
@@ -302,8 +304,8 @@ static char const *const FANN_ERRORFUNC_NAMES[] = {
 /* Enum: fann_stopfunc_enum
 	Stop criteria used during training.
 
-	FANN_STOPFUNC_MSE - Stop criteria is Mean Square Error (MSE) value.
-	FANN_STOPFUNC_BIT - Stop criteria is number of bits that fail. The number of bits; means the
+	FANN_STOPFUNC_MSE - Stop criterion is Mean Square Error (MSE) value.
+	FANN_STOPFUNC_BIT - Stop criterion is number of bits that fail. The number of bits; means the
 		number of output neurons which differ more than the bit fail limit 
 		(see <fann_get_bit_fail_limit>, <fann_set_bit_fail_limit>). 
 		The bits are counted in all of the training data, so this number can be higher than
@@ -383,11 +385,11 @@ struct fann_train_data;
 	>                                             unsigned int epochs_between_reports, 
 	>                                             float desired_error, unsigned int epochs);
 	
-	The callback can be set by using <fann_set_callback> and is very usefull for doing custom 
+	The callback can be set by using <fann_set_callback> and is very useful for doing custom 
 	things during training. It is recommended to use this function when implementing custom 
 	training procedures, or when visualizing the training in a GUI etc. The parameters which the
-	callback function takes is the parameters given to the <fann_train_on_data>, plus an epochs
-	parameter which tells how many epochs the training have taken so far.
+	callback function takes are the parameters given to <fann_train_on_data>, plus an epochs
+	parameter which tells how many epochs the training has taken so far.
 	
 	The callback function should return an integer, if the callback function returns -1, the training
 	will terminate.
@@ -441,7 +443,7 @@ struct fann_layer
 {
 	/* A pointer to the first neuron in the layer 
 	 * When allocated, all the neurons in all the layers are actually
-	 * in one long array, this is because we wan't to easily clear all
+	 * in one long array, this is because we want to easily clear all
 	 * the neurons at once.
 	 */
 	struct fann_neuron *first_neuron;
@@ -468,7 +470,7 @@ struct fann_error
 
 
 /* 	Struct: struct fann
-	The fast artificial neural network(fann) structure.
+	The fast artificial neural network (fann) structure.
 
 	Data within this structure should never be accessed directly, but only by using the
 	*fann_get_...* and *fann_set_...* functions.
@@ -520,7 +522,7 @@ struct fann
 	struct fann_layer *last_layer;
 
 	/* Total number of neurons.
-	 * very usefull, because the actual neurons are allocated in one long array
+	 * very useful, because the actual neurons are allocated in one long array
 	 */
 	unsigned int total_neurons;
 
@@ -570,7 +572,7 @@ struct fann
 #endif
 
 	/* Total number of connections.
-	 * very usefull, because the actual connections
+	 * very useful, because the actual connections
 	 * are allocated in one long array
 	 */
 	unsigned int total_connections;

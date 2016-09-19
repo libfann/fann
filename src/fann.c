@@ -1,6 +1,6 @@
 /*
   Fast Artificial Neural Network Library (fann)
-  Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+  Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
 
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -139,10 +139,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 		connection_rate = 1;
 	}
 
-	/* seed random */
-#ifndef FANN_NO_SEED
 	fann_seed_rand();
-#endif
 
 	/* allocate the general structure */
 	ann = fann_allocate_structure(num_layers);
@@ -166,11 +163,11 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 		 * last_neuron - first_neuron is the number of neurons */
 		layer_it->first_neuron = NULL;
 		layer_it->last_neuron = layer_it->first_neuron + layers[i++] + 1;	/* +1 for bias */
-		ann->total_neurons += layer_it->last_neuron - layer_it->first_neuron;
+		ann->total_neurons += (unsigned int)(layer_it->last_neuron - layer_it->first_neuron);
 	}
 
-	ann->num_output = (ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron - 1;
-	ann->num_input = ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1;
+	ann->num_output = (unsigned int)((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron - 1);
+	ann->num_input = (unsigned int)(ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1);
 
 	/* allocate room for the actual neurons */
 	fann_allocate_neurons(ann);
@@ -190,7 +187,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 	num_neurons_in = ann->num_input;
 	for(layer_it = ann->first_layer + 1; layer_it != ann->last_layer; layer_it++)
 	{
-		num_neurons_out = layer_it->last_neuron - layer_it->first_neuron - 1;
+		num_neurons_out = (unsigned int)(layer_it->last_neuron - layer_it->first_neuron - 1);
 		/*�if all neurons in each layer should be connected to at least one neuron
 		 * in the previous layer, and one neuron in the next layer.
 		 * and the bias node should be connected to the all neurons in the next layer.
@@ -294,8 +291,8 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 		for(layer_it = ann->first_layer + 1; layer_it != ann->last_layer; layer_it++)
 		{
 
-			num_neurons_out = layer_it->last_neuron - layer_it->first_neuron - 1;
-			num_neurons_in = (layer_it - 1)->last_neuron - (layer_it - 1)->first_neuron - 1;
+			num_neurons_out = (unsigned int)(layer_it->last_neuron - layer_it->first_neuron - 1);
+			num_neurons_in = (unsigned int)((layer_it - 1)->last_neuron - (layer_it - 1)->first_neuron - 1);
 
 			/* first connect the bias neuron */
 			bias_neuron = (layer_it - 1)->last_neuron - 1;
@@ -441,10 +438,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_
 #ifdef FIXEDFANN
 	unsigned int multiplier;
 #endif
-	/* seed random */
-#ifndef FANN_NO_SEED
 	fann_seed_rand();
-#endif
 
 	/* allocate the general structure */
 	ann = fann_allocate_structure(num_layers);
@@ -475,11 +469,11 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_
 			layer_it->last_neuron++;
 		}
 
-		ann->total_neurons += layer_it->last_neuron - layer_it->first_neuron;
+		ann->total_neurons += (unsigned int)(layer_it->last_neuron - layer_it->first_neuron);
 	}
 
-	ann->num_output = (ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron;
-	ann->num_input = ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1;
+	ann->num_output = (unsigned int)((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron);
+	ann->num_input = (unsigned int)(ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1);
 
 	/* allocate room for the actual neurons */
 	fann_allocate_neurons(ann);
@@ -500,7 +494,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_
 	last_layer = ann->last_layer;
 	for(layer_it = ann->first_layer + 1; layer_it != last_layer; layer_it++)
 	{
-		num_neurons_out = layer_it->last_neuron - layer_it->first_neuron;
+		num_neurons_out = (unsigned int)(layer_it->last_neuron - layer_it->first_neuron);
 
 		/* Now split out the connections on the different neurons */
 		for(i = 0; i != num_neurons_out; i++)
@@ -552,7 +546,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_
 				}
 			}
 		}
-		num_neurons_in += layer_it->last_neuron - layer_it->first_neuron;
+		num_neurons_in += (unsigned int)(layer_it->last_neuron - layer_it->first_neuron);
 	}
 
 #ifdef DEBUG
@@ -878,7 +872,7 @@ FANN_EXTERNAL void FANN_API fann_randomize_weights(struct fann *ann, fann_type m
 FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
 {
     struct fann* copy;
-    unsigned int num_layers = orig->last_layer - orig->first_layer;
+    unsigned int num_layers = (unsigned int)(orig->last_layer - orig->first_layer);
     struct fann_layer *orig_layer_it, *copy_layer_it;
     unsigned int layer_size;
     struct fann_neuron *last_neuron,*orig_neuron_it,*copy_neuron_it;
@@ -917,6 +911,8 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
     copy->train_stop_function = orig->train_stop_function;
 	copy->training_algorithm = orig->training_algorithm;
     copy->callback = orig->callback;
+	copy->user_data = orig->user_data;
+#ifndef FIXEDFANN
     copy->cascade_output_change_fraction = orig->cascade_output_change_fraction;
     copy->cascade_output_stagnation_epochs = orig->cascade_output_stagnation_epochs;
     copy->cascade_candidate_change_fraction = orig->cascade_candidate_change_fraction;
@@ -926,7 +922,6 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
     copy->cascade_weight_multiplier = orig->cascade_weight_multiplier;
     copy->cascade_max_out_epochs = orig->cascade_max_out_epochs;
     copy->cascade_max_cand_epochs = orig->cascade_max_cand_epochs;
-	copy->user_data = orig->user_data;
 
    /* copy cascade activation functions */
     copy->cascade_activation_functions_count = orig->cascade_activation_functions_count;
@@ -971,6 +966,7 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
         }
         memcpy(copy->cascade_candidate_scores,orig->cascade_candidate_scores,fann_get_cascade_num_candidates(copy) * sizeof(fann_type));
     }
+#endif /* FIXEDFANN */
 
     copy->quickprop_decay = orig->quickprop_decay;
     copy->quickprop_mu = orig->quickprop_mu;
@@ -997,7 +993,7 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
     for (orig_layer_it = orig->first_layer, copy_layer_it = copy->first_layer;
             orig_layer_it != orig->last_layer; orig_layer_it++, copy_layer_it++)
     {
-        layer_size = orig_layer_it->last_neuron - orig_layer_it->first_neuron;
+        layer_size = (unsigned int)(orig_layer_it->last_neuron - orig_layer_it->first_neuron);
         copy_layer_it->first_neuron = NULL;
         copy_layer_it->last_neuron = copy_layer_it->first_neuron + layer_size;
         copy->total_neurons += layer_size;
@@ -1033,7 +1029,7 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
         fann_destroy(copy);
         return NULL;
     }
-    layer_size = (orig->last_layer-1)->last_neuron - (orig->last_layer-1)->first_neuron;
+    layer_size = (unsigned int)((orig->last_layer-1)->last_neuron - (orig->last_layer-1)->first_neuron);
     memcpy(copy->output,orig->output, layer_size * sizeof(fann_type));
 
     last_neuron = (orig->last_layer - 1)->last_neuron;
@@ -1056,7 +1052,7 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
     for (i=0; i < orig->total_connections; i++)
     {
         copy->weights[i] = orig->weights[i];
-        input_neuron = orig->connections[i] - orig_first_neuron;
+        input_neuron = (unsigned int)(orig->connections[i] - orig_first_neuron);
         copy->connections[i] = copy_first_neuron + input_neuron;
     }
 
@@ -1199,9 +1195,9 @@ FANN_EXTERNAL void FANN_API fann_init_weights(struct fann *ann, struct fann_trai
 		}
 	}
 
-	num_hidden_neurons =
+	num_hidden_neurons = (unsigned int)(
 		ann->total_neurons - (ann->num_input + ann->num_output +
-							  (ann->last_layer - ann->first_layer));
+							  (ann->last_layer - ann->first_layer)));
 	scale_factor =
 		(float) (pow
 				 ((double) (0.7f * (double) num_hidden_neurons),
@@ -1358,7 +1354,7 @@ FANN_EXTERNAL float FANN_API fann_get_connection_rate(struct fann *ann)
 
 FANN_EXTERNAL unsigned int FANN_API fann_get_num_layers(struct fann *ann)
 {
-    return ann->last_layer - ann->first_layer;
+    return (unsigned int)(ann->last_layer - ann->first_layer);
 }
 
 FANN_EXTERNAL void FANN_API fann_get_layer_array(struct fann *ann, unsigned int *layers)
@@ -1366,7 +1362,7 @@ FANN_EXTERNAL void FANN_API fann_get_layer_array(struct fann *ann, unsigned int 
     struct fann_layer *layer_it;
 
     for (layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++) {
-        unsigned int count = layer_it->last_neuron - layer_it->first_neuron;
+        unsigned int count = (unsigned int)(layer_it->last_neuron - layer_it->first_neuron);
         /* Remove the bias from the count of neurons. */
         switch (fann_get_network_type(ann)) {
             case FANN_NETTYPE_LAYER: {
@@ -1442,7 +1438,7 @@ FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann, struct f
             /* for each connection */
             for (idx = neuron_it->first_con; idx < neuron_it->last_con; idx++){
                 /* Assign the source, destination and weight */
-                connections->from_neuron = ann->connections[source_index] - first_neuron;
+                connections->from_neuron = (unsigned int)(ann->connections[source_index] - first_neuron);
                 connections->to_neuron = destination_index;
                 connections->weight = ann->weights[source_index];
 
@@ -1569,6 +1565,16 @@ FANN_EXTERNAL void FANN_API fann_set_weight(struct fann *ann,
             destination_index++;
         }
     }
+}
+
+FANN_EXTERNAL void FANN_API fann_get_weights(struct fann *ann, fann_type *weights)
+{
+	memcpy(weights, ann->weights, sizeof(fann_type)*ann->total_connections);
+}
+
+FANN_EXTERNAL void FANN_API fann_set_weights(struct fann *ann, fann_type *weights)
+{
+	memcpy(ann->weights, weights, sizeof(fann_type)*ann->total_connections);
 }
 
 FANN_GET_SET(void *, user_data)
@@ -1840,7 +1846,7 @@ void fann_allocate_neurons(struct fann *ann)
 
 	for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++)
 	{
-		num_neurons = layer_it->last_neuron - layer_it->first_neuron;
+		num_neurons = (unsigned int)(layer_it->last_neuron - layer_it->first_neuron);
 		layer_it->first_neuron = neurons + num_neurons_so_far;
 		layer_it->last_neuron = layer_it->first_neuron + num_neurons;
 		num_neurons_so_far += num_neurons;
@@ -1880,6 +1886,21 @@ void fann_allocate_connections(struct fann *ann)
 	}
 }
 
+#ifdef FANN_NO_SEED
+int FANN_SEED_RAND = 0;
+#else
+int FANN_SEED_RAND = 1;
+#endif
+
+FANN_EXTERNAL void FANN_API fann_disable_seed_rand()
+{
+    FANN_SEED_RAND = 0;
+}
+
+FANN_EXTERNAL void FANN_API fann_enable_seed_rand()
+{
+    FANN_SEED_RAND = 1;
+}
 
 /* INTERNAL FUNCTION
    Seed the random function.
@@ -1911,10 +1932,14 @@ void fann_seed_rand()
 		}
 		fclose(fp);
 	}
-	srand(foo);
+    if(FANN_SEED_RAND) {
+        srand(foo);
+    }
 #else
 	/* COMPAT_TIME REPLACEMENT */
-	srand(GetTickCount());
+    if(FANN_SEED_RAND) {
+    	srand(GetTickCount());
+    }
 #endif
 }
 

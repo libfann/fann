@@ -7,8 +7,9 @@
 #define PARALLEL_FANN_HPP_
 #include <omp.h>
 #include <vector>
-#include <fann.h>
+#include "fann.h"
 
+#ifndef FIXEDFANN
 namespace parallel_fann {
 float train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb);
 
@@ -33,5 +34,6 @@ float train_epoch_incremental_mod(struct fann *ann, struct fann_train_data *data
 float test_data_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb);
 float test_data_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb, std::vector< std::vector<fann_type> >& predicted_outputs);
 }
+#endif /* FIXEDFANN */
 #endif /* PARALLEL_FANN_HPP_ */
 #endif /* DISABLE_PARALLEL_FANN */

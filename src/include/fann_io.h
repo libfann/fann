@@ -1,6 +1,6 @@
 /*
 Fast Artificial Neural Network Library (fann)
-Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -29,7 +29,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 /* Function: fann_create_from_file
    
-   Constructs a backpropagation neural network from a configuration file, which have been saved by <fann_save>.
+   Constructs a backpropagation neural network from a configuration file, which has been saved by <fann_save>.
    
    See also:
    	<fann_save>, <fann_save_to_fixed>
@@ -48,9 +48,9 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_from_file(const char *configurat
    parameters associated with the neural network.
    
    These three parameters (<fann_set_callback>, <fann_set_error_log>,
-   <fann_set_user_data>) are *NOT* saved  to the file because they cannot safely be
+   <fann_set_user_data>) are *NOT* saved to the file because they cannot safely be
    ported to a different location. Also temporary parameters generated during training
-   like <fann_get_MSE> is not saved.
+   like <fann_get_MSE> are not saved.
    
    Return:
    The function returns 0 on success and -1 on failure.
@@ -69,7 +69,7 @@ FANN_EXTERNAL int FANN_API fann_save(struct fann *ann, const char *configuration
    But it is saved in fixed point format no matter which
    format it is currently in.
 
-   This is usefull for training a network in floating points,
+   This is useful for training a network in floating points,
    and then later executing it in fixed point.
 
    The function returns the bit position of the fix point, which
@@ -80,7 +80,7 @@ FANN_EXTERNAL int FANN_API fann_save(struct fann *ann, const char *configuration
    A negative value indicates very low precision, and a very
    strong possibility for overflow.
    (the actual fix point will be set to 0, since a negative
-   fix point does not make sence).
+   fix point does not make sense).
 
    Generally, a fix point lower than 6 is bad, and should be avoided.
    The best way to avoid this, is to have less connections to each neuron,

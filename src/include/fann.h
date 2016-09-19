@@ -1,6 +1,6 @@
 /*
 Fast Artificial Neural Network Library (fann)
-Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -31,8 +31,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
    and executed by <fann_run>.
    
    All of this can be done without much knowledge of the internals of ANNs, although the ANNs created will
-   still be powerfull and effective. If you have more knowledge about ANNs, and desire more control, almost
-   every part of the ANNs can be parametized to create specialized and highly optimal ANNs.
+   still be powerful and effective. If you have more knowledge about ANNs, and desire more control, almost
+   every part of the ANNs can be parametrized to create specialized and highly optimal ANNs.
  */
 /* Group: Creation, Destruction & Execution */
 	
@@ -159,7 +159,7 @@ extern "C"
 			
 	Example:
 		> // Creating an ANN with 2 input neurons, 1 output neuron, 
-		> // and two hidden neurons with 8 and 9 neurons
+		> // and two hidden layers with 8 and 9 neurons
 		> struct fann *ann = fann_create_standard(4, 2, 8, 9, 1);
 		
 	See also:
@@ -175,7 +175,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_standard(unsigned int num_layers
 
 	Example:
 		> // Creating an ANN with 2 input neurons, 1 output neuron, 
-		> // and two hidden neurons with 8 and 9 neurons
+		> // and two hidden layers with 8 and 9 neurons
 		> unsigned int layers[4] = {2, 8, 9, 1};
 		> struct fann *ann = fann_create_standard_array(4, layers);
 
@@ -229,11 +229,11 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 
 /* Function: fann_create_shortcut
 
-	Creates a standard backpropagation neural network, which is not fully connected and which
+	Creates a standard backpropagation neural network, which is fully connected and which
 	also has shortcut connections.
 
  	Shortcut connections are connections that skip layers. A fully connected network with shortcut 
-	connections, is a network where all neurons are connected to all neurons in later layers. 
+	connections is a network where all neurons are connected to all neurons in later layers. 
 	Including direct connections from the input layer to the output layer.
 
 	See <fann_create_standard> for a description of the parameters.
@@ -259,7 +259,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut(unsigned int num_layers
 FANN_EXTERNAL struct fann *FANN_API fann_create_shortcut_array(unsigned int num_layers,
 															   const unsigned int *layers);
 /* Function: fann_destroy
-   Destroys the entire network and properly freeing all the associated memmory.
+   Destroys the entire network, properly freeing all the associated memory.
 
 	This function appears in FANN >= 1.0.0.
 */ 
@@ -331,15 +331,15 @@ FANN_EXTERNAL void FANN_API fann_init_weights(struct fann *ann, struct fann_trai
 	>L   2 / N    6 ...BBA
 	>L   2 / N    7 ......
 		  
-	This network have five real neurons and two bias neurons. This gives a total of seven neurons 
+	This network has five real neurons and two bias neurons. This gives a total of seven neurons 
 	named from 0 to 6. The connections between these neurons can be seen in the matrix. "." is a 
 	place where there is no connection, while a character tells how strong the connection is on a 
-	scale from a-z. The two real neurons in the hidden layer (neuron 3 and 4 in layer 1) has 
-	connection from the three neurons in the previous layer as is visible in the first two lines. 
-	The output neuron (6) has connections form the three neurons in the hidden layer 3 - 5 as is 
+	scale from a-z. The two real neurons in the hidden layer (neuron 3 and 4 in layer 1) have 
+	connections from the three neurons in the previous layer as is visible in the first two lines. 
+	The output neuron (6) has connections from the three neurons in the hidden layer 3 - 5 as is 
 	visible in the fourth line.
 
-	To simplify the matrix output neurons is not visible as neurons that connections can come from, 
+	To simplify the matrix output neurons are not visible as neurons that connections can come from, 
 	and input and bias neurons are not visible as neurons that connections can go to.
 
 	This function appears in FANN >= 1.2.0.
@@ -531,6 +531,37 @@ FANN_EXTERNAL void FANN_API fann_set_weight_array(struct fann *ann,
 FANN_EXTERNAL void FANN_API fann_set_weight(struct fann *ann,
     unsigned int from_neuron, unsigned int to_neuron, fann_type weight);
 
+/* Function: fann_get_weights
+
+    Get all the network weights.
+
+    Parameters:
+		ann - A previously created neural network structure of
+            type <struct fann> pointer.
+		weights - A fann_type pointer to user data. It is the responsibility
+			of the user to allocate sufficient space to store all the weights.
+
+   This function appears in FANN >= x.y.z
+*/
+FANN_EXTERNAL void FANN_API fann_get_weights(struct fann *ann, fann_type *weights);
+
+
+/* Function: fann_set_weights
+
+    Set network weights.
+
+    Parameters:
+		ann - A previously created neural network structure of
+            type <struct fann> pointer.
+		weights - A fann_type pointer to user data. It is the responsibility
+			of the user to make the weights array sufficient long 
+			to store all the weights.
+
+   This function appears in FANN >= x.y.z
+*/
+FANN_EXTERNAL void FANN_API fann_set_weights(struct fann *ann, fann_type *weights);
+
+
 /* Function: fann_set_user_data
 
     Store a pointer to user defined data. The pointer can be
@@ -563,6 +594,31 @@ FANN_EXTERNAL void FANN_API fann_set_user_data(struct fann *ann, void *user_data
    This function appears in FANN >= 2.1.0
 */
 FANN_EXTERNAL void * FANN_API fann_get_user_data(struct fann *ann);
+
+/* Function: fann_disable_seed_rand
+
+   Disables the automatic random generator seeding that happens in FANN.
+
+   Per default FANN will always seed the random generator when creating a new network,
+   unless FANN_NO_SEED is defined during compilation of the library. This method can
+   disable this at runtime.
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL void FANN_API fann_disable_seed_rand();
+
+/* Function: fann_enable_seed_rand
+
+   Enables the automatic random generator seeding that happens in FANN.
+
+   Per default FANN will always seed the random generator when creating a new network,
+   unless FANN_NO_SEED is defined during compilation of the library. This method can
+   disable this at runtime.
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL void FANN_API fann_enable_seed_rand();
+
 
 #ifdef FIXEDFANN
 	

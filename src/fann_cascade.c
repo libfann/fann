@@ -1,6 +1,6 @@
 /*
   Fast Artificial Neural Network Library (fann)
-  Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+  Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -328,7 +328,7 @@ int fann_reallocate_neurons(struct fann *ann, unsigned int total_neurons)
 		/* Move pointers from layers to neurons */
 		for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++)
 		{
-			num_neurons = layer_it->last_neuron - layer_it->first_neuron;
+			num_neurons = (unsigned int)(layer_it->last_neuron - layer_it->first_neuron);
 			layer_it->first_neuron = neurons + num_neurons_so_far;
 			layer_it->last_neuron = layer_it->first_neuron + num_neurons;
 			num_neurons_so_far += num_neurons;
@@ -342,7 +342,7 @@ void initialize_candidate_weights(struct fann *ann, unsigned int first_con, unsi
 {
 	fann_type prev_step;
 	unsigned int i = 0;
-	unsigned int bias_weight = first_con + (ann->first_layer->last_neuron - ann->first_layer->first_neuron) - 1;
+	unsigned int bias_weight = (unsigned int)(first_con + (ann->first_layer->last_neuron - ann->first_layer->first_neuron) - 1);
 
 	if(ann->training_algorithm == FANN_TRAIN_RPROP)
 		prev_step = ann->rprop_delta_zero;
@@ -778,11 +778,11 @@ fann_type fann_train_candidates_epoch(struct fann *ann, struct fann_train_data *
 	return best_score;
 }
 
-/* add a layer ad the position pointed to by *layer */
+/* add a layer at the position pointed to by *layer */
 struct fann_layer *fann_add_layer(struct fann *ann, struct fann_layer *layer)
 {
-	int layer_pos = layer - ann->first_layer;
-	int num_layers = ann->last_layer - ann->first_layer + 1;
+	int layer_pos = (int)(layer - ann->first_layer);
+	int num_layers = (int)(ann->last_layer - ann->first_layer + 1);
 	int i;
 
 	/* allocate the layer */
@@ -842,9 +842,8 @@ void fann_set_shortcut_connections(struct fann *ann)
 
 void fann_add_candidate_neuron(struct fann *ann, struct fann_layer *layer)
 {
-	unsigned int num_connections_in = layer->first_neuron - ann->first_layer->first_neuron;
-	unsigned int num_connections_out =
-		(ann->last_layer - 1)->last_neuron - (layer + 1)->first_neuron;
+	unsigned int num_connections_in = (unsigned int)(layer->first_neuron - ann->first_layer->first_neuron);
+	unsigned int num_connections_out = (unsigned int)((ann->last_layer - 1)->last_neuron - (layer + 1)->first_neuron);
 	unsigned int num_connections_move = num_connections_out + num_connections_in;
 
 	unsigned int candidate_con, candidate_output_weight;

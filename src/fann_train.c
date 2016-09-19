@@ -1,6 +1,6 @@
 /*
   Fast Artificial Neural Network Library (fann)
-  Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+  Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -1044,7 +1044,7 @@ void fann_update_weights_sarprop(struct fann *ann, unsigned int epoch, unsigned 
 	float step_error_shift = ann->sarprop_step_error_shift; /* ld 3 = 1.585 */
 	float T = ann->sarprop_temperature;
 	float MSE = fann_get_MSE(ann);
-	float RMSE = (float)sqrt(MSE);
+	float RMSE = sqrtf(MSE);
 
 	unsigned int i = first_weight;
 

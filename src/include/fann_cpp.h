@@ -1,8 +1,9 @@
 #ifndef FANN_CPP_H_INCLUDED
 #define FANN_CPP_H_INCLUDED
 
+#include <memory>
+#include <iterator>
 /*
- *
  *  Fast Artificial Neural Network (fann) C++ Wrapper
  *  Copyright (C) 2004-2006 created by freegoldbar (at) yahoo dot com
  *
@@ -23,16 +24,18 @@
  */
 
 /*
- *  Title: FANN Wrapper for C++
+ *  Title: FANN C++ Wrapper
  *
  *  Overview:
  *
  *  The Fann Wrapper for C++ provides two classes: <neural_net>
  *  and <training_data>. To use the wrapper include
  *  doublefann.h, floatfann.h or fixedfann.h before the
- *  fann_cpp.h header file. To get started see xor_sample.cpp
- *  in the examples directory. The license is LGPL. Copyright (C)
- *  2004-2006 created by <freegoldbar@yahoo.com>.
+ *  fann_cpp.h header file.
+ *
+ *  To get started see xor_sample.cpp in the examples directory.
+ *  The license is LGPL. Copyright (C) 2004-2006 created by <freegoldbar@yahoo.com>.
+ *
  *
  *  Note:  Notes and differences from C API
  *
@@ -47,11 +50,10 @@
  *       except that the struct fann *ann/struct fann_train_data *data
  *       arguments are encapsulated so they are not present in the
  *       method signatures or are translated into class references.
- *  -  The various create methods return a boolean set to true to
- *       indicate that the neural network was created, false otherwise.
- *       The same goes for the read_train_from_file method.
+ *  -  C++ style constructors have been implemented to make network creation
+ *       easier
  *  -  The neural network and training data is automatically cleaned
- *       up in the destructors and create/read methods.
+ *       up in the destructors
  *  -  To make the destructors virtual define USE_VIRTUAL_DESTRUCTOR
  *       before including the header file.
  *  -  Additional methods are available on the training_data class to
@@ -59,828 +61,234 @@
  *       get_output and set_train_data. Finally fann_duplicate_train_data
  *       has been replaced by a copy constructor.
  *
- *  Note: Changes
- *
- *  Version 2.2.0:
- *     - General update to fann C library 2.2.0 with support for new functionality
- *
- *  Version 2.1.0:
- *     - General update to fann C library 2.1.0 with support for new functionality
- *     - Due to changes in the C API the C++ API is not fully backward compatible:
- *        The create methods have changed names and parameters.
- *        The training callback function has different parameters and a set_callback.
- *        Some <training_data> methods have updated names.
- *        Get activation function and steepness is available for neurons, not layers.
- *     - Extensions are now part of fann so there is no fann_extensions.h
- *
- *  Version 1.2.0:
- *     - Changed char pointers to const std::string references
- *     - Added const_casts where the C API required it
- *     - Initialized enums from the C enums instead of numeric constants
- *     - Added a method set_train_data that copies and allocates training
- *     - data in a way that is compatible with the way the C API deallocates
- *     - the data thus making it possible to change training data.
- *     - The get_rprop_increase_factor method did not return its value
- *
- *  Version 1.0.0:
- *     - Initial version
- *
  */
 
+#include <assert.h>
 #include <stdarg.h>
 #include <string>
+#include "fann_data_cpp.h"
+#include "fann_training_data_cpp.h"
 
 /* Namespace: FANN
     The FANN namespace groups the C++ wrapper definitions */
-namespace FANN
-{
-    /* Enum: error_function_enum
-	    Error function used during training.
-    	
-	    ERRORFUNC_LINEAR - Standard linear error function.
-	    ERRORFUNC_TANH - Tanh error function, usually better 
-		    but can require a lower learning rate. This error function agressively targets outputs that
-		    differ much from the desired, while not targetting outputs that only differ a little that much.
-		    This activation function is not recommended for cascade training and incremental training.
-
-	    See also:
-		    <neural_net::set_train_error_function>, <neural_net::get_train_error_function>
-    */
-    enum error_function_enum {
-        ERRORFUNC_LINEAR = FANN_ERRORFUNC_LINEAR,
-        ERRORFUNC_TANH
-    };
-
-    /* Enum: stop_function_enum
-	    Stop criteria used during training.
-
-	    STOPFUNC_MSE - Stop criteria is Mean Square Error (MSE) value.
-	    STOPFUNC_BIT - Stop criteria is number of bits that fail. The number of bits; means the
-		    number of output neurons which differ more than the bit fail limit 
-		    (see <neural_net::get_bit_fail_limit>, <neural_net::set_bit_fail_limit>). 
-		    The bits are counted in all of the training data, so this number can be higher than
-		    the number of training data.
-
-	    See also:
-		    <neural_net::set_train_stop_function>, <neural_net::get_train_stop_function>
-    */
-    enum stop_function_enum
-    {
-	    STOPFUNC_MSE = FANN_STOPFUNC_MSE,
-	    STOPFUNC_BIT
-    };
-
-    /* Enum: training_algorithm_enum
-	    The Training algorithms used when training on <training_data> with functions like
-	    <neural_net::train_on_data> or <neural_net::train_on_file>. The incremental training
-        looks alters the weights after each time it is presented an input pattern, while batch
-        only alters the weights once after it has been presented to all the patterns.
-
-	    TRAIN_INCREMENTAL -  Standard backpropagation algorithm, where the weights are 
-		    updated after each training pattern. This means that the weights are updated many 
-		    times during a single epoch. For this reason some problems, will train very fast with 
-		    this algorithm, while other more advanced problems will not train very well.
-	    TRAIN_BATCH -  Standard backpropagation algorithm, where the weights are updated after 
-		    calculating the mean square error for the whole training set. This means that the weights 
-		    are only updated once during a epoch. For this reason some problems, will train slower with 
-		    this algorithm. But since the mean square error is calculated more correctly than in 
-		    incremental training, some problems will reach a better solutions with this algorithm.
-	    TRAIN_RPROP - A more advanced batch training algorithm which achieves good results 
-		    for many problems. The RPROP training algorithm is adaptive, and does therefore not 
-		    use the learning_rate. Some other parameters can however be set to change the way the 
-		    RPROP algorithm works, but it is only recommended for users with insight in how the RPROP 
-		    training algorithm works. The RPROP training algorithm is described by 
-		    [Riedmiller and Braun, 1993], but the actual learning algorithm used here is the 
-		    iRPROP- training algorithm which is described by [Igel and Husken, 2000] which 
-    	    is an variety of the standard RPROP training algorithm.
-	    TRAIN_QUICKPROP - A more advanced batch training algorithm which achieves good results 
-		    for many problems. The quickprop training algorithm uses the learning_rate parameter 
-		    along with other more advanced parameters, but it is only recommended to change these 
-		    advanced parameters, for users with insight in how the quickprop training algorithm works.
-		    The quickprop training algorithm is described by [Fahlman, 1988].
-    	
-	    See also:
-		    <neural_net::set_training_algorithm>, <neural_net::get_training_algorithm>
-    */
-    enum training_algorithm_enum {
-        TRAIN_INCREMENTAL = FANN_TRAIN_INCREMENTAL,
-        TRAIN_BATCH,
-        TRAIN_RPROP,
-        TRAIN_QUICKPROP,
-	TRAIN_SARPROP
-    };
-
-    /* Enum: activation_function_enum
-       
-	    The activation functions used for the neurons during training. The activation functions
-	    can either be defined for a group of neurons by <neural_net::set_activation_function_hidden>
-        and <neural_net::set_activation_function_output> or it can be defined for a single neuron by
-        <neural_net::set_activation_function>.
-
-	    The steepness of an activation function is defined in the same way by 
-	    <neural_net::set_activation_steepness_hidden>, <neural_net::set_activation_steepness_output>
-        and <neural_net::set_activation_steepness>.
-       
-       The functions are described with functions where:
-       * x is the input to the activation function,
-       * y is the output,
-       * s is the steepness and
-       * d is the derivation.
-
-       FANN_LINEAR - Linear activation function. 
-         * span: -inf < y < inf
-	     * y = x*s, d = 1*s
-	     * Can NOT be used in fixed point.
-
-       FANN_THRESHOLD - Threshold activation function.
-	     * x < 0 -> y = 0, x >= 0 -> y = 1
-	     * Can NOT be used during training.
-
-       FANN_THRESHOLD_SYMMETRIC - Threshold activation function.
-	     * x < 0 -> y = 0, x >= 0 -> y = 1
-	     * Can NOT be used during training.
-
-       FANN_SIGMOID - Sigmoid activation function.
-	     * One of the most used activation functions.
-	     * span: 0 < y < 1
-	     * y = 1/(1 + exp(-2*s*x))
-	     * d = 2*s*y*(1 - y)
-
-       FANN_SIGMOID_STEPWISE - Stepwise linear approximation to sigmoid.
-	     * Faster than sigmoid but a bit less precise.
-
-       FANN_SIGMOID_SYMMETRIC - Symmetric sigmoid activation function, aka. tanh.
-	     * One of the most used activation functions.
-	     * span: -1 < y < 1
-	     * y = tanh(s*x) = 2/(1 + exp(-2*s*x)) - 1
-	     * d = s*(1-(y*y))
-
-       FANN_SIGMOID_SYMMETRIC - Stepwise linear approximation to symmetric sigmoid.
-	     * Faster than symmetric sigmoid but a bit less precise.
-
-       FANN_GAUSSIAN - Gaussian activation function.
-	     * 0 when x = -inf, 1 when x = 0 and 0 when x = inf
-	     * span: 0 < y < 1
-	     * y = exp(-x*s*x*s)
-	     * d = -2*x*s*y*s
-
-       FANN_GAUSSIAN_SYMMETRIC - Symmetric gaussian activation function.
-	     * -1 when x = -inf, 1 when x = 0 and 0 when x = inf
-	     * span: -1 < y < 1
-	     * y = exp(-x*s*x*s)*2-1
-	     * d = -2*x*s*(y+1)*s
-    	 
-       FANN_ELLIOT - Fast (sigmoid like) activation function defined by David Elliott
-	     * span: 0 < y < 1
-	     * y = ((x*s) / 2) / (1 + |x*s|) + 0.5
-	     * d = s*1/(2*(1+|x*s|)*(1+|x*s|))
-    	 
-       FANN_ELLIOT_SYMMETRIC - Fast (symmetric sigmoid like) activation function defined by David Elliott
-	     * span: -1 < y < 1   
-	     * y = (x*s) / (1 + |x*s|)
-	     * d = s*1/((1+|x*s|)*(1+|x*s|))
-
-	    FANN_LINEAR_PIECE - Bounded linear activation function.
-	     * span: 0 < y < 1
-	     * y = x*s, d = 1*s
-    	 
-	    FANN_LINEAR_PIECE_SYMMETRIC - Bounded Linear activation function.
-	     * span: -1 < y < 1
-	     * y = x*s, d = 1*s
-	
-        FANN_SIN_SYMMETRIC - Periodical sinus activation function.
-         * span: -1 <= y <= 1
-         * y = sin(x*s)
-         * d = s*cos(x*s)
-         
-        FANN_COS_SYMMETRIC - Periodical cosinus activation function.
-         * span: -1 <= y <= 1
-         * y = cos(x*s)
-         * d = s*-sin(x*s)
-    	 
-	    See also:
-		    <neural_net::set_activation_function_hidden>,
-		    <neural_net::set_activation_function_output>
-    */
-    enum activation_function_enum {
-        LINEAR = FANN_LINEAR,
-        THRESHOLD,
-        THRESHOLD_SYMMETRIC,
-        SIGMOID,
-        SIGMOID_STEPWISE,
-        SIGMOID_SYMMETRIC,
-        SIGMOID_SYMMETRIC_STEPWISE,
-        GAUSSIAN,
-        GAUSSIAN_SYMMETRIC,
-        GAUSSIAN_STEPWISE,
-        ELLIOT,
-        ELLIOT_SYMMETRIC,
-        LINEAR_PIECE,
-        LINEAR_PIECE_SYMMETRIC,
-	    SIN_SYMMETRIC,
-	    COS_SYMMETRIC
-    };
-
-    /* Enum: network_type_enum
-
-        Definition of network types used by <neural_net::get_network_type>
-
-        LAYER - Each layer only has connections to the next layer
-        SHORTCUT - Each layer has connections to all following layers
-
-       See Also:
-          <neural_net::get_network_type>, <fann_get_network_type>
-
-       This enumeration appears in FANN >= 2.1.0
-    */
-    enum network_type_enum
-    {
-        LAYER = FANN_NETTYPE_LAYER,
-        SHORTCUT
-    };
-
-    /* Type: connection
-
-        Describes a connection between two neurons and its weight
-
-        from_neuron - Unique number used to identify source neuron
-        to_neuron - Unique number used to identify destination neuron
-        weight - The numerical value of the weight
-
-        See Also:
-            <neural_net::get_connection_array>, <neural_net::set_weight_array>
-
-       This structure appears in FANN >= 2.1.0
-    */
-    typedef struct fann_connection connection;
-
-    /* Forward declaration of class neural_net and training_data */
-    class neural_net;
-    class training_data;
-
-    /* Type: callback_type
-       This callback function can be called during training when using <neural_net::train_on_data>, 
-       <neural_net::train_on_file> or <neural_net::cascadetrain_on_data>.
-    	
-        >typedef int (*callback_type) (neural_net &net, training_data &train,
-        >    unsigned int max_epochs, unsigned int epochs_between_reports,
-        >    float desired_error, unsigned int epochs, void *user_data);
-    	
-	    The callback can be set by using <neural_net::set_callback> and is very usefull for doing custom 
-	    things during training. It is recommended to use this function when implementing custom 
-	    training procedures, or when visualizing the training in a GUI etc. The parameters which the
-	    callback function takes is the parameters given to the <neural_net::train_on_data>, plus an epochs
-	    parameter which tells how many epochs the training have taken so far.
-    	
-	    The callback function should return an integer, if the callback function returns -1, the training
-	    will terminate.
-    	
-	    Example of a callback function that prints information to cout:
-            >int print_callback(FANN::neural_net &net, FANN::training_data &train,
-            >    unsigned int max_epochs, unsigned int epochs_between_reports,
-            >    float desired_error, unsigned int epochs, void *user_data)
-            >{
-            >    cout << "Epochs     " << setw(8) << epochs << ". "
-            >         << "Current Error: " << left << net.get_MSE() << right << endl;
-            >    return 0;
-            >}
-    	
-	    See also:
-		    <neural_net::set_callback>, <fann_callback_type>
-     */ 
-    typedef int (*callback_type) (neural_net &net, training_data &train,
-        unsigned int max_epochs, unsigned int epochs_between_reports,
-        float desired_error, unsigned int epochs, void *user_data);
-
-    /*************************************************************************/
-
-    /* Class: training_data
-
-        Encapsulation of a training data set <struct fann_train_data> and
-        associated C API functions.
-    */
-    class training_data
-    {
-    public:
-        /* Constructor: training_data
-        
-            Default constructor creates an empty neural net.
-            Use <read_train_from_file>, <set_train_data> or <create_train_from_callback> to initialize.
-        */
-        training_data() : train_data(NULL)
-        {
-        }
-
-        /* Constructor: training_data
-        
-            Copy constructor constructs a copy of the training data.
-            Corresponds to the C API <fann_duplicate_train_data> function.
-        */
-        training_data(const training_data &data)
-        {
-            destroy_train();
-            if (data.train_data != NULL)
-            {
-                train_data = fann_duplicate_train_data(data.train_data);
-            }
-        }
-
-        /* Destructor: ~training_data
-
-            Provides automatic cleanup of data.
-            Define USE_VIRTUAL_DESTRUCTOR if you need the destructor to be virtual.
-
-            See also:
-                <destroy>
-        */
-#ifdef USE_VIRTUAL_DESTRUCTOR
-        virtual
-#endif
-        ~training_data()
-        {
-            destroy_train();
-        }
-
-        /* Method: destroy
-        
-            Destructs the training data. Called automatically by the destructor.
-
-            See also:
-                <~training_data>
-        */
-        void destroy_train()
-        {
-            if (train_data != NULL)
-            {
-                fann_destroy_train(train_data);
-                train_data = NULL;
-            }
-        }
-
-        /* Method: read_train_from_file
-           Reads a file that stores training data.
-           
-           The file must be formatted like:
-           >num_train_data num_input num_output
-           >inputdata seperated by space
-           >outputdata seperated by space
-           >
-           >.
-           >.
-           >.
-           >
-           >inputdata seperated by space
-           >outputdata seperated by space
-           
-           See also:
-   	        <neural_net::train_on_data>, <save_train>, <fann_read_train_from_file>
-
-            This function appears in FANN >= 1.0.0
-        */ 
-        bool read_train_from_file(const std::string &filename)
-        {
-            destroy_train();
-            train_data = fann_read_train_from_file(filename.c_str());
-            return (train_data != NULL);
-        }
-
-        /* Method: save_train
-           
-           Save the training structure to a file, with the format as specified in <read_train_from_file>
-
-           Return:
-           The function returns true on success and false on failure.
-              
-           See also:
-   	        <read_train_from_file>, <save_train_to_fixed>, <fann_save_train>
-        	
-           This function appears in FANN >= 1.0.0.   	
-         */ 
-        bool save_train(const std::string &filename)
-        {
-            if (train_data == NULL)
-            {
-                return false;
-            }
-            if (fann_save_train(train_data, filename.c_str()) == -1)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /* Method: save_train_to_fixed
-           
-           Saves the training structure to a fixed point data file.
-         
-           This function is very usefull for testing the quality of a fixed point network.
-           
-           Return:
-           The function returns true on success and false on failure.
-           
-           See also:
-   	        <save_train>, <fann_save_train_to_fixed>
-
-           This function appears in FANN >= 1.0.0.   	
-         */ 
-        bool save_train_to_fixed(const std::string &filename, unsigned int decimal_point)
-        {
-            if (train_data == NULL)
-            {
-                return false;
-            }
-            if (fann_save_train_to_fixed(train_data, filename.c_str(), decimal_point) == -1)
-            {
-                return false;
-            }
-            return true;
-        }
-
-        /* Method: shuffle_train_data
-           
-           Shuffles training data, randomizing the order. 
-           This is recommended for incremental training, while it have no influence during batch training.
-           
-           This function appears in FANN >= 1.1.0.
-         */ 
-        void shuffle_train_data()
-        {
-            if (train_data != NULL)
-            {
-                fann_shuffle_train_data(train_data);
-            }
-        }
-
-        /* Method: merge_train_data
-           
-           Merges the data into the data contained in the <training_data>.
-           
-           This function appears in FANN >= 1.1.0.
-         */ 
-        void merge_train_data(const training_data &data)
-        {
-            fann_train_data *new_data = fann_merge_train_data(train_data, data.train_data);
-            if (new_data != NULL)
-            {
-                destroy_train();
-                train_data = new_data;
-            }
-        }
-
-        /* Method: length_train_data
-           
-           Returns the number of training patterns in the <training_data>.
-
-           See also:
-           <num_input_train_data>, <num_output_train_data>, <fann_length_train_data>
-
-           This function appears in FANN >= 2.0.0.
-         */ 
-        unsigned int length_train_data()
-        {
-            if (train_data == NULL)
-            {
-                return 0;
-            }
-            else
-            {
-                return fann_length_train_data(train_data);
-            }
-        }
-
-        /* Method: num_input_train_data
-
-           Returns the number of inputs in each of the training patterns in the <training_data>.
-           
-           See also:
-           <num_output_train_data>, <length_train_data>, <fann_num_input_train_data>
-
-           This function appears in FANN >= 2.0.0.
-         */ 
-        unsigned int num_input_train_data()
-        {
-            if (train_data == NULL)
-            {
-                return 0;
-            }
-            else
-            {
-                return fann_num_input_train_data(train_data);
-            }
-        }
-
-        /* Method: num_output_train_data
-           
-           Returns the number of outputs in each of the training patterns in the <struct fann_train_data>.
-           
-           See also:
-           <num_input_train_data>, <length_train_data>, <fann_num_output_train_data>
-
-           This function appears in FANN >= 2.0.0.
-         */ 
-        unsigned int num_output_train_data()
-        {
-            if (train_data == NULL)
-            {
-                return 0;
-            }
-            else
-            {
-                return fann_num_output_train_data(train_data);
-            }
-        }
-
-        /* Grant access to the encapsulated data since many situations
-            and applications creates the data from sources other than files
-            or uses the training data for testing and related functions */
-
-        /* Method: get_input
-        
-            Returns:
-                A pointer to the array of input training data
-
-            See also:
-                <get_output>, <set_train_data>
-        */
-        fann_type **get_input()
-        {
-            if (train_data == NULL)
-            {
-                return NULL;
-            }
-            else
-            {
-                return train_data->input;
-            }
-        }
-
-        /* Method: get_output
-        
-            Returns:
-                A pointer to the array of output training data
-
-            See also:
-                <get_input>, <set_train_data>
-        */
-        fann_type **get_output()
-        {
-            if (train_data == NULL)
-            {
-                return NULL;
-            }
-            else
-            {
-                return train_data->output;
-            }
-        }
-
-        /* Method: set_train_data
-
-            Set the training data to the input and output data provided.
-
-            A copy of the data is made so there are no restrictions on the
-            allocation of the input/output data and the caller is responsible
-            for the deallocation of the data pointed to by input and output.
-
-           Parameters:
-             num_data      - The number of training data
-             num_input     - The number of inputs per training data
-             num_output    - The number of ouputs per training data
-             input      - The set of inputs (a pointer to an array of pointers to arrays of floating point data)
-             output     - The set of desired outputs (a pointer to an array of pointers to arrays of floating point data)
-
-            See also:
-                <get_input>, <get_output>
-        */
-        void set_train_data(unsigned int num_data,
-            unsigned int num_input, fann_type **input,
-            unsigned int num_output, fann_type **output)
-        {
-            set_train_data(fann_create_train_pointer_array(num_data, num_input, input, num_output, output));
-        }
-
-        /* Method: set_train_data
-
-            Set the training data to the input and output data provided.
-
-            A copy of the data is made so there are no restrictions on the
-            allocation of the input/output data and the caller is responsible
-            for the deallocation of the data pointed to by input and output.
-
-           Parameters:
-             num_data      - The number of training data
-             num_input     - The number of inputs per training data
-             num_output    - The number of ouputs per training data
-             input      - The set of inputs (an array with the dimension num_data*num_input)
-             output     - The set of desired outputs (an array with the dimension num_data*num_output)
-
-            See also:
-                <get_input>, <get_output>
-        */
-        void set_train_data(unsigned int num_data,
-            unsigned int num_input, fann_type *input,
-            unsigned int num_output, fann_type *output)
-        {
-            set_train_data(fann_create_train_array(num_data, num_input, input, num_output, output));
-        }
-
-private:
-        /* Set the training data to the struct fann_training_data pointer.
-            The struct has to be allocated with malloc to be compatible
-            with fann_destroy. */
-        void set_train_data(struct fann_train_data *data)
-        {
-            destroy_train();
-            train_data = data;
-        }
-
-public:
-        /*********************************************************************/
-
-        /* Method: create_train_from_callback
-           Creates the training data struct from a user supplied function.
-           As the training data are numerable (data 1, data 2...), the user must write
-           a function that receives the number of the training data set (input,output)
-           and returns the set.
-
-           Parameters:
-             num_data      - The number of training data
-             num_input     - The number of inputs per training data
-             num_output    - The number of ouputs per training data
-             user_function - The user suplied function
-
-           Parameters for the user function:
-             num        - The number of the training data set
-             num_input  - The number of inputs per training data
-             num_output - The number of ouputs per training data
-             input      - The set of inputs
-             output     - The set of desired outputs
-          
-           See also:
-             <training_data::read_train_from_file>, <neural_net::train_on_data>,
-             <fann_create_train_from_callback>
-
-            This function appears in FANN >= 2.1.0
-        */ 
-        void create_train_from_callback(unsigned int num_data,
-                                                  unsigned int num_input,
-                                                  unsigned int num_output,
-                                                  void (FANN_API *user_function)( unsigned int,
-                                                                         unsigned int,
-                                                                         unsigned int,
-                                                                         fann_type * ,
-                                                                         fann_type * ))
-        {
-            destroy_train();
-            train_data = fann_create_train_from_callback(num_data, num_input, num_output, user_function);
-        }
-
-        /* Method: scale_input_train_data
-           
-           Scales the inputs in the training data to the specified range.
-
-           See also:
-   	        <scale_output_train_data>, <scale_train_data>, <fann_scale_input_train_data>
-
-           This function appears in FANN >= 2.0.0.
-         */ 
-        void scale_input_train_data(fann_type new_min, fann_type new_max)
-        {
-            if (train_data != NULL)
-            {
-                fann_scale_input_train_data(train_data, new_min, new_max);
-            }
-        }
-
-        /* Method: scale_output_train_data
-           
-           Scales the outputs in the training data to the specified range.
-
-           See also:
-   	        <scale_input_train_data>, <scale_train_data>, <fann_scale_output_train_data>
-
-           This function appears in FANN >= 2.0.0.
-         */ 
-        void scale_output_train_data(fann_type new_min, fann_type new_max)
-        {
-            if (train_data != NULL)
-            {
-                fann_scale_output_train_data(train_data, new_min, new_max);
-            }
-        }
-
-        /* Method: scale_train_data
-           
-           Scales the inputs and outputs in the training data to the specified range.
-           
-           See also:
-   	        <scale_output_train_data>, <scale_input_train_data>, <fann_scale_train_data>
-
-           This function appears in FANN >= 2.0.0.
-         */ 
-        void scale_train_data(fann_type new_min, fann_type new_max)
-        {
-            if (train_data != NULL)
-            {
-                fann_scale_train_data(train_data, new_min, new_max);
-            }
-        }
-
-        /* Method: subset_train_data
-           
-           Changes the training data to a subset, starting at position *pos* 
-           and *length* elements forward. Use the copy constructor to work
-           on a new copy of the training data.
-           
-            >FANN::training_data full_data_set;
-            >full_data_set.read_train_from_file("somefile.train");
-            >FANN::training_data *small_data_set = new FANN::training_data(full_data_set);
-            >small_data_set->subset_train_data(0, 2); // Only use first two
-            >// Use small_data_set ...
-            >delete small_data_set;
-
-           See also:
-   	        <fann_subset_train_data>
-
-           This function appears in FANN >= 2.0.0.
-         */
-        void subset_train_data(unsigned int pos, unsigned int length)
-        {
-            if (train_data != NULL)
-            {
-                struct fann_train_data *temp = fann_subset_train_data(train_data, pos, length);
-                destroy_train();
-                train_data = temp;
-            }
-        }
-
-        /*********************************************************************/
-
-    protected:
-        /* The neural_net class has direct access to the training data */
-        friend class neural_net;
-
-        /* Pointer to the encapsulated training data */
-        struct fann_train_data* train_data;
-    };
-
-    /*************************************************************************/
-
+namespace FANN {
     /* Class: neural_net
+        <neural_net> is the main neural network class used for both training and execution
 
         Encapsulation of a neural network <struct fann> and
         associated C API functions.
     */
-    class neural_net
-    {
+    class neural_net {
     public:
-        /* Constructor: neural_net
-        
-            Default constructor creates an empty neural net.
+        /* Constructor: neural_net(network_type_enum net_type, unsigned int num_layers, const unsigned int *layers)
+
+            Creates a neural network of the desired <network_type_enum> net_type, based on array of layers.
+
+            Parameters:
+                net_type - The desired network type of the neural network
+                num_layers - The total number of layers including the input and the output layer.
+                layers - array of the layer sizes
+
+            NOTE: if layers does not have the same size as num_layers, the result is undefined
+
+            Example:
+              >FANN::neural_net net(LAYER, 3, (unsigned int[]) {2, 3, 1});
+
+            This function appears in FANN >= 2.3.0.
+         */
+        neural_net(network_type_enum net_type, unsigned int num_layers, const unsigned int *layers) {
+            switch (net_type){
+                case LAYER:
+                    ann = fann_create_standard_array(num_layers, layers);
+                    break;
+                case SHORTCUT:
+                    ann = fann_create_shortcut_array(num_layers, layers);
+                    break;
+            }
+            assert(ann != NULL);
+        }
+
+        /* Constructor: neural_net(network_type_enum net_type, InputIterator layersBeginIterator, InputIterator layersEndIterator)
+
+            Creates a neural network of the desired <network_type_enum> net_type, based on iterator to the layers.
+
+            Parameters:
+                net_type - The desired network type of the neural network
+                layersBeginIterator - begin iterator to the collection of unsigned int layers
+                layersEndIterator - end iterator to the collection of unsigned int layers
+
+            Example:
+              >vector<unsigned int> layers{2, 3, 4, 5};
+              >neural_net net(LAYER, layers.begin(), layers.end());
+
+            This function appears in FANN >= 2.3.0.
+         */
+        template <class InputIterator>
+        neural_net(network_type_enum net_type, InputIterator layersBeginIterator, InputIterator layersEndIterator) {
+            unsigned int num_layers = static_cast<unsigned int>(std::distance(layersBeginIterator, layersEndIterator));
+            unsigned int *layers = new unsigned int[num_layers];
+            std::copy(layersBeginIterator, layersEndIterator, layers);
+
+            switch (net_type){
+                case LAYER:
+                    ann = fann_create_standard_array(num_layers, layers);
+                    break;
+                case SHORTCUT:
+                    ann = fann_create_shortcut_array(num_layers, layers);
+                    break;
+            }
+            delete[] layers;
+            assert(ann != NULL);
+        }
+
+        /* Constructor: neural_net(network_type_enum net_type, unsigned int num_layers, ...)
+
+	        Creates a neural network of the desired <network_type_enum> net_type.
+
+	        Parameters:
+		        num_layers - The total number of layers including the input and the output layer.
+		        ... - Integer values determining the number of neurons in each layer starting with the
+			        input layer and ending with the output layer.
+
+            Example:
+                >const unsigned int num_layers = 3;
+                >const unsigned int num_input = 2;
+                >const unsigned int num_hidden = 3;
+                >const unsigned int num_output = 1;
+                >
+                >FANN::neural_net net(num_layers, num_input, num_hidden, num_output);
+
+	        This function appears in FANN >= 2.3.0.
+        */
+        neural_net(network_type_enum net_type, unsigned int num_layers, ...) {
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
+
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i = 0; i < num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned
+                        int);
+            va_end(layers);
+
+            switch (net_type){
+                case LAYER:
+                    ann = fann_create_standard_array(num_layers, data.get());
+                    break;
+                case SHORTCUT:
+                    ann = fann_create_shortcut_array(num_layers, data.get());
+                    break;
+            }
+            assert(ann != NULL);
+        }
+
+
+        /* Constructor: neural_net(float connection_rate, unsigned int num_layers, ...)
+
+	        Creates a standard backpropagation neural network, which is sparsely connected, this will default the <network_type_enum> to <LAYER>
+
+	        Parameters:
+		        connection_rate - The connection rate controls how many connections there will be in the
+   			        network. If the connection rate is set to 1, the network will be fully
+   			        connected, but if it is set to 0.5 only half of the connections will be set.
+			        A connection rate of 1 will yield the same result as <fann_create_standard>
+		        num_layers - The total number of layers including the input and the output layer.
+		        ... - Integer values determining the number of neurons in each layer starting with the
+			        input layer and ending with the output layer.
+
+	        This function appears in FANN >= 2.3.0.
+        */
+        neural_net(float connection_rate, unsigned int num_layers, ...) {
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
+
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i = 0; i < num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned int);
+            va_end(layers);
+
+            ann = fann_create_sparse_array(connection_rate, num_layers, data.get());
+            assert(ann != NULL);
+        }
+
+        /* Constructor: neural_net(float connection_rate, unsigned int num_layers, const unsigned int *layers)
+
+	        Creates a standard backpropagation neural network, which is sparsely connected, this will default the <network_type_enum> to <LAYER>
+
+	        Parameters:
+		        connection_rate - The connection rate controls how many connections there will be in the
+   			        network. If the connection rate is set to 1, the network will be fully
+   			        connected, but if it is set to 0.5 only half of the connections will be set.
+			        A connection rate of 1 will yield the same result as <fann_create_standard>
+		        num_layers - The total number of layers including the input and the output layer.
+		        layers - Integer values determining the number of neurons in each layer starting with the
+			        input layer and ending with the output layer.
+
+	        This function appears in FANN >= 2.3.0.
+        */
+        neural_net(float connection_rate, unsigned int num_layers, const unsigned int *layers) {
+            ann = fann_create_sparse_array(connection_rate, num_layers, layers);
+            assert(ann != NULL);
+        }
+
+
+        /* Constructor: neural_net(const std::string &configuration_file)
+
+           Constructs a backpropagation neural network from a configuration file,
+           which have been saved by <save>.
+
+           See also:
+   	        <save>, <save_to_fixed>
+
+           This function appears in FANN >= 2.3.0.
+         */
+        neural_net(const std::string &configuration_file) {
+            ann = fann_create_from_file(configuration_file.c_str());
+            assert(ann != NULL);
+        }
+
+        /* Constructor neural_net(const neural_net &other)
+
+            Creates a copy the other neural_net.
+            */
+        neural_net(const neural_net &other) : ann(NULL) {
+            copy_from_struct_fann(other.ann);
+        }
+
+        /* Constructor: neural_net(struct fann *other)
+
+           Creates a copy the other neural_net.
+            */
+        neural_net(struct fann *other) {
+            copy_from_struct_fann(other);
+        }
+
+        /* Constructor: neural_net() - DEPRECATED
+
+            Creates an empty neural net.
             Use one of the create functions to create the neural network.
+
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
 
             See also:
 		        <create_standard>, <create_sparse>, <create_shortcut>,
 		        <create_standard_array>, <create_sparse_array>, <create_shortcut_array>
         */
-        neural_net() : ann(NULL)
-        {
+        neural_net() : ann(NULL) {
         }
 
-	/* Constructor neural_net
+        /* Method: copy_from_struct_fann - DEPRECATED
 
-	    Creates a copy the other neural_net.
-            
-	    See also:
-	    		<copy_from_struct_fann>
+           Set the internal fann struct to a copy of other
+
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
         */
-	neural_net(const neural_net& other)
-	{
-	    copy_from_struct_fann(other.ann);
-	}
-	
-	/* Constructor: neural_net
-
-	   Creates a copy the other neural_net.
-	    
-	   See also:
-	    		<copy_from_struct_fann>
-        */
-	neural_net(struct fann* other)
-	{
-	    copy_from_struct_fann(other);
-	}
-
-	/* Method: copy_from_struct_fann
-	   
-	   Set the internal fann struct to a copy of other
-	*/
-	void copy_from_struct_fann(struct fann* other)
-	{
-	    destroy();
-	    if (other != NULL)
-		ann=fann_copy(other);
-	}
+        void copy_from_struct_fann(struct fann *other) {
+            destroy();
+            if (other != NULL)
+                ann = fann_copy(other);
+        }
 
         /* Destructor: ~neural_net
 
@@ -893,8 +301,8 @@ public:
 #ifdef USE_VIRTUAL_DESTRUCTOR
         virtual
 #endif
-        ~neural_net()
-        {
+
+        ~neural_net() {
             destroy();
         }
 
@@ -905,10 +313,8 @@ public:
             See also:
                 <~neural_net>
         */
-        void destroy()
-        {
-            if (ann != NULL)
-            {
+        void destroy() {
+            if (ann != NULL) {
                 user_context *user_data = static_cast<user_context *>(fann_get_user_data(ann));
                 if (user_data != NULL)
                     delete user_data;
@@ -918,7 +324,7 @@ public:
             }
         }
 
-        /* Method: create_standard
+        /* Method: create_standard - DEPRECATED
         	
 	        Creates a standard fully connected backpropagation neural network.
 
@@ -943,55 +349,50 @@ public:
                 >FANN::neural_net net;
                 >net.create_standard(num_layers, num_input, num_hidden, num_output);
 
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
 	        See also:
 		        <create_standard_array>, <create_sparse>, <create_shortcut>,
 		        <fann_create_standard_array>
 
 	        This function appears in FANN >= 2.0.0.
-        */ 
-        bool create_standard(unsigned int num_layers, ...)
-        {
-			unsigned int *layers = new unsigned int[num_layers];
-			if(layers == NULL) return false;
+        */
+        bool create_standard(unsigned int num_layers, ...) {
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
 
-			va_list layer_sizes;
-			va_start(layer_sizes, num_layers);
-			bool status = true;
-			for(int i = 0; i < (int) num_layers; i++)
-			{
-				int arg = va_arg(layer_sizes, unsigned int);
-				if(arg < 0 || arg > 1000000)
-					status = false;
-				layers[i] = arg;
-			}
-			va_end(layer_sizes);
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i = 0; i < num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned
+                        int);
+            va_end(layers);
 
-			if(status)
-				status = create_standard_array(num_layers, layers);
-
-			delete layers;
+            bool status = create_standard_array(num_layers, data.get());
             return status;
         }
 
-        /* Method: create_standard_array
+        /* Method: create_standard_array - DEPRECATED
 
            Just like <create_standard>, but with an array of layer sizes
            instead of individual parameters.
+
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
 
 	        See also:
 		        <create_standard>, <create_sparse>, <create_shortcut>,
 		        <fann_create_standard>
 
 	        This function appears in FANN >= 2.0.0.
-        */ 
-        bool create_standard_array(unsigned int num_layers, const unsigned int * layers)
-        {
+        */
+        bool create_standard_array(unsigned int num_layers, const unsigned int *layers) {
             destroy();
             ann = fann_create_standard_array(num_layers, layers);
             return (ann != NULL);
         }
 
-        /* Method: create_sparse
+        /* Method: create_sparse - DEPRECATED
 
 	        Creates a standard backpropagation neural network, which is not fully connected.
 
@@ -1007,57 +408,53 @@ public:
 	        Returns:
 		        Boolean true if the network was created, false otherwise.
 
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
 	        See also:
 		        <create_standard>, <create_sparse_array>, <create_shortcut>,
 		        <fann_create_sparse>
 
 	        This function appears in FANN >= 2.0.0.
         */
-        bool create_sparse(float connection_rate, unsigned int num_layers, ...)
-        {
-			unsigned int *layers = new unsigned int[num_layers];
-			if(layers == NULL) return false;
+        bool create_sparse(float connection_rate, unsigned int num_layers, ...) {
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
 
-			va_list layer_sizes;
-			va_start(layer_sizes, num_layers);
-			bool status = true;
-			for(int i = 0; i < (int) num_layers; i++)
-			{
-				int arg = va_arg(layer_sizes, unsigned int);
-				if(arg < 0 || arg > 1000000)
-					status = false;
-				layers[i] = arg;
-			}
-			va_end(layer_sizes);
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i = 0; i < num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned
+                        int);
+            va_end(layers);
 
-			if(status)
-	            status = create_sparse_array(connection_rate, num_layers, layers);
-
-            delete layers;
+            bool status = create_sparse_array(connection_rate, num_layers,
+                                              data.get());
             return status;
         }
 
-        /* Method: create_sparse_array
+        /* Method: create_sparse_array - DEPRECATED
            Just like <create_sparse>, but with an array of layer sizes
            instead of individual parameters.
 
            See <create_sparse> for a description of the parameters.
 
-	        See also:
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
+           See also:
 		        <create_standard>, <create_sparse>, <create_shortcut>,
 		        <fann_create_sparse_array>
 
 	        This function appears in FANN >= 2.0.0.
         */
         bool create_sparse_array(float connection_rate,
-            unsigned int num_layers, const unsigned int * layers)
-        {
+                                 unsigned int num_layers, const unsigned int *layers) {
             destroy();
             ann = fann_create_sparse_array(connection_rate, num_layers, layers);
             return (ann != NULL);
         }
 
-        /* Method: create_shortcut
+        /* Method: create_shortcut - DEPRECATED
 
 	        Creates a standard backpropagation neural network, which is fully connected and which
 	        also has shortcut connections.
@@ -1068,52 +465,47 @@ public:
 
 	        See <create_standard> for a description of the parameters.
 
+            NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+            an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
 	        See also:
 		        <create_standard>, <create_sparse>, <create_shortcut_array>,
 		        <fann_create_shortcut>
 
 	        This function appears in FANN >= 2.0.0.
-        */ 
-        bool create_shortcut(unsigned int num_layers, ...)
-        {
-			unsigned int *layers = new unsigned int[num_layers];
-			if(layers == NULL) return false;
+        */
+        bool create_shortcut(unsigned int num_layers, ...) {
+            std::unique_ptr<unsigned int[]> data(new unsigned int[num_layers]);
 
-			va_list layer_sizes;
-			va_start(layer_sizes, num_layers);
-			bool status = true;
-			for(int i = 0; i < (int) num_layers; i++)
-			{
-				int arg = va_arg(layer_sizes, unsigned int);
-				if(arg < 0 || arg > 1000000)
-					status = false;
-				layers[i] = arg;
-			}
-			va_end(layer_sizes);
+            va_list layers;
+            va_start(layers, num_layers);
+            for (unsigned int i = 0; i < num_layers; i++)
+                data.get()[i] = va_arg(layers, unsigned
+                        int);
+            va_end(layers);
 
-			if(status)
-				status = create_shortcut_array(num_layers, layers);
-
-            delete layers;
+            bool status = create_shortcut_array(num_layers, data.get());
             return status;
         }
 
-        /* Method: create_shortcut_array
+        /* Method: create_shortcut_array - DEPRECATED
 
            Just like <create_shortcut>, but with an array of layer sizes
            instead of individual parameters.
 
 	        See <create_standard_array> for a description of the parameters.
 
-	        See also:
+            NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+            an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
+ 	        See also:
 		        <create_standard>, <create_sparse>, <create_shortcut>,
 		        <fann_create_shortcut_array>
 
 	        This function appears in FANN >= 2.0.0.
         */
         bool create_shortcut_array(unsigned int num_layers,
-            const unsigned int * layers)
-        {
+                                   const unsigned int *layers) {
             destroy();
             ann = fann_create_shortcut_array(num_layers, layers);
             return (ann != NULL);
@@ -1128,11 +520,9 @@ public:
 		        <test>, <fann_run>
 
 	        This function appears in FANN >= 1.0.0.
-        */ 
-        fann_type* run(fann_type *input)
-        {
-            if (ann == NULL)
-            {
+        */
+        fann_type *run(fann_type *input) {
+            if (ann == NULL) {
                 return NULL;
             }
             return fann_run(ann, input);
@@ -1148,11 +538,9 @@ public:
 		        <init_weights>, <fann_randomize_weights>
 
 	        This function appears in FANN >= 1.0.0.
-        */ 
-        void randomize_weights(fann_type min_weight, fann_type max_weight)
-        {
-            if (ann != NULL)
-            {
+        */
+        void randomize_weights(fann_type min_weight, fann_type max_weight) {
+            if (ann != NULL) {
                 fann_randomize_weights(ann, min_weight, max_weight);
             }
         }
@@ -1175,11 +563,9 @@ public:
                 <fann_init_weights>
 
 	        This function appears in FANN >= 1.1.0.
-        */ 
-        void init_weights(const training_data &data)
-        {
-            if ((ann != NULL) && (data.train_data != NULL))
-            {
+        */
+        void init_weights(const training_data &data) {
+            if ((ann != NULL) && (data.train_data != NULL)) {
                 fann_init_weights(ann, data.train_data);
             }
         }
@@ -1209,27 +595,27 @@ public:
 	        and input and bias neurons are not visible as neurons that connections can go to.
 
 	        This function appears in FANN >= 1.2.0.
-        */ 
-        void print_connections()
-        {
-            if (ann != NULL)
-            {
+        */
+        void print_connections() {
+            if (ann != NULL) {
                 fann_print_connections(ann);
             }
         }
 
-        /* Method: create_from_file
+        /* Method: create_from_file - DEPRECATED
            
            Constructs a backpropagation neural network from a configuration file,
            which have been saved by <save>.
-           
+
+           NOTE: As of version 2.3.0 it recommended to create neural networks using the constructors instead of creating
+           an empty network and setting the internal structure of that. This method is hence discouraged and will be deprecated later on.
+
            See also:
    	        <save>, <save_to_fixed>, <fann_create_from_file>
            	
            This function appears in FANN >= 1.0.0.
          */
-        bool create_from_file(const std::string &configuration_file)
-        {
+        bool create_from_file(const std::string &configuration_file) {
             destroy();
             ann = fann_create_from_file(configuration_file.c_str());
             return (ann != NULL);
@@ -1255,14 +641,11 @@ public:
 
            This function appears in FANN >= 1.0.0.
          */
-        bool save(const std::string &configuration_file)
-        {
-            if (ann == NULL)
-            {
+        bool save(const std::string &configuration_file) {
+            if (ann == NULL) {
                 return false;
             }
-            if (fann_save(ann, configuration_file.c_str()) == -1)
-            {
+            if (fann_save(ann, configuration_file.c_str()) == -1) {
                 return false;
             }
             return true;
@@ -1274,7 +657,7 @@ public:
            But it is saved in fixed point format no matter which
            format it is currently in.
 
-           This is usefull for training a network in floating points,
+           This is useful for training a network in floating points,
            and then later executing it in fixed point.
 
            The function returns the bit position of the fix point, which
@@ -1299,18 +682,17 @@ public:
             <create_from_file>, <save>, <fann_save_to_fixed>
 
            This function appears in FANN >= 1.0.0.
-        */ 
-        int save_to_fixed(const std::string &configuration_file)
-        {
+        */
+        int save_to_fixed(const std::string &configuration_file) {
             int fixpoint = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 fixpoint = fann_save_to_fixed(ann, configuration_file.c_str());
             }
             return fixpoint;
         }
 
 #ifndef FIXEDFANN
+
         /* Method: train
 
            Train one iteration with a set of inputs, and a set of desired outputs.
@@ -1326,11 +708,9 @@ public:
    		        <train_on_data>, <train_epoch>, <fann_train>
            	
    	        This function appears in FANN >= 1.0.0.
-         */ 
-        void train(fann_type *input, fann_type *desired_output)
-        {
-            if (ann != NULL)
-            {
+         */
+        void train(fann_type *input, fann_type *desired_output) {
+            if (ann != NULL) {
                 fann_train(ann, input, desired_output);
             }
         }
@@ -1353,12 +733,10 @@ public:
 		        <train_on_data>, <test_data>, <fann_train_epoch>
         		
 	        This function appears in FANN >= 1.2.0.
-         */ 
-        float train_epoch(const training_data &data)
-        {
+         */
+        float train_epoch(const training_data &data) {
             float mse = 0.0f;
-            if ((ann != NULL) && (data.train_data != NULL))
-            {
+            if ((ann != NULL) && (data.train_data != NULL)) {
                 mse = fann_train_epoch(ann, data.train_data);
             }
             return mse;
@@ -1387,14 +765,12 @@ public:
 		        <train_on_file>, <train_epoch>, <fann_train_on_data>
 
 	        This function appears in FANN >= 1.0.0.
-        */ 
+        */
         void train_on_data(const training_data &data, unsigned int max_epochs,
-            unsigned int epochs_between_reports, float desired_error)
-        {
-            if ((ann != NULL) && (data.train_data != NULL))
-            {
+                           unsigned int epochs_between_reports, float desired_error) {
+            if ((ann != NULL) && (data.train_data != NULL)) {
                 fann_train_on_data(ann, data.train_data, max_epochs,
-                    epochs_between_reports, desired_error);
+                                   epochs_between_reports, desired_error);
             }
         }
 
@@ -1406,16 +782,15 @@ public:
    		        <train_on_data>, <fann_train_on_file>
 
 	        This function appears in FANN >= 1.0.0.
-        */ 
+        */
         void train_on_file(const std::string &filename, unsigned int max_epochs,
-            unsigned int epochs_between_reports, float desired_error)
-        {
-            if (ann != NULL)
-            {
+                           unsigned int epochs_between_reports, float desired_error) {
+            if (ann != NULL) {
                 fann_train_on_file(ann, filename.c_str(),
-                    max_epochs, epochs_between_reports, desired_error);
+                                   max_epochs, epochs_between_reports, desired_error);
             }
         }
+
 #endif /* NOT FIXEDFANN */
 
         /* Method: test
@@ -1428,12 +803,10 @@ public:
    		        <test_data>, <train>, <fann_test>
            
            This function appears in FANN >= 1.0.0.
-        */ 
-        fann_type * test(fann_type *input, fann_type *desired_output)
-        {
-            fann_type * output = NULL;
-            if (ann != NULL)
-            {
+        */
+        fann_type *test(fann_type *input, fann_type *desired_output) {
+            fann_type *output = NULL;
+            if (ann != NULL) {
                 output = fann_test(ann, input, desired_output);
             }
             return output;
@@ -1449,12 +822,10 @@ public:
  	        <test>, <get_MSE>, <get_bit_fail>, <fann_test_data>
 
 	        This function appears in FANN >= 1.2.0.
-         */ 
-        float test_data(const training_data &data)
-        {
+         */
+        float test_data(const training_data &data) {
             float mse = 0.0f;
-            if ((ann != NULL) && (data.train_data != NULL))
-            {
+            if ((ann != NULL) && (data.train_data != NULL)) {
                 mse = fann_test_data(ann, data.train_data);
             }
             return mse;
@@ -1471,12 +842,10 @@ public:
    	        <test_data>, <fann_get_MSE>
 
 	        This function appears in FANN >= 1.1.0.
-         */ 
-        float get_MSE()
-        {
+         */
+        float get_MSE() {
             float mse = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 mse = fann_get_MSE(ann);
             }
             return mse;
@@ -1492,14 +861,14 @@ public:
    	        <get_MSE>, <get_bit_fail_limit>, <fann_reset_MSE>
            
             This function appears in FANN >= 1.1.0
-         */ 
-        void reset_MSE()
-        {
-            if (ann != NULL)
-            {
+         */
+        void reset_MSE() {
+            if (ann != NULL) {
                 fann_reset_MSE(ann);
             }
         }
+
+#ifndef FIXEDFANN
 
         /* Method: set_callback
            
@@ -1513,10 +882,8 @@ public:
 
            This function appears in FANN >= 2.0.0.
          */
-        void set_callback(callback_type callback, void *user_data)
-        {
-            if (ann != NULL)
-            {
+        void set_callback(callback_type callback, void *user_data) {
+            if (ann != NULL) {
                 // Allocated data is also deleted in the destroy method called by the destructor
                 user_context *user_instance = static_cast<user_context *>(fann_get_user_data(ann));
                 if (user_instance != NULL)
@@ -1535,6 +902,8 @@ public:
             }
         }
 
+#endif  /* NOT FIXEDFANN */
+
         /* Method: print_parameters
 
   	        Prints all of the parameters and options of the neural network
@@ -1543,11 +912,9 @@ public:
                 <fann_print_parameters>
 
 	        This function appears in FANN >= 1.2.0.
-        */ 
-        void print_parameters()
-        {
-            if (ann != NULL)
-            {
+        */
+        void print_parameters() {
+            if (ann != NULL) {
                 fann_print_parameters(ann);
             }
         }
@@ -1567,12 +934,10 @@ public:
             <fann_get_training_algorithm>
 
            This function appears in FANN >= 1.0.0.   	
-         */ 
-        training_algorithm_enum get_training_algorithm()
-        {
+         */
+        training_algorithm_enum get_training_algorithm() {
             fann_train_enum training_algorithm = FANN_TRAIN_INCREMENTAL;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 training_algorithm = fann_get_training_algorithm(ann);
             }
             return static_cast<training_algorithm_enum>(training_algorithm);
@@ -1585,13 +950,11 @@ public:
            More info available in <get_training_algorithm>
 
            This function appears in FANN >= 1.0.0.   	
-         */ 
-        void set_training_algorithm(training_algorithm_enum training_algorithm)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_training_algorithm(training_algorithm_enum training_algorithm) {
+            if (ann != NULL) {
                 fann_set_training_algorithm(ann,
-					static_cast<fann_train_enum>(training_algorithm));
+                                            static_cast<fann_train_enum>(training_algorithm));
             }
         }
 
@@ -1610,12 +973,10 @@ public:
             <fann_get_learning_rate>
            
            This function appears in FANN >= 1.0.0.   	
-         */ 
-        float get_learning_rate()
-        {
+         */
+        float get_learning_rate() {
             float learning_rate = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 learning_rate = fann_get_learning_rate(ann);
             }
             return learning_rate;
@@ -1628,11 +989,9 @@ public:
            More info available in <get_learning_rate>
 
            This function appears in FANN >= 1.0.0.   	
-         */ 
-        void set_learning_rate(float learning_rate)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_learning_rate(float learning_rate) {
+            if (ann != NULL) {
                 fann_set_learning_rate(ann, learning_rate);
             }
         }
@@ -1657,12 +1016,10 @@ public:
             <set_activation_function>, <fann_get_activation_function>
 
            This function appears in FANN >= 2.1.0
-         */ 
-        activation_function_enum get_activation_function(int layer, int neuron)
-        {
+         */
+        activation_function_enum get_activation_function(int layer, int neuron) {
             unsigned int activation_function = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 activation_function = fann_get_activation_function(ann, layer, neuron);
             }
             return static_cast<activation_function_enum>(activation_function);
@@ -1677,7 +1034,7 @@ public:
            
            When choosing an activation function it is important to note that the activation 
            functions have different range. FANN::SIGMOID is e.g. in the 0 - 1 range while 
-           FANN::SIGMOID_SYMMETRIC is in the -1 - 1 range and FANN::LINEAR is unbound.
+           FANN::SIGMOID_SYMMETRIC is in the -1 - 1 range and FANN::LINEAR is unbounded.
            
            Information about the individual activation functions is available at <FANN::activation_function_enum>.
            
@@ -1689,13 +1046,11 @@ public:
             <get_activation_function>, <fann_set_activation_function>
 
            This function appears in FANN >= 2.0.0.
-         */ 
-        void set_activation_function(activation_function_enum activation_function, int layer, int neuron)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_activation_function(activation_function_enum activation_function, int layer, int neuron) {
+            if (ann != NULL) {
                 fann_set_activation_function(ann,
-					static_cast<fann_activationfunc_enum>(activation_function), layer, neuron);
+                                             static_cast<fann_activationfunc_enum>(activation_function), layer, neuron);
             }
         }
 
@@ -1712,13 +1067,11 @@ public:
             <fann_set_activation_function_layer>
 
            This function appears in FANN >= 2.0.0.
-         */ 
-        void set_activation_function_layer(activation_function_enum activation_function, int layer)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_activation_function_layer(activation_function_enum activation_function, int layer) {
+            if (ann != NULL) {
                 fann_set_activation_function_layer(ann,
-					static_cast<fann_activationfunc_enum>(activation_function), layer);
+                                                   static_cast<fann_activationfunc_enum>(activation_function), layer);
             }
         }
 
@@ -1732,13 +1085,11 @@ public:
             <fann_set_activation_function_hidden>
 
            This function appears in FANN >= 1.0.0.
-         */ 
-        void set_activation_function_hidden(activation_function_enum activation_function)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_activation_function_hidden(activation_function_enum activation_function) {
+            if (ann != NULL) {
                 fann_set_activation_function_hidden(ann,
-					static_cast<fann_activationfunc_enum>(activation_function));
+                                                    static_cast<fann_activationfunc_enum>(activation_function));
             }
         }
 
@@ -1752,13 +1103,11 @@ public:
             <fann_set_activation_function_output>
 
            This function appears in FANN >= 1.0.0.
-         */ 
-        void set_activation_function_output(activation_function_enum activation_function)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_activation_function_output(activation_function_enum activation_function) {
+            if (ann != NULL) {
                 fann_set_activation_function_output(ann,
-					static_cast<fann_activationfunc_enum>(activation_function));
+                                                    static_cast<fann_activationfunc_enum>(activation_function));
             }
         }
 
@@ -1771,7 +1120,7 @@ public:
            
            The steepness of an activation function says something about how fast the activation function 
            goes from the minimum to the maximum. A high value for the activation function will also
-           give a more agressive training.
+           give a more aggressive training.
            
            When training neural networks where the output values should be at the extremes (usually 0 and 1, 
            depending on the activation function), a steep activation function can be used (e.g. 1.0).
@@ -1787,12 +1136,10 @@ public:
             <set_activation_steepness>, <fann_get_activation_steepness>
 
            This function appears in FANN >= 2.1.0
-         */ 
-        fann_type get_activation_steepness(int layer, int neuron)
-        {
+         */
+        fann_type get_activation_steepness(int layer, int neuron) {
             fann_type activation_steepness = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 activation_steepness = fann_get_activation_steepness(ann, layer, neuron);
             }
             return activation_steepness;
@@ -1807,7 +1154,7 @@ public:
            
            The steepness of an activation function says something about how fast the activation function 
            goes from the minimum to the maximum. A high value for the activation function will also
-           give a more agressive training.
+           give a more aggressive training.
            
            When training neural networks where the output values should be at the extremes (usually 0 and 1, 
            depending on the activation function), a steep activation function can be used (e.g. 1.0).
@@ -1820,11 +1167,9 @@ public:
             <get_activation_steepness>, <fann_set_activation_steepness>
 
            This function appears in FANN >= 2.0.0.
-         */ 
-        void set_activation_steepness(fann_type steepness, int layer, int neuron)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_activation_steepness(fann_type steepness, int layer, int neuron) {
+            if (ann != NULL) {
                 fann_set_activation_steepness(ann, steepness, layer, neuron);
             }
         }
@@ -1842,11 +1187,9 @@ public:
             <fann_set_activation_steepness_layer>
 
            This function appears in FANN >= 2.0.0.
-         */ 
-        void set_activation_steepness_layer(fann_type steepness, int layer)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_activation_steepness_layer(fann_type steepness, int layer) {
+            if (ann != NULL) {
                 fann_set_activation_steepness_layer(ann, steepness, layer);
             }
         }
@@ -1861,11 +1204,9 @@ public:
             <fann_set_activation_steepness_hidden>
 
            This function appears in FANN >= 1.2.0.
-         */ 
-        void set_activation_steepness_hidden(fann_type steepness)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_activation_steepness_hidden(fann_type steepness) {
+            if (ann != NULL) {
                 fann_set_activation_steepness_hidden(ann, steepness);
             }
         }
@@ -1880,11 +1221,9 @@ public:
             <fann_set_activation_steepness_output>
 
            This function appears in FANN >= 1.2.0.
-         */ 
-        void set_activation_steepness_output(fann_type steepness)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_activation_steepness_output(fann_type steepness) {
+            if (ann != NULL) {
                 fann_set_activation_steepness_output(ann, steepness);
             }
         }
@@ -1903,12 +1242,10 @@ public:
    	        <set_train_error_function>, <fann_get_train_error_function>
               
            This function appears in FANN >= 1.2.0.
-          */ 
-        error_function_enum get_train_error_function()
-        {
+          */
+        error_function_enum get_train_error_function() {
             fann_errorfunc_enum train_error_function = FANN_ERRORFUNC_LINEAR;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 train_error_function = fann_get_train_error_function(ann);
             }
             return static_cast<error_function_enum>(train_error_function);
@@ -1924,13 +1261,11 @@ public:
    	        <get_train_error_function>, <fann_set_train_error_function>
               
            This function appears in FANN >= 1.2.0.
-         */ 
-        void set_train_error_function(error_function_enum train_error_function)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_train_error_function(error_function_enum train_error_function) {
+            if (ann != NULL) {
                 fann_set_train_error_function(ann,
-					static_cast<fann_errorfunc_enum>(train_error_function));
+                                              static_cast<fann_errorfunc_enum>(train_error_function));
             }
         }
 
@@ -1947,11 +1282,9 @@ public:
 
            This function appears in FANN >= 1.2.0.
          */
-        float get_quickprop_decay()
-        {
+        float get_quickprop_decay() {
             float quickprop_decay = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 quickprop_decay = fann_get_quickprop_decay(ann);
             }
             return quickprop_decay;
@@ -1965,11 +1298,9 @@ public:
    	        <get_quickprop_decay>, <fann_set_quickprop_decay>
 
            This function appears in FANN >= 1.2.0.
-        */ 
-        void set_quickprop_decay(float quickprop_decay)
-        {
-            if (ann != NULL)
-            {
+        */
+        void set_quickprop_decay(float quickprop_decay) {
+            if (ann != NULL) {
                 fann_set_quickprop_decay(ann, quickprop_decay);
             }
         }
@@ -1986,12 +1317,10 @@ public:
    	        <set_quickprop_mu>, <fann_get_quickprop_mu>
 
            This function appears in FANN >= 1.2.0.
-        */ 
-        float get_quickprop_mu()
-        {
+        */
+        float get_quickprop_mu() {
             float quickprop_mu = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 quickprop_mu = fann_get_quickprop_mu(ann);
             }
             return quickprop_mu;
@@ -2005,11 +1334,9 @@ public:
    	        <get_quickprop_mu>, <fann_set_quickprop_mu>
 
            This function appears in FANN >= 1.2.0.
-        */ 
-        void set_quickprop_mu(float quickprop_mu)
-        {
-            if (ann != NULL)
-            {
+        */
+        void set_quickprop_mu(float quickprop_mu) {
+            if (ann != NULL) {
                 fann_set_quickprop_mu(ann, quickprop_mu);
             }
         }
@@ -2025,12 +1352,10 @@ public:
    	        <set_rprop_increase_factor>, <fann_get_rprop_increase_factor>
 
            This function appears in FANN >= 1.2.0.
-        */ 
-        float get_rprop_increase_factor()
-        {
+        */
+        float get_rprop_increase_factor() {
             float factor = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 factor = fann_get_rprop_increase_factor(ann);
             }
             return factor;
@@ -2044,11 +1369,9 @@ public:
    	        <get_rprop_increase_factor>, <fann_set_rprop_increase_factor>
 
            This function appears in FANN >= 1.2.0.
-        */ 
-        void set_rprop_increase_factor(float rprop_increase_factor)
-        {
-            if (ann != NULL)
-            {
+        */
+        void set_rprop_increase_factor(float rprop_increase_factor) {
+            if (ann != NULL) {
                 fann_set_rprop_increase_factor(ann, rprop_increase_factor);
             }
         }
@@ -2063,12 +1386,10 @@ public:
             <set_rprop_decrease_factor>, <fann_get_rprop_decrease_factor>
 
            This function appears in FANN >= 1.2.0.
-        */ 
-        float get_rprop_decrease_factor()
-        {
+        */
+        float get_rprop_decrease_factor() {
             float factor = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 factor = fann_get_rprop_decrease_factor(ann);
             }
             return factor;
@@ -2083,10 +1404,8 @@ public:
 
            This function appears in FANN >= 1.2.0.
         */
-        void set_rprop_decrease_factor(float rprop_decrease_factor)
-        {
-            if (ann != NULL)
-            {
+        void set_rprop_decrease_factor(float rprop_decrease_factor) {
+            if (ann != NULL) {
                 fann_set_rprop_decrease_factor(ann, rprop_decrease_factor);
             }
         }
@@ -2101,12 +1420,10 @@ public:
    	        <set_rprop_delta_zero>, <fann_get_rprop_delta_zero>
            	
            This function appears in FANN >= 2.1.0.
-        */ 
-        float get_rprop_delta_zero()
-        {
+        */
+        float get_rprop_delta_zero() {
             float delta = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 delta = fann_get_rprop_delta_zero(ann);
             }
             return delta;
@@ -2120,14 +1437,13 @@ public:
    	        <get_rprop_delta_zero>, <fann_set_rprop_delta_zero>
            	
            This function appears in FANN >= 2.1.0.
-        */ 
-        void set_rprop_delta_zero(float rprop_delta_zero)
-        {
-            if (ann != NULL)
-            {
+        */
+        void set_rprop_delta_zero(float rprop_delta_zero) {
+            if (ann != NULL) {
                 fann_set_rprop_delta_zero(ann, rprop_delta_zero);
             }
         }
+
         /* Method: get_rprop_delta_min
 
            The minimum step-size is a small positive number determining how small the minimum step-size may be.
@@ -2138,12 +1454,10 @@ public:
    	        <set_rprop_delta_min>, <fann_get_rprop_delta_min>
            	
            This function appears in FANN >= 1.2.0.
-        */ 
-        float get_rprop_delta_min()
-        {
+        */
+        float get_rprop_delta_min() {
             float delta = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 delta = fann_get_rprop_delta_min(ann);
             }
             return delta;
@@ -2157,11 +1471,9 @@ public:
    	        <get_rprop_delta_min>, <fann_set_rprop_delta_min>
            	
            This function appears in FANN >= 1.2.0.
-        */ 
-        void set_rprop_delta_min(float rprop_delta_min)
-        {
-            if (ann != NULL)
-            {
+        */
+        void set_rprop_delta_min(float rprop_delta_min) {
+            if (ann != NULL) {
                 fann_set_rprop_delta_min(ann, rprop_delta_min);
             }
         }
@@ -2176,12 +1488,10 @@ public:
    	        <set_rprop_delta_max>, <get_rprop_delta_min>, <fann_get_rprop_delta_max>
 
            This function appears in FANN >= 1.2.0.
-        */ 
-        float get_rprop_delta_max()
-        {
+        */
+        float get_rprop_delta_max() {
             float delta = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 delta = fann_get_rprop_delta_max(ann);
             }
             return delta;
@@ -2196,10 +1506,8 @@ public:
 
            This function appears in FANN >= 1.2.0.
         */
-        void set_rprop_delta_max(float rprop_delta_max)
-        {
-            if (ann != NULL)
-            {
+        void set_rprop_delta_max(float rprop_delta_max) {
+            if (ann != NULL) {
                 fann_set_rprop_delta_max(ann, rprop_delta_max);
             }
         }
@@ -2214,12 +1522,10 @@ public:
    	        <set_sarprop_weight_decay_shift>, <fann get_sarprop_weight_decay_shift>
 
            This function appears in FANN >= 2.1.0.
-        */ 
-        float get_sarprop_weight_decay_shift()
-        {
+        */
+        float get_sarprop_weight_decay_shift() {
             float res = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 res = fann_get_rprop_delta_max(ann);
             }
             return res;
@@ -2233,11 +1539,9 @@ public:
            
 	    See also:
    	        <get_sarprop_weight_decay_shift>, <fann_set_sarprop_weight_decay_shift>
-        */ 
-        void set_sarprop_weight_decay_shift(float sarprop_weight_decay_shift)
-        {
-            if (ann != NULL)
-            {
+        */
+        void set_sarprop_weight_decay_shift(float sarprop_weight_decay_shift) {
+            if (ann != NULL) {
                 fann_set_sarprop_weight_decay_shift(ann, sarprop_weight_decay_shift);
             }
         }
@@ -2252,12 +1556,10 @@ public:
    	        <set_sarprop_step_error_threshold_factor>, <fann get_sarprop_step_error_threshold_factor>
 
            This function appears in FANN >= 2.1.0.
-        */ 
-        float get_sarprop_step_error_threshold_factor()
-        {
+        */
+        float get_sarprop_step_error_threshold_factor() {
             float res = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 res = fann_get_rprop_delta_max(ann);
             }
             return res;
@@ -2271,11 +1573,9 @@ public:
            
 	    See also:
    	        <get_sarprop_step_error_threshold_factor>, <fann_set_sarprop_step_error_threshold_factor>
-        */ 
-        void set_sarprop_step_error_threshold_factor(float sarprop_step_error_threshold_factor)
-        {
-            if (ann != NULL)
-            {
+        */
+        void set_sarprop_step_error_threshold_factor(float sarprop_step_error_threshold_factor) {
+            if (ann != NULL) {
                 fann_set_sarprop_step_error_threshold_factor(ann, sarprop_step_error_threshold_factor);
             }
         }
@@ -2290,12 +1590,10 @@ public:
    	        <set_sarprop_step_error_shift>, <fann get_sarprop_step_error_shift>
 
            This function appears in FANN >= 2.1.0.
-        */ 
-        float get_sarprop_step_error_shift()
-        {
+        */
+        float get_sarprop_step_error_shift() {
             float res = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 res = fann_get_rprop_delta_max(ann);
             }
             return res;
@@ -2309,31 +1607,27 @@ public:
            
 	    See also:
    	        <get_sarprop_step_error_shift>, <fann_set_sarprop_step_error_shift>
-        */ 
-        void set_sarprop_step_error_shift(float sarprop_step_error_shift)
-        {
-            if (ann != NULL)
-            {
+        */
+        void set_sarprop_step_error_shift(float sarprop_step_error_shift) {
+            if (ann != NULL) {
                 fann_set_sarprop_step_error_shift(ann, sarprop_step_error_shift);
             }
         }
-        
-	/* Method: get_sarprop_temperature
 
-           The sarprop weight decay shift.
+        /* Method: get_sarprop_temperature
 
-           The default delta max is 0.015.
+               The sarprop weight decay shift.
 
-           See also:
-   	        <set_sarprop_temperature>, <fann get_sarprop_temperature>
+               The default delta max is 0.015.
 
-           This function appears in FANN >= 2.1.0.
-        */ 
-        float get_sarprop_temperature()
-        {
+               See also:
+                   <set_sarprop_temperature>, <fann get_sarprop_temperature>
+
+               This function appears in FANN >= 2.1.0.
+            */
+        float get_sarprop_temperature() {
             float res = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 res = fann_get_rprop_delta_max(ann);
             }
             return res;
@@ -2347,11 +1641,9 @@ public:
            
 	    See also:
    	        <get_sarprop_temperature>, <fann_set_sarprop_temperature>
-        */ 
-        void set_sarprop_temperature(float sarprop_temperature)
-        {
-            if (ann != NULL)
-            {
+        */
+        void set_sarprop_temperature(float sarprop_temperature) {
+            if (ann != NULL) {
                 fann_set_sarprop_temperature(ann, sarprop_temperature);
             }
         }
@@ -2362,12 +1654,10 @@ public:
            Get the number of input neurons.
 
 	        This function appears in FANN >= 1.0.0.
-        */ 
-        unsigned int get_num_input()
-        {
+        */
+        unsigned int get_num_input() {
             unsigned int num_input = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 num_input = fann_get_num_input(ann);
             }
             return num_input;
@@ -2378,12 +1668,10 @@ public:
            Get the number of output neurons.
 
 	        This function appears in FANN >= 1.0.0.
-        */ 
-        unsigned int get_num_output()
-        {
+        */
+        unsigned int get_num_output() {
             unsigned int num_output = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 num_output = fann_get_num_output(ann);
             }
             return num_output;
@@ -2395,11 +1683,9 @@ public:
 	        bias neurons, so a 2-4-2 network has 2+4+2 +2(bias) = 10 neurons.
 
 	        This function appears in FANN >= 1.0.0.
-        */ 
-        unsigned int get_total_neurons()
-        {
-            if (ann == NULL)
-            {
+        */
+        unsigned int get_total_neurons() {
+            if (ann == NULL) {
                 return 0;
             }
             return fann_get_total_neurons(ann);
@@ -2410,11 +1696,9 @@ public:
            Get the total number of connections in the entire network.
 
 	        This function appears in FANN >= 1.0.0.
-        */ 
-        unsigned int get_total_connections()
-        {
-            if (ann == NULL)
-            {
+        */
+        unsigned int get_total_connections() {
+            if (ann == NULL) {
                 return 0;
             }
             return fann_get_total_connections(ann);
@@ -2423,18 +1707,18 @@ public:
 #ifdef FIXEDFANN
         /* Method: get_decimal_point
 
-	        Returns the position of the decimal point in the ann.
+            Returns the position of the decimal point in the ann.
 
-	        This function is only available when the ANN is in fixed point mode.
+            This function is only available when the ANN is in fixed point mode.
 
-	        The decimal point is described in greater detail in the tutorial <Fixed Point Usage>.
+            The decimal point is described in greater detail in the tutorial <Fixed Point Usage>.
 
-	        See also:
-		        <Fixed Point Usage>, <get_multiplier>, <save_to_fixed>,
+            See also:
+                <Fixed Point Usage>, <get_multiplier>, <save_to_fixed>,
                 <training_data::save_train_to_fixed>, <fann_get_decimal_point>
 
-	        This function appears in FANN >= 1.0.0.
-        */ 
+            This function appears in FANN >= 1.0.0.
+        */
         unsigned int get_decimal_point()
         {
             if (ann == NULL)
@@ -2448,19 +1732,19 @@ public:
 
             Returns the multiplier that fix point data is multiplied with.
 
-	        This function is only available when the ANN is in fixed point mode.
+            This function is only available when the ANN is in fixed point mode.
 
-	        The multiplier is the used to convert between floating point and fixed point notation. 
-	        A floating point number is multiplied with the multiplier in order to get the fixed point
-	        number and visa versa.
+            The multiplier is the used to convert between floating point and fixed point notation.
+            A floating point number is multiplied with the multiplier in order to get the fixed point
+            number and visa versa.
 
-	        The multiplier is described in greater detail in the tutorial <Fixed Point Usage>.
+            The multiplier is described in greater detail in the tutorial <Fixed Point Usage>.
 
-	        See also:
-		        <Fixed Point Usage>, <get_decimal_point>, <save_to_fixed>,
+            See also:
+                <Fixed Point Usage>, <get_decimal_point>, <save_to_fixed>,
                 <training_data::save_train_to_fixed>, <fann_get_multiplier>
 
-	        This function appears in FANN >= 1.0.0.
+            This function appears in FANN >= 1.0.0.
         */ 
         unsigned int get_multiplier()
         {
@@ -2486,11 +1770,9 @@ public:
 
            This function appears in FANN >= 2.1.0
         */
-        network_type_enum get_network_type()
-        {
+        network_type_enum get_network_type() {
             fann_nettype_enum network_type = FANN_NETTYPE_LAYER;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 network_type = fann_get_network_type(ann);
             }
             return static_cast<network_type_enum>(network_type);
@@ -2508,10 +1790,8 @@ public:
 
            This function appears in FANN >= 2.1.0
         */
-        float get_connection_rate()
-        {
-            if (ann == NULL)
-            {
+        float get_connection_rate() {
+            if (ann == NULL) {
                 return 0;
             }
             return fann_get_connection_rate(ann);
@@ -2529,10 +1809,8 @@ public:
 
            This function appears in FANN >= 2.1.0
         */
-        unsigned int get_num_layers()
-        {
-            if (ann == NULL)
-            {
+        unsigned int get_num_layers() {
+            if (ann == NULL) {
                 return 0;
             }
             return fann_get_num_layers(ann);
@@ -2552,10 +1830,8 @@ public:
 
            This function appears in FANN >= 2.1.0
         */
-        void get_layer_array(unsigned int *layers)
-        {
-            if (ann != NULL)
-            {
+        void get_layer_array(unsigned int *layers) {
+            if (ann != NULL) {
                 fann_get_layer_array(ann, layers);
             }
         }
@@ -2572,10 +1848,8 @@ public:
 
             This function appears in FANN >= 2.1.0
         */
-        void get_bias_array(unsigned int *bias)
-        {
-            if (ann != NULL)
-            {
+        void get_bias_array(unsigned int *bias) {
+            if (ann != NULL) {
                 fann_get_bias_array(ann, bias);
             }
         }
@@ -2592,10 +1866,8 @@ public:
 
            This function appears in FANN >= 2.1.0
         */
-        void get_connection_array(connection *connections)
-        {
-            if (ann != NULL)
-            {
+        void get_connection_array(connection *connections) {
+            if (ann != NULL) {
                 fann_get_connection_array(ann, connections);
             }
         }
@@ -2614,10 +1886,8 @@ public:
 
            This function appears in FANN >= 2.1.0
         */
-        void set_weight_array(connection *connections, unsigned int num_connections)
-        {
-            if (ann != NULL)
-            {
+        void set_weight_array(connection *connections, unsigned int num_connections) {
+            if (ann != NULL) {
                 fann_set_weight_array(ann, connections, num_connections);
             }
         }
@@ -2634,10 +1904,8 @@ public:
 
            This function appears in FANN >= 2.1.0
         */
-        void set_weight(unsigned int from_neuron, unsigned int to_neuron, fann_type weight)
-        {
-            if (ann != NULL)
-            {
+        void set_weight(unsigned int from_neuron, unsigned int to_neuron, fann_type weight) {
+            if (ann != NULL) {
                 fann_set_weight(ann, from_neuron, to_neuron, weight);
             }
         }
@@ -2659,12 +1927,10 @@ public:
            <set_learning_momentum>, <set_training_algorithm>
 
            This function appears in FANN >= 2.0.0.   	
-         */ 
-        float get_learning_momentum()
-        {
+         */
+        float get_learning_momentum() {
             float learning_momentum = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 learning_momentum = fann_get_learning_momentum(ann);
             }
             return learning_momentum;
@@ -2677,11 +1943,9 @@ public:
            More info available in <get_learning_momentum>
 
            This function appears in FANN >= 2.0.0.   	
-         */ 
-        void set_learning_momentum(float learning_momentum)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_learning_momentum(float learning_momentum) {
+            if (ann != NULL) {
                 fann_set_learning_momentum(ann, learning_momentum);
             }
         }
@@ -2715,12 +1979,10 @@ public:
    	        <get_train_stop_function>, <get_bit_fail_limit>
               
            This function appears in FANN >= 2.0.0.
-         */ 
-        stop_function_enum get_train_stop_function()
-        {
+         */
+        stop_function_enum get_train_stop_function() {
             enum fann_stopfunc_enum stopfunc = FANN_STOPFUNC_MSE;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 stopfunc = fann_get_train_stop_function(ann);
             }
             return static_cast<stop_function_enum>(stopfunc);
@@ -2736,13 +1998,11 @@ public:
    	        <get_train_stop_function>
               
            This function appears in FANN >= 2.0.0.
-         */ 
-        void set_train_stop_function(stop_function_enum train_stop_function)
-        {
-            if (ann != NULL)
-            {
+         */
+        void set_train_stop_function(stop_function_enum train_stop_function) {
+            if (ann != NULL) {
                 fann_set_train_stop_function(ann,
-                    static_cast<enum fann_stopfunc_enum>(train_stop_function));
+                                             static_cast<enum fann_stopfunc_enum>(train_stop_function));
             }
         }
 
@@ -2763,13 +2023,11 @@ public:
    	        <set_bit_fail_limit>
            
            This function appears in FANN >= 2.0.0.
-         */ 
-        fann_type get_bit_fail_limit()
-        {
+         */
+        fann_type get_bit_fail_limit() {
             fann_type bit_fail_limit = 0.0f;
 
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 bit_fail_limit = fann_get_bit_fail_limit(ann);
             }
             return bit_fail_limit;
@@ -2784,10 +2042,8 @@ public:
            
            This function appears in FANN >= 2.0.0.
          */
-        void set_bit_fail_limit(fann_type bit_fail_limit)
-        {
-            if (ann != NULL)
-            {
+        void set_bit_fail_limit(fann_type bit_fail_limit) {
+            if (ann != NULL) {
                 fann_set_bit_fail_limit(ann, bit_fail_limit);
             }
         }
@@ -2807,16 +2063,15 @@ public:
 
 	        This function appears in FANN >= 2.0.0
         */
-        unsigned int get_bit_fail()
-        {
+        unsigned int get_bit_fail() {
             unsigned int bit_fail = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 bit_fail = fann_get_bit_fail(ann);
             }
             return bit_fail;
         }
 
+#ifndef FIXEDFANN
         /*********************************************************************/
 
         /* Method: cascadetrain_on_data
@@ -2849,12 +2104,10 @@ public:
 	        This function appears in FANN >= 2.0.0. 
         */
         void cascadetrain_on_data(const training_data &data, unsigned int max_neurons,
-            unsigned int neurons_between_reports, float desired_error)
-        {
-            if ((ann != NULL) && (data.train_data != NULL))
-            {
+                                  unsigned int neurons_between_reports, float desired_error) {
+            if ((ann != NULL) && (data.train_data != NULL)) {
                 fann_cascadetrain_on_data(ann, data.train_data, max_neurons,
-                    neurons_between_reports, desired_error);
+                                          neurons_between_reports, desired_error);
             }
         }
 
@@ -2866,14 +2119,12 @@ public:
    		        <fann_cascadetrain_on_data>, <fann_cascadetrain_on_file>
 
 	        This function appears in FANN >= 2.0.0.
-        */ 
+        */
         void cascadetrain_on_file(const std::string &filename, unsigned int max_neurons,
-            unsigned int neurons_between_reports, float desired_error)
-        {
-            if (ann != NULL)
-            {
+                                  unsigned int neurons_between_reports, float desired_error) {
+            if (ann != NULL) {
                 fann_cascadetrain_on_file(ann, filename.c_str(),
-                    max_neurons, neurons_between_reports, desired_error);
+                                          max_neurons, neurons_between_reports, desired_error);
             }
         }
 
@@ -2900,11 +2151,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        float get_cascade_output_change_fraction()
-        {
+        float get_cascade_output_change_fraction() {
             float change_fraction = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 change_fraction = fann_get_cascade_output_change_fraction(ann);
             }
             return change_fraction;
@@ -2919,10 +2168,8 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        void set_cascade_output_change_fraction(float cascade_output_change_fraction)
-        {
-            if (ann != NULL)
-            {
+        void set_cascade_output_change_fraction(float cascade_output_change_fraction) {
+            if (ann != NULL) {
                 fann_set_cascade_output_change_fraction(ann, cascade_output_change_fraction);
             }
         }
@@ -2942,11 +2189,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        unsigned int get_cascade_output_stagnation_epochs()
-        {
+        unsigned int get_cascade_output_stagnation_epochs() {
             unsigned int stagnation_epochs = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 stagnation_epochs = fann_get_cascade_output_stagnation_epochs(ann);
             }
             return stagnation_epochs;
@@ -2961,10 +2206,8 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        void set_cascade_output_stagnation_epochs(unsigned int cascade_output_stagnation_epochs)
-        {
-            if (ann != NULL)
-            {
+        void set_cascade_output_stagnation_epochs(unsigned int cascade_output_stagnation_epochs) {
+            if (ann != NULL) {
                 fann_set_cascade_output_stagnation_epochs(ann, cascade_output_stagnation_epochs);
             }
         }
@@ -2992,11 +2235,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        float get_cascade_candidate_change_fraction()
-        {
+        float get_cascade_candidate_change_fraction() {
             float change_fraction = 0.0f;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 change_fraction = fann_get_cascade_candidate_change_fraction(ann);
             }
             return change_fraction;
@@ -3012,10 +2253,8 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        void set_cascade_candidate_change_fraction(float cascade_candidate_change_fraction)
-        {
-            if (ann != NULL)
-            {
+        void set_cascade_candidate_change_fraction(float cascade_candidate_change_fraction) {
+            if (ann != NULL) {
                 fann_set_cascade_candidate_change_fraction(ann, cascade_candidate_change_fraction);
             }
         }
@@ -3035,11 +2274,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        unsigned int get_cascade_candidate_stagnation_epochs()
-        {
+        unsigned int get_cascade_candidate_stagnation_epochs() {
             unsigned int stagnation_epochs = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 stagnation_epochs = fann_get_cascade_candidate_stagnation_epochs(ann);
             }
             return stagnation_epochs;
@@ -3055,10 +2292,8 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        void set_cascade_candidate_stagnation_epochs(unsigned int cascade_candidate_stagnation_epochs)
-        {
-            if (ann != NULL)
-            {
+        void set_cascade_candidate_stagnation_epochs(unsigned int cascade_candidate_stagnation_epochs) {
+            if (ann != NULL) {
                 fann_set_cascade_candidate_stagnation_epochs(ann, cascade_candidate_stagnation_epochs);
             }
         }
@@ -3076,11 +2311,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        fann_type get_cascade_weight_multiplier()
-        {
+        fann_type get_cascade_weight_multiplier() {
             fann_type weight_multiplier = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 weight_multiplier = fann_get_cascade_weight_multiplier(ann);
             }
             return weight_multiplier;
@@ -3095,10 +2328,8 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        void set_cascade_weight_multiplier(fann_type cascade_weight_multiplier)
-        {
-            if (ann != NULL)
-            {
+        void set_cascade_weight_multiplier(fann_type cascade_weight_multiplier) {
+            if (ann != NULL) {
                 fann_set_cascade_weight_multiplier(ann, cascade_weight_multiplier);
             }
         }
@@ -3118,11 +2349,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        fann_type get_cascade_candidate_limit()
-        {
+        fann_type get_cascade_candidate_limit() {
             fann_type candidate_limit = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 candidate_limit = fann_get_cascade_candidate_limit(ann);
             }
             return candidate_limit;
@@ -3137,10 +2366,8 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        void set_cascade_candidate_limit(fann_type cascade_candidate_limit)
-        {
-            if (ann != NULL)
-            {
+        void set_cascade_candidate_limit(fann_type cascade_candidate_limit) {
+            if (ann != NULL) {
                 fann_set_cascade_candidate_limit(ann, cascade_candidate_limit);
             }
         }
@@ -3157,11 +2384,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        unsigned int get_cascade_max_out_epochs()
-        {
+        unsigned int get_cascade_max_out_epochs() {
             unsigned int max_out_epochs = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 max_out_epochs = fann_get_cascade_max_out_epochs(ann);
             }
             return max_out_epochs;
@@ -3176,10 +2401,8 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        void set_cascade_max_out_epochs(unsigned int cascade_max_out_epochs)
-        {
-            if (ann != NULL)
-            {
+        void set_cascade_max_out_epochs(unsigned int cascade_max_out_epochs) {
+            if (ann != NULL) {
                 fann_set_cascade_max_out_epochs(ann, cascade_max_out_epochs);
             }
         }
@@ -3196,11 +2419,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        unsigned int get_cascade_max_cand_epochs()
-        {
+        unsigned int get_cascade_max_cand_epochs() {
             unsigned int max_cand_epochs = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 max_cand_epochs = fann_get_cascade_max_cand_epochs(ann);
             }
             return max_cand_epochs;
@@ -3215,10 +2436,8 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        void set_cascade_max_cand_epochs(unsigned int cascade_max_cand_epochs)
-        {
-            if (ann != NULL)
-            {
+        void set_cascade_max_cand_epochs(unsigned int cascade_max_cand_epochs) {
+            if (ann != NULL) {
                 fann_set_cascade_max_cand_epochs(ann, cascade_max_cand_epochs);
             }
         }
@@ -3245,12 +2464,10 @@ public:
    		        <get_cascade_num_candidate_groups>, <fann_get_cascade_num_candidates>
 
 	        This function appears in FANN >= 2.0.0.
-         */ 
-        unsigned int get_cascade_num_candidates()
-        {
+         */
+        unsigned int get_cascade_num_candidates() {
             unsigned int num_candidates = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 num_candidates = fann_get_cascade_num_candidates(ann);
             }
             return num_candidates;
@@ -3260,7 +2477,7 @@ public:
 
            The number of activation functions in the <get_cascade_activation_functions> array.
 
-           The default number of activation functions is 6.
+           The default number of activation functions is 10.
 
            See also:
    		        <get_cascade_activation_functions>, <set_cascade_activation_functions>,
@@ -3268,11 +2485,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        unsigned int get_cascade_activation_functions_count()
-        {
+        unsigned int get_cascade_activation_functions_count() {
             unsigned int activation_functions_count = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 activation_functions_count = fann_get_cascade_activation_functions_count(ann);
             }
             return activation_functions_count;
@@ -3292,11 +2507,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        activation_function_enum * get_cascade_activation_functions()
-        {
+        activation_function_enum *get_cascade_activation_functions() {
             enum fann_activationfunc_enum *activation_functions = NULL;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 activation_functions = fann_get_cascade_activation_functions(ann);
             }
             return reinterpret_cast<activation_function_enum *>(activation_functions);
@@ -3317,13 +2530,11 @@ public:
 	        This function appears in FANN >= 2.0.0.
          */
         void set_cascade_activation_functions(activation_function_enum *cascade_activation_functions,
-            unsigned int cascade_activation_functions_count)
-        {
-            if (ann != NULL)
-            {
+                                              unsigned int cascade_activation_functions_count) {
+            if (ann != NULL) {
                 fann_set_cascade_activation_functions(ann,
-                    reinterpret_cast<enum fann_activationfunc_enum *>(cascade_activation_functions),
-                    cascade_activation_functions_count);
+                                                      reinterpret_cast<enum fann_activationfunc_enum *>(cascade_activation_functions),
+                                                      cascade_activation_functions_count);
             }
         }
 
@@ -3339,11 +2550,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        unsigned int get_cascade_activation_steepnesses_count()
-        {
+        unsigned int get_cascade_activation_steepnesses_count() {
             unsigned int activation_steepness_count = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 activation_steepness_count = fann_get_cascade_activation_steepnesses_count(ann);
             }
             return activation_steepness_count;
@@ -3365,15 +2574,13 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        fann_type *get_cascade_activation_steepnesses()
-        {
+        fann_type *get_cascade_activation_steepnesses() {
             fann_type *activation_steepnesses = NULL;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 activation_steepnesses = fann_get_cascade_activation_steepnesses(ann);
             }
             return activation_steepnesses;
-        }																
+        }
 
         /* Method: set_cascade_activation_steepnesses
 
@@ -3390,12 +2597,11 @@ public:
 	        This function appears in FANN >= 2.0.0.
          */
         void set_cascade_activation_steepnesses(fann_type *cascade_activation_steepnesses,
-            unsigned int cascade_activation_steepnesses_count)
-        {
-            if (ann != NULL)
-            {
+                                                unsigned int cascade_activation_steepnesses_count) {
+            if (ann != NULL) {
                 fann_set_cascade_activation_steepnesses(ann,
-                    cascade_activation_steepnesses, cascade_activation_steepnesses_count);
+                                                        cascade_activation_steepnesses,
+                                                        cascade_activation_steepnesses_count);
             }
         }
 
@@ -3416,11 +2622,9 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        unsigned int get_cascade_num_candidate_groups()
-        {
+        unsigned int get_cascade_num_candidate_groups() {
             unsigned int num_candidate_groups = 0;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 num_candidate_groups = fann_get_cascade_num_candidate_groups(ann);
             }
             return num_candidate_groups;
@@ -3435,17 +2639,15 @@ public:
 
 	        This function appears in FANN >= 2.0.0.
          */
-        void set_cascade_num_candidate_groups(unsigned int cascade_num_candidate_groups)
-        {
-            if (ann != NULL)
-            {
+        void set_cascade_num_candidate_groups(unsigned int cascade_num_candidate_groups) {
+            if (ann != NULL) {
                 fann_set_cascade_num_candidate_groups(ann, cascade_num_candidate_groups);
             }
         }
 
         /*********************************************************************/
 
-#ifndef FIXEDFANN
+
         /* Method: scale_train
 
            Scale input and output data based on previously calculated parameters.
@@ -3455,10 +2657,8 @@ public:
 
 	        This function appears in FANN >= 2.1.0.
          */
-        void scale_train(training_data &data)
-        {
-            if (ann != NULL)
-            {
+        void scale_train(training_data &data) {
+            if (ann != NULL) {
                 fann_scale_train(ann, data.train_data);
             }
         }
@@ -3472,10 +2672,8 @@ public:
 
 	        This function appears in FANN >= 2.1.0.
          */
-        void descale_train(training_data &data)
-        {
-            if (ann != NULL)
-            {
+        void descale_train(training_data &data) {
+            if (ann != NULL) {
                 fann_descale_train(ann, data.train_data);
             }
         }
@@ -3489,11 +2687,9 @@ public:
 
 	        This function appears in FANN >= 2.1.0.
          */
-        bool set_input_scaling_params(const training_data &data, float new_input_min, float new_input_max)
-        {
+        bool set_input_scaling_params(const training_data &data, float new_input_min, float new_input_max) {
             bool status = false;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 status = (fann_set_input_scaling_params(ann, data.train_data, new_input_min, new_input_max) != -1);
             }
             return status;
@@ -3508,11 +2704,9 @@ public:
 
 	        This function appears in FANN >= 2.1.0.
          */
-        bool set_output_scaling_params(const training_data &data, float new_output_min, float new_output_max)
-        {
+        bool set_output_scaling_params(const training_data &data, float new_output_min, float new_output_max) {
             bool status = false;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 status = (fann_set_output_scaling_params(ann, data.train_data, new_output_min, new_output_max) != -1);
             }
             return status;
@@ -3528,13 +2722,11 @@ public:
 	        This function appears in FANN >= 2.1.0.
          */
         bool set_scaling_params(const training_data &data,
-	        float new_input_min, float new_input_max, float new_output_min, float new_output_max)
-        {
+                                float new_input_min, float new_input_max, float new_output_min, float new_output_max) {
             bool status = false;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 status = (fann_set_scaling_params(ann, data.train_data,
-                    new_input_min, new_input_max, new_output_min, new_output_max) != -1);
+                                                  new_input_min, new_input_max, new_output_min, new_output_max) != -1);
             }
             return status;
         }
@@ -3548,11 +2740,9 @@ public:
 
 	        This function appears in FANN >= 2.1.0.
          */
-        bool clear_scaling_params()
-        {
+        bool clear_scaling_params() {
             bool status = false;
-            if (ann != NULL)
-            {
+            if (ann != NULL) {
                 status = (fann_clear_scaling_params(ann) != -1);
             }
             return status;
@@ -3567,11 +2757,9 @@ public:
 
 	        This function appears in FANN >= 2.1.0.
          */
-        void scale_input(fann_type *input_vector)
-        {
-            if (ann != NULL)
-            {
-                fann_scale_input(ann, input_vector );
+        void scale_input(fann_type *input_vector) {
+            if (ann != NULL) {
+                fann_scale_input(ann, input_vector);
             }
         }
 
@@ -3584,11 +2772,9 @@ public:
 
 	        This function appears in FANN >= 2.1.0.
          */
-        void scale_output(fann_type *output_vector)
-        {
-            if (ann != NULL)
-            {
-                fann_scale_output(ann, output_vector );
+        void scale_output(fann_type *output_vector) {
+            if (ann != NULL) {
+                fann_scale_output(ann, output_vector);
             }
         }
 
@@ -3601,11 +2787,9 @@ public:
 
 	        This function appears in FANN >= 2.1.0.
          */
-        void descale_input(fann_type *input_vector)
-        {
-            if (ann != NULL)
-            {
-                fann_descale_input(ann, input_vector );
+        void descale_input(fann_type *input_vector) {
+            if (ann != NULL) {
+                fann_descale_input(ann, input_vector);
             }
         }
 
@@ -3618,11 +2802,9 @@ public:
 
 	        This function appears in FANN >= 2.1.0.
          */
-        void descale_output(fann_type *output_vector)
-        {
-            if (ann != NULL)
-            {
-                fann_descale_output(ann, output_vector );
+        void descale_output(fann_type *output_vector) {
+            if (ann != NULL) {
+                fann_descale_output(ann, output_vector);
             }
         }
 
@@ -3647,9 +2829,8 @@ public:
                 <struct fann_error>, <fann_set_error_log>
            
            This function appears in FANN >= 1.1.0.   
-         */ 
-        void set_error_log(FILE *log_file)
-        {
+         */
+        void set_error_log(FILE *log_file) {
             fann_set_error_log(reinterpret_cast<struct fann_error *>(ann), log_file);
         }
 
@@ -3661,9 +2842,8 @@ public:
             <fann_errno_enum>, <fann_reset_errno>, <fann_get_errno>
             
            This function appears in FANN >= 1.1.0.   
-         */ 
-        unsigned int get_errno()
-        {
+         */
+        unsigned int get_errno() {
             return fann_get_errno(reinterpret_cast<struct fann_error *>(ann));
         }
 
@@ -3672,9 +2852,8 @@ public:
            Resets the last error number.
            
            This function appears in FANN >= 1.1.0.   
-         */ 
-        void reset_errno()
-        {
+         */
+        void reset_errno() {
             fann_reset_errno(reinterpret_cast<struct fann_error *>(ann));
         }
 
@@ -3683,9 +2862,8 @@ public:
            Resets the last error string.
 
            This function appears in FANN >= 1.1.0.   
-         */ 
-        void reset_errstr()
-        {
+         */
+        void reset_errstr() {
             fann_reset_errstr(reinterpret_cast<struct fann_error *>(ann));
         }
 
@@ -3696,9 +2874,8 @@ public:
            This function calls <fann_reset_errno> and <fann_reset_errstr>
 
            This function appears in FANN >= 1.1.0.   
-         */ 
-        std::string get_errstr()
-        {
+         */
+        std::string get_errstr() {
             return std::string(fann_get_errstr(reinterpret_cast<struct fann_error *>(ann)));
         }
 
@@ -3707,44 +2884,74 @@ public:
            Prints the last error to stderr.
 
            This function appears in FANN >= 1.1.0.   
-         */ 
-        void print_error()
-        {
+         */
+        void print_error() {
             fann_print_error(reinterpret_cast<struct fann_error *>(ann));
+        }
+
+        /* Function: disable_seed_rand
+
+           Disables the automatic random generator seeding that happens in FANN.
+
+           Per default FANN will always seed the random generator when creating a new network,
+           unless FANN_NO_SEED is defined during compilation of the library. This method can
+           disable this at runtime.
+
+           This function appears in FANN >= 2.3.0
+        */
+        void disable_seed_rand() {
+            fann_disable_seed_rand();
+        }
+
+        /* Function: enable_seed_rand
+
+           Enables the automatic random generator seeding that happens in FANN.
+
+           Per default FANN will always seed the random generator when creating a new network,
+           unless FANN_NO_SEED is defined during compilation of the library. This method can
+           disable this at runtime.
+
+           This function appears in FANN >= 2.3.0
+        */
+        void enable_seed_rand() {
+            fann_enable_seed_rand();
         }
 
         /*********************************************************************/
 
     private:
         // Structure used by set_callback to hold information about a user callback
-        typedef struct user_context_type
-        {
+        typedef struct user_context_type {
             callback_type user_callback; // Pointer to user callback function
             void *user_data; // Arbitrary data pointer passed to the callback
             neural_net *net; // This pointer for the neural network
         } user_context;
 
+#ifndef FIXEDFANN
+
         // Internal callback used to convert from pointers to class references
-        static int FANN_API internal_callback(struct fann *ann, struct fann_train_data *train, 
-            unsigned int max_epochs, unsigned int epochs_between_reports, float desired_error, unsigned int epochs)
-        {
+        static int FANN_API internal_callback(struct fann *ann, struct fann_train_data *train,
+                                              unsigned int max_epochs, unsigned int epochs_between_reports,
+                                              float desired_error, unsigned int epochs) {
             user_context *user_data = static_cast<user_context *>(fann_get_user_data(ann));
-            if (user_data != NULL)
-            {
+            if (user_data != NULL) {
                 FANN::training_data data;
                 data.train_data = train;
 
                 int result = (*user_data->user_callback)(*user_data->net,
-                    data, max_epochs, epochs_between_reports, desired_error, epochs, user_data->user_data);
+                                                         data, max_epochs, epochs_between_reports, desired_error,
+                                                         epochs, user_data->user_data);
 
                 data.train_data = NULL; // Prevent automatic cleanup
                 return result;
             }
-            else
-            {
+            else {
                 return -1; // This should not occur except if out of memory
             }
         }
+
+#endif  /* NOT FIXEDFANN */
+
     protected:
         // Pointer the encapsulated fann neural net structure
         struct fann *ann;

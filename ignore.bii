@@ -1,0 +1,4 @@
+bin/*
+VS2010/*
+lib/*
+cmake/*

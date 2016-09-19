@@ -1,6 +1,6 @@
 /*
 Fast Artificial Neural Network Library (fann)
-Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -25,7 +25,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  	There are many different ways of training neural networks and the FANN library supports
  	a number of different approaches. 
  	
- 	Two fundementally different approaches are the most commonly used:
+ 	Two fundamentally different approaches are the most commonly used:
  	
  		Fixed topology training - The size and topology of the ANN is determined in advance
  			and the training alters the weights in order to minimize the difference between
@@ -33,7 +33,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  			supported by <fann_train_on_data>.
  			
  		Evolving topology training - The training start out with an empty ANN, only consisting
- 			of input and output neurons. Hidden neurons and connections is the added during training,
+ 			of input and output neurons. Hidden neurons and connections are added during training,
  			in order to reach the same goal as for fixed topology training. This kind of training
  			is supported by <FANN Cascade Training>.
  */
@@ -124,7 +124,7 @@ FANN_EXTERNAL float FANN_API fann_get_MSE(struct fann *ann);
 	the number of training data.
 	
 	This value is reset by <fann_reset_MSE> and updated by all the same functions which also
-	updates the MSE value (e.g. <fann_test_data>, <fann_train_epoch>)
+	update the MSE value (e.g. <fann_test_data>, <fann_train_epoch>)
 	
 	See also:
 		<fann_stopfunc_enum>, <fann_get_MSE>
@@ -238,15 +238,15 @@ FANN_EXTERNAL float FANN_API fann_test_data(struct fann *ann, struct fann_train_
    
    The file must be formatted like:
    >num_train_data num_input num_output
-   >inputdata seperated by space
-   >outputdata seperated by space
+   >inputdata separated by space
+   >outputdata separated by space
    >
    >.
    >.
    >.
    >
-   >inputdata seperated by space
-   >outputdata seperated by space
+   >inputdata separated by space
+   >outputdata separated by space
    
    See also:
    	<fann_train_on_data>, <fann_destroy_train>, <fann_save_train>
@@ -303,13 +303,18 @@ FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_array(unsigned
    Creates the training data struct from a user supplied function.
    As the training data are numerable (data 1, data 2...), the user must write
    a function that receives the number of the training data set (input,output)
-   and returns the set.
+   and returns the set.  fann_create_train_from_callback will call the user
+   supplied function 'num_data' times, one input-output pair each time. Each
+   time the user supplied function is called, the time of the call will be passed
+   as the 'num' parameter and the user supplied function must write the input
+   and output to the corresponding parameters.
+   
 
    Parameters:
      num_data      - The number of training data
      num_input     - The number of inputs per training data
      num_output    - The number of ouputs per training data
-     user_function - The user suplied function
+     user_function - The user supplied function
 
    Parameters for the user function:
      num        - The number of the training data set
@@ -335,7 +340,7 @@ FANN_EXTERNAL struct fann_train_data * FANN_API fann_create_train_from_callback(
 
 /* Function: fann_destroy_train
    Destructs the training data and properly deallocates all of the associated data.
-   Be sure to call this function after finished using the training data.
+   Be sure to call this function when finished using the training data.
 
     This function appears in FANN >= 1.0.0
  */ 
@@ -365,19 +370,53 @@ FANN_EXTERNAL fann_type * FANN_API fann_get_train_output(struct fann_train_data 
 /* Function: fann_shuffle_train_data
    
    Shuffles training data, randomizing the order. 
-   This is recommended for incremental training, while it have no influence during batch training.
+   This is recommended for incremental training, while it has no influence during batch training.
    
    This function appears in FANN >= 1.1.0.
  */ 
 FANN_EXTERNAL void FANN_API fann_shuffle_train_data(struct fann_train_data *train_data);
 
 #ifndef FIXEDFANN
+
+/* Function: fann_get_min_train_input
+
+   Get the minimum value of all in the input data
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL fann_type FANN_API fann_get_min_train_input(struct fann_train_data *train_data);
+
+/* Function: fann_get_max_train_input
+
+   Get the maximum value of all in the input data
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL fann_type FANN_API fann_get_max_train_input(struct fann_train_data *train_data);
+
+/* Function: fann_get_min_train_output
+
+   Get the minimum value of all in the output data
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL fann_type FANN_API fann_get_min_train_output(struct fann_train_data *train_data);
+
+/* Function: fann_get_max_train_output
+
+   Get the maximum value of all in the output data
+
+   This function appears in FANN >= 2.3.0
+*/
+FANN_EXTERNAL fann_type FANN_API fann_get_max_train_output(struct fann_train_data *train_data);
+
+
 /* Function: fann_scale_train
 
    Scale input and output data based on previously calculated parameters.
    
    Parameters:
-     ann      - ann for which were calculated trained parameters before
+     ann      - ann for which trained parameters were calculated before
      data     - training data that needs to be scaled
      
    See also:
@@ -392,7 +431,7 @@ FANN_EXTERNAL void FANN_API fann_scale_train( struct fann *ann, struct fann_trai
    Descale input and output data based on previously calculated parameters.
    
    Parameters:
-     ann      - ann for which were calculated trained parameters before
+     ann      - ann for which trained parameters were calculated before
      data     - training data that needs to be descaled
      
    See also:
@@ -407,7 +446,7 @@ FANN_EXTERNAL void FANN_API fann_descale_train( struct fann *ann, struct fann_tr
    Calculate input scaling parameters for future use based on training data.
    
    Parameters:
-   	 ann           - ann for wgich parameters needs to be calculated
+   	 ann           - ann for which parameters need to be calculated
    	 data          - training data that will be used to calculate scaling parameters
    	 new_input_min - desired lower bound in input data after scaling (not strictly followed)
    	 new_input_max - desired upper bound in input data after scaling (not strictly followed)
@@ -428,10 +467,10 @@ FANN_EXTERNAL int FANN_API fann_set_input_scaling_params(
    Calculate output scaling parameters for future use based on training data.
    
    Parameters:
-   	 ann            - ann for wgich parameters needs to be calculated
+   	 ann            - ann for which parameters need to be calculated
    	 data           - training data that will be used to calculate scaling parameters
-   	 new_output_min - desired lower bound in input data after scaling (not strictly followed)
-   	 new_output_max - desired upper bound in input data after scaling (not strictly followed)
+   	 new_output_min - desired lower bound in output data after scaling (not strictly followed)
+   	 new_output_max - desired upper bound in output data after scaling (not strictly followed)
    	 
    See also:
    	 <fann_set_input_scaling_params>
@@ -449,12 +488,12 @@ FANN_EXTERNAL int FANN_API fann_set_output_scaling_params(
    Calculate input and output scaling parameters for future use based on training data.
 
    Parameters:
-   	 ann            - ann for wgich parameters needs to be calculated
+   	 ann            - ann for which parameters need to be calculated
    	 data           - training data that will be used to calculate scaling parameters
    	 new_input_min  - desired lower bound in input data after scaling (not strictly followed)
    	 new_input_max  - desired upper bound in input data after scaling (not strictly followed)
-   	 new_output_min - desired lower bound in input data after scaling (not strictly followed)
-   	 new_output_max - desired upper bound in input data after scaling (not strictly followed)
+   	 new_output_min - desired lower bound in output data after scaling (not strictly followed)
+   	 new_output_max - desired upper bound in output data after scaling (not strictly followed)
    	 
    See also:
    	 <fann_set_input_scaling_params>, <fann_set_output_scaling_params>
@@ -482,7 +521,7 @@ FANN_EXTERNAL int FANN_API fann_clear_scaling_params(struct fann *ann);
 
 /* Function: fann_scale_input
 
-   Scale data in input vector before feed it to ann based on previously calculated parameters.
+   Scale data in input vector before feeding it to ann based on previously calculated parameters.
    
    Parameters:
      ann          - for which scaling parameters were calculated
@@ -497,7 +536,7 @@ FANN_EXTERNAL void FANN_API fann_scale_input( struct fann *ann, fann_type *input
 
 /* Function: fann_scale_output
 
-   Scale data in output vector before feed it to ann based on previously calculated parameters.
+   Scale data in output vector before feeding it to ann based on previously calculated parameters.
    
    Parameters:
      ann           - for which scaling parameters were calculated
@@ -512,7 +551,7 @@ FANN_EXTERNAL void FANN_API fann_scale_output( struct fann *ann, fann_type *outp
 
 /* Function: fann_descale_input
 
-   Scale data in input vector after get it from ann based on previously calculated parameters.
+   Scale data in input vector after getting it from ann based on previously calculated parameters.
    
    Parameters:
      ann          - for which scaling parameters were calculated
@@ -527,7 +566,7 @@ FANN_EXTERNAL void FANN_API fann_descale_input( struct fann *ann, fann_type *inp
 
 /* Function: fann_descale_output
 
-   Scale data in output vector after get it from ann based on previously calculated parameters.
+   Scale data in output vector after getting it from ann based on previously calculated parameters.
    
    Parameters:
      ann           - for which scaling parameters were calculated
@@ -546,8 +585,16 @@ FANN_EXTERNAL void FANN_API fann_descale_output( struct fann *ann, fann_type *ou
    
    Scales the inputs in the training data to the specified range.
 
+   A simplified scaling method, which is mostly useful in examples where it's known that all the
+   data will be in one range and it should be transformed to another range.
+
+   It is not recommended to use this on subsets of data as the complete input range might not be
+   available in that subset.
+
+   For more powerful scaling, please consider <fann_scale_train>
+
    See also:
-   	<fann_scale_output_train_data>, <fann_scale_train_data>
+   	<fann_scale_output_train_data>, <fann_scale_train_data>, <fann_scala_input>
 
    This function appears in FANN >= 2.0.0.
  */ 
@@ -558,6 +605,14 @@ FANN_EXTERNAL void FANN_API fann_scale_input_train_data(struct fann_train_data *
 /* Function: fann_scale_output_train_data
    
    Scales the outputs in the training data to the specified range.
+
+   A simplified scaling method, which is mostly useful in examples where it's known that all the
+   data will be in one range and it should be transformed to another range.
+
+   It is not recommended to use this on subsets of data as the complete input range might not be
+   available in that subset.
+
+   For more powerful scaling, please consider <fann_scale_train>
 
    See also:
    	<fann_scale_input_train_data>, <fann_scale_train_data>
@@ -571,7 +626,15 @@ FANN_EXTERNAL void FANN_API fann_scale_output_train_data(struct fann_train_data 
 /* Function: fann_scale_train_data
    
    Scales the inputs and outputs in the training data to the specified range.
-   
+
+   A simplified scaling method, which is mostly useful in examples where it's known that all the
+   data will be in one range and it should be transformed to another range.
+
+   It is not recommended to use this on subsets of data as the complete input range might not be
+   available in that subset.
+
+   For more powerful scaling, please consider <fann_scale_train>
+
    See also:
    	<fann_scale_output_train_data>, <fann_scale_input_train_data>
 
@@ -667,7 +730,7 @@ FANN_EXTERNAL int FANN_API fann_save_train(struct fann_train_data *data, const c
    
    Saves the training structure to a fixed point data file.
  
-   This function is very usefull for testing the quality of a fixed point network.
+   This function is very useful for testing the quality of a fixed point network.
    
    Return:
    The function returns 0 on success and -1 on failure.
@@ -804,7 +867,7 @@ FANN_EXTERNAL enum fann_activationfunc_enum FANN_API fann_get_activation_functio
    
    When choosing an activation function it is important to note that the activation 
    functions have different range. FANN_SIGMOID is e.g. in the 0 - 1 range while 
-   FANN_SIGMOID_SYMMETRIC is in the -1 - 1 range and FANN_LINEAR is unbound.
+   FANN_SIGMOID_SYMMETRIC is in the -1 - 1 range and FANN_LINEAR is unbounded.
    
    Information about the individual activation functions is available at <fann_activationfunc_enum>.
    
@@ -879,7 +942,7 @@ FANN_EXTERNAL void FANN_API fann_set_activation_function_output(struct fann *ann
    
    The steepness of an activation function says something about how fast the activation function 
    goes from the minimum to the maximum. A high value for the activation function will also
-   give a more agressive training.
+   give a more aggressive training.
    
    When training neural networks where the output values should be at the extremes (usually 0 and 1, 
    depending on the activation function), a steep activation function can be used (e.g. 1.0).
@@ -909,7 +972,7 @@ FANN_EXTERNAL fann_type FANN_API fann_get_activation_steepness(struct fann *ann,
    
    The steepness of an activation function says something about how fast the activation function 
    goes from the minimum to the maximum. A high value for the activation function will also
-   give a more agressive training.
+   give a more aggressive training.
    
    When training neural networks where the output values should be at the extremes (usually 0 and 1, 
    depending on the activation function), a steep activation function can be used (e.g. 1.0).
@@ -930,7 +993,7 @@ FANN_EXTERNAL void FANN_API fann_set_activation_steepness(struct fann *ann,
 
 /* Function: fann_set_activation_steepness_layer
 
-   Set the activation steepness all of the neurons in layer number *layer*, 
+   Set the activation steepness for all of the neurons in layer number *layer*, 
    counting the input layer as layer 0. 
    
    It is not possible to set activation steepness for the neurons in the input layer.
@@ -977,7 +1040,7 @@ FANN_EXTERNAL void FANN_API fann_set_activation_steepness_output(struct fann *an
 
    Returns the error function used during training.
 
-   The error functions is described further in <fann_errorfunc_enum>
+   The error functions are described further in <fann_errorfunc_enum>
    
    The default error function is FANN_ERRORFUNC_TANH
    
@@ -993,7 +1056,7 @@ FANN_EXTERNAL enum fann_errorfunc_enum FANN_API fann_get_train_error_function(st
 
    Set the error function used during training.
    
-   The error functions is described further in <fann_errorfunc_enum>
+   The error functions are described further in <fann_errorfunc_enum>
    
    See also:
    	<fann_get_train_error_function>
@@ -1113,7 +1176,7 @@ FANN_EXTERNAL void FANN_API fann_set_quickprop_decay(struct fann *ann, float qui
 
    The mu factor is used to increase and decrease the step-size during quickprop training. 
    The mu factor should always be above 1, since it would otherwise decrease the step-size 
-   when it was suppose to increase it.
+   when it was supposed to increase it.
    
    The default mu factor is 1.75. 
    

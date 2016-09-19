@@ -1,6 +1,6 @@
 /*
   Fast Artificial Neural Network Library (fann)
-  Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+  Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -40,8 +40,8 @@ int main()
 	
 	printf("Reading data.\n");
 	 
-	train_data = fann_read_train_from_file("../datasets/parity8.train");
-	test_data = fann_read_train_from_file("../datasets/parity8.test");
+	train_data = fann_read_train_from_file("../../datasets/parity8.train");
+	test_data = fann_read_train_from_file("../../datasets/parity8.test");
 
 	fann_scale_train_data(train_data, -1, 1);
 	fann_scale_train_data(test_data, -1, 1);

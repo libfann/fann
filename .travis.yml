@@ -1,0 +1,27 @@
+sudo: false
+
+language: cpp
+
+compiler:
+  - gcc
+
+addons:
+  apt:
+    sources:
+    - llvm-toolchain-precise
+    - ubuntu-toolchain-r-test
+    packages:
+    - clang-3.7
+    - g++-5
+    - gcc-5
+install:
+    - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
+    - if [ "$CXX" = "clang++" ]; then export CXX="clang++-3.7" CC="clang-3.7"; fi
+
+before_script:
+  - cmake .
+
+script:
+  - make
+  - ./tests/fann_tests
+

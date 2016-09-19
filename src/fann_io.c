@@ -1,6 +1,6 @@
 /*
   Fast Artificial Neural Network Library (fann)
-  Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+  Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
   
   This library is free software; you can redistribute it and/or
   modify it under the terms of the GNU Lesser General Public
@@ -490,12 +490,13 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 	fann_skip("cascade_activation_functions=");
 	for(i = 0; i < ann->cascade_activation_functions_count; i++)
 	{
-		if(fscanf(conf, "%u ", (unsigned int *)&ann->cascade_activation_functions[i]) != 1)
+		if(fscanf(conf, "%u ", &tmpVal) != 1)
 		{
 			fann_error(NULL, FANN_E_CANT_READ_CONFIG, "cascade_activation_functions", configuration_file);
 			fann_destroy(ann);
 			return NULL;
 		}
+		ann->cascade_activation_functions[i] = (enum fann_activationfunc_enum)tmpVal;
 	}
 
 	fann_scanf("%u", "cascade_activation_steepnesses_count", &ann->cascade_activation_steepnesses_count);
@@ -563,8 +564,8 @@ struct fann *fann_create_from_fd(FILE * conf, const char *configuration_file)
 #endif
 	}
 
-	ann->num_input = ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1;
-	ann->num_output = ((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron);
+	ann->num_input = (unsigned int)(ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1);
+	ann->num_output = (unsigned int)((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron);
 	if(ann->network_type == FANN_NETTYPE_LAYER)
 	{
 		/* one too many (bias) in the output layer */
@@ -740,8 +741,8 @@ struct fann *fann_create_from_fd_1_1(FILE * conf, const char *configuration_file
 #endif
 	}
 
-	ann->num_input = ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1;
-	ann->num_output = ((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron);
+	ann->num_input = (unsigned int)(ann->first_layer->last_neuron - ann->first_layer->first_neuron - 1);
+	ann->num_output = (unsigned int)((ann->last_layer - 1)->last_neuron - (ann->last_layer - 1)->first_neuron);
 	if(ann->network_type == FANN_NETTYPE_LAYER)
 	{
 		/* one too many (bias) in the output layer */

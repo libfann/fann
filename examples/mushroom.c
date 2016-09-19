@@ -1,6 +1,6 @@
 /*
 Fast Artificial Neural Network Library (fann)
-Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -35,7 +35,7 @@ int main()
 
 	printf("Creating network.\n");
 
-	train_data = fann_read_train_from_file("../datasets/mushroom.train");
+	train_data = fann_read_train_from_file("../../datasets/mushroom.train");
 
 	ann = fann_create_standard(num_layers,
 					  train_data->num_input, num_neurons_hidden, train_data->num_output);
@@ -51,7 +51,7 @@ int main()
 
 	printf("Testing network.\n");
 
-	test_data = fann_read_train_from_file("../datasets/mushroom.test");
+	test_data = fann_read_train_from_file("../../datasets/mushroom.test");
 
 	fann_reset_MSE(ann);
 	for(i = 0; i < fann_length_train_data(test_data); i++)

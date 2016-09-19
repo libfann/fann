@@ -1,0 +1,38 @@
+#                                               -*- cmake -*-
+#
+#  fann-config.cmake(.in)
+#
+
+# Use the following variables to compile and link against FANN:
+#  FANN_FOUND              - True if FANN was found on your system
+#  FANN_USE_FILE           - The file making FANN usable
+#  FANN_DEFINITIONS        - Definitions needed to build with FANN
+#  FANN_INCLUDE_DIR        - Directory where fann.h can be found
+#  FANN_INCLUDE_DIRS       - List of directories of FANN and it's dependencies
+#  FANN_LIBRARY            - FANN library location
+#  FANN_LIBRARIES          - List of libraries to link against FANN library
+#  FANN_LIBRARY_DIRS       - List of directories containing FANN' libraries
+#  FANN_ROOT_DIR           - The base directory of FANN
+#  FANN_VERSION_STRING     - A human-readable string containing the version
+#  FANN_VERSION_MAJOR      - The major version of FANN
+#  FANN_VERSION_MINOR      - The minor version of FANN
+#  FANN_VERSION_PATCH      - The patch version of FANN
+
+@PACKAGE_INIT@
+
+set ( FANN_FOUND 1 )
+set ( FANN_USE_FILE     "@FANN_USE_FILE@" )
+
+set ( FANN_DEFINITIONS  "@FANN_DEFINITIONS@" )
+set ( FANN_INCLUDE_DIR  "@FANN_INCLUDE_DIR@" )
+set ( FANN_INCLUDE_DIRS "@FANN_INCLUDE_DIRS@" )
+set ( FANN_LIBRARY      "@FANN_LIBRARY@" )
+set ( FANN_LIBRARIES    "@FANN_LIBRARIES@" )
+set ( FANN_LIBRARY_DIRS "@FANN_LIBRARY_DIRS@" )
+set ( FANN_ROOT_DIR     "@FANN_ROOT_DIR@" )
+
+set ( FANN_VERSION_STRING "@FANN_VERSION_STRING@" )
+set ( FANN_VERSION_MAJOR  "@FANN_VERSION_MAJOR@" )
+set ( FANN_VERSION_MINOR  "@FANN_VERSION_MINOR@" )
+set ( FANN_VERSION_PATCH  "@FANN_VERSION_PATCH@" )
+

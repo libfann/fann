@@ -1,6 +1,6 @@
 /*
 Fast Artificial Neural Network Library (fann)
-Copyright (C) 2003-2012 Steffen Nissen (sn@leenissen.dk)
+Copyright (C) 2003-2016 Steffen Nissen (steffen.fann@gmail.com)
 
 This library is free software; you can redistribute it and/or
 modify it under the terms of the GNU Lesser General Public
@@ -99,7 +99,7 @@ enum fann_errno_enum
    
    If log_file is NULL, no errors will be printed.
    
-   If errdata is NULL, the default log will be set. The default log is the log used when creating 
+   If errdat is NULL, the default log will be set. The default log is the log used when creating 
    <struct fann> and <struct fann_data>. This default log will also be the default for all new structs
    that are created.
    
@@ -162,6 +162,6 @@ FANN_EXTERNAL char *FANN_API fann_get_errstr(struct fann_error *errdat);
  */ 
 FANN_EXTERNAL void FANN_API fann_print_error(struct fann_error *errdat);
 
-extern FILE * fann_default_error_log;
+FANN_EXTERNAL extern FILE * fann_default_error_log;
 
 #endif

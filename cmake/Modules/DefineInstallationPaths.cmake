@@ -1,4 +1,4 @@
-if (UNIX)
+if (UNIX OR MINGW OR WIN32)
     IF (NOT APPLICATION_NAME)
         MESSAGE(STATUS "${PROJECT_NAME} is used as APPLICATION_NAME")
         SET(APPLICATION_NAME ${PROJECT_NAME})
@@ -122,9 +122,12 @@ if (UNIX)
         CACHE PATH "The ${APPLICATION_NAME} info install dir (default prefix/info)"
         FORCE
     )
-endif (UNIX)
 
-if (WIN32)
+  set (CMAKE_CONFIG_DIR "${LIB_INSTALL_DIR}/cmake/fann" CACHE PATH "config dir" FORCE)
+  set (PKGCONFIG_INSTALL_DIR "${LIB_INSTALL_DIR}/pkgconfig" CACHE PATH "pkgconfig dir" FORCE)
+endif ()
+
+if (MSCV)
 	# Same same
 	SET(BIN_INSTALL_DIR .)
 	SET(SBIN_INSTALL_DIR .)
@@ -134,5 +137,5 @@ if (WIN32)
 	SET(ICON_INSTALL_DIR .)
 	SET(SOUND_INSTALL_DIR .)
 	SET(LOCALE_INSTALL_DIR lang)
-endif (WIN32)
+endif (MSCV)
 
