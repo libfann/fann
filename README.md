@@ -56,6 +56,33 @@ After that, you'll need to use elevated priviledges to install the library:
 
 That's it! If everything went right, you should see a lot of text, and FANN should be installed!
 
+### With biicode dependency manager
+
+[![Build Status](https://webapi.biicode.com/v1/badges/lasote/lasote/fann/master)](https://www.biicode.com/lasote/fann) 
+
+* [Get started with biicode](http://web.biicode.com/learn/getting-started/)
+
+* Create a project folder:
+
+````
+$ mkdir fann_project 
+$ cd fann_project
+````
+
+* Create a "main.cpp" file and *#include* fann header:
+
+`#include "lasote/fann/src/include/fann.h"`
+
+   If you want to keep your #include as "fann.h" just edit *biicode.conf* file and specify the include mapping. There is an example [here](http://www.biicode.com/examples/examples/fann/master/0/biicode.conf)
+
+* Execute "bii buzz" and biicode will compile directly your code:
+
+````
+$ bii buzz
+````
+
+You can check an example [here](http://www.biicode.com/examples/examples/fann/master/0/example.c)
+
 ## To Learn More
 
 To get started with FANN, go to the [FANN help site](http://leenissen.dk/fann/wp/help/), which will include links to all the available resources. 
