@@ -1,4 +1,8 @@
 # Fast Artificial Neural Network Library
+
+This is a fork of [libfann](https://github.com/libfann/fann) intended to keep the library maintained as the original author no longer
+seems to be maintaining the project.  This is a fork of FANN version 1.0.0 and includes several bug fixes.  Pull requests are welcome.
+
 ## FANN
 
 **Fast Artificial Neural Network (FANN) Library** is a free open source neural network library, which implements multilayer artificial neural networks in C with support for both fully connected and sparsely connected networks.
