@@ -225,7 +225,9 @@ namespace FANN {
         LINEAR_PIECE,
         LINEAR_PIECE_SYMMETRIC,
         SIN_SYMMETRIC,
-        COS_SYMMETRIC
+        COS_SYMMETRIC,
+        SIN,
+        COS
     };
 
     /* Enum: network_type_enum
