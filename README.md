@@ -1,3 +1,6 @@
+# Regarding this fork
+I found some CMakeLists issues, and I might decide to rewrite some small parts of the code in the future. Since the main repo seems somewhat idle, I created this fork to be able to help out with issues on the repository. I'll later try to do a pull request with the main repo.
+
 # Fast Artificial Neural Network Library
 ## FANN
 
