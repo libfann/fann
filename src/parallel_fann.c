@@ -4,9 +4,9 @@
  */
 #ifndef DISABLE_PARALLEL_FANN
 #include <omp.h>
-#include "parallel_fann.h"
-#include "config.h"
-#include "fann.h"
+#include "fann/parallel_fann.h"
+#include "fann/config.h"
+#include "fann/fann.h"
 
 FANN_EXTERNAL float FANN_API fann_train_epoch_batch_parallel(struct fann *ann, struct fann_train_data *data, const unsigned int threadnumb)
 {

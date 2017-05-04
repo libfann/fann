@@ -23,8 +23,8 @@
 #include <string.h>
 
 #include "config.h"
-#include "fann.h"
-#include "fann_data.h"
+#include "fann/fann.h"
+#include "fann/fann_data.h"
 
 /* Create a network from a configuration file.
  */

@@ -67,6 +67,7 @@ configure_file (cmake/fann.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/fann.pc @ONLY)
 
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/fann.pc DESTINATION ${PKGCONFIG_INSTALL_DIR})
 
+include_directories(include)
 ADD_SUBDIRECTORY( src ) 
 
 ################# cpack ################

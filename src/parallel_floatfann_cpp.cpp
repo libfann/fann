@@ -20,8 +20,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /* Easy way to allow for build of multiple binaries */
 
 #ifndef DISABLE_PARALLEL_FANN
-#include "config.h"
-#include "floatfann.h"
+#include "fann/config.h"
+#include "fann/floatfann.h"
 
 #include "parallel_fann_cpp.cpp"
 #endif /* DISABLE_PARALLEL_FANN */

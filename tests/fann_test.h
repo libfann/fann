@@ -3,8 +3,8 @@
 
 #include "gtest/gtest.h"
 
-#include "doublefann.h"
-#include "fann_cpp.h"
+#include "../include/fann/doublefann.h"
+#include "../include/fann/fann_cpp.h"
 
 using namespace FANN;
 

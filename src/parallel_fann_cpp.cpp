@@ -3,7 +3,7 @@
  *     Author: Alessandro Pietro Bardelli
  */
 #ifndef DISABLE_PARALLEL_FANN
-#include "parallel_fann.hpp"
+#include "fann/parallel_fann.hpp"
 #include <omp.h>
 using namespace std;
 namespace parallel_fann {
