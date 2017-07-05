@@ -17,9 +17,6 @@ Release
 /bin/xor_test_floatd.exe
 /bin/xor_traind.exe
 Makefile
-CMakeFiles
-CMakeCache.txt
-cmake_install.cmake
 install_manifest.txt
 *~
 /bin/cascade_traind.exe
@@ -34,3 +31,5 @@ install_manifest.txt
 *.suo
 *.filters
 *.vcxproj
+.idea
+cmake-build-debug
