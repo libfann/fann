@@ -19,7 +19,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA02111-1307USA
 
 #include <stdio.h>
 
-#include "fann.h"
+#include "../include/fann/fann.h"
 
 int main()
 {

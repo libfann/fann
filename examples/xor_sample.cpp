@@ -22,8 +22,8 @@
  *
  */
 
-#include "floatfann.h"
-#include "fann_cpp.h"
+#include "../include/fann/floatfann.h"
+#include "../include/fann/fann_cpp.h"
 
 #include <ios>
 #include <iostream>

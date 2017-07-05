@@ -1,0 +1,10 @@
+prefix=/usr/local
+exec_prefix=/usr/local/bin
+libdir=/usr/local/lib
+includedir=/usr/local/include
+ 
+Name: fann
+Description: Fast Artificial Neural Network Library
+Version: 
+Libs: -L${libdir} -lm -lfann
+Cflags: -I${includedir}
