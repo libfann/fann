@@ -67,7 +67,7 @@ INCLUDE(DefineInstallationPaths)
 
 
 configure_file (cmake/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
-include_directories (${CMAKE_CURRENT_BINARY_DIR}/include/)
+include_directories(${CMAKE_CURRENT_BINARY_DIR}/include/)
 
 configure_file (cmake/fann.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/fann.pc @ONLY)
 
