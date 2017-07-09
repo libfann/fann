@@ -46,6 +46,14 @@ endif ()
 
 project (FANN)
 
+# Added a CMake check for C++11 support. #79 https://github.com/libfann/fann/pull/79/files
+INCLUDE(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
+
+IF(NOT COMPILER_SUPPORTS_CXX11)
+  message(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Tests will not be compiled. To enable tests use a compiler that supports C++11.")
+ENDIF()
+
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 set (FANN_VERSION_MAJOR 2)
@@ -58,20 +66,18 @@ option(BUILD_SHARED_LIBS "build shared/static libs" ON)
 INCLUDE(DefineInstallationPaths)
 
 
-configure_file (cmake/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/include/config.h)
-include_directories (${CMAKE_CURRENT_BINARY_DIR}/src/include/)
+configure_file (cmake/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/include/config.h)
+include_directories (${CMAKE_CURRENT_BINARY_DIR}/include/)
 
 configure_file (cmake/fann.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/fann.pc @ONLY)
 
 ########### install files ###############
-
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/fann.pc DESTINATION ${PKGCONFIG_INSTALL_DIR})
 
 include_directories(include)
 ADD_SUBDIRECTORY( src ) 
 
 ################# cpack ################
-
 SET(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Fast Artificial Neural Network Library (FANN)")
 SET(CPACK_PACKAGE_VENDOR "Steffen Nissen")
 SET(CPACK_PACKAGE_DESCRIPTION_FILE "${CMAKE_CURRENT_SOURCE_DIR}/README.md")
@@ -101,7 +107,6 @@ ENDIF(WIN32 AND NOT UNIX)
 INCLUDE(CPack)
 
 ################# config ################
-
 set (FANN_USE_FILE ${CMAKE_CONFIG_DIR}/fann-use.cmake)
 set (FANN_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
 set (FANN_INCLUDE_DIR ${CMAKE_INSTALL_PREFIX}/include)
@@ -141,8 +146,9 @@ install (FILES
  )
 
 ################# compile tests ################
-
-ADD_SUBDIRECTORY( lib/googletest )
-ADD_SUBDIRECTORY( tests )
+if(COMPILER_SUPPORTS_CXX11)
+    ADD_SUBDIRECTORY( lib/googletest )
+    ADD_SUBDIRECTORY( tests )
+endif()
 
 ENDIF()
