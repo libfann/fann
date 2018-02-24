@@ -211,9 +211,9 @@ int fann_save_internal_fd(struct fann *ann, FILE * conf, const char *configurati
 	else
 #endif	
 	{
-		fprintf(conf, "bit_fail_limit="FANNPRINTF"\n", ann->bit_fail_limit);
-		fprintf(conf, "cascade_candidate_limit="FANNPRINTF"\n", ann->cascade_candidate_limit);
-		fprintf(conf, "cascade_weight_multiplier="FANNPRINTF"\n", ann->cascade_weight_multiplier);
+		fprintf(conf, "bit_fail_limit=" FANNPRINTF "\n", ann->bit_fail_limit);
+		fprintf(conf, "cascade_candidate_limit=" FANNPRINTF "\n", ann->cascade_candidate_limit);
+		fprintf(conf, "cascade_weight_multiplier=" FANNPRINTF "\n", ann->cascade_weight_multiplier);
 	}
 
 	fprintf(conf, "cascade_activation_functions_count=%u\n", ann->cascade_activation_functions_count);
@@ -343,7 +343,7 @@ struct fann *fann_create_from_fd_1_1(FILE * conf, const char *configuration_file
 
 #define fann_scanf(type, name, val) \
 { \
-	if(fscanf(conf, name"="type"\n", val) != 1) \
+	if(fscanf(conf, name "=" type "\n", val) != 1) \
 	{ \
 		fann_error(NULL, FANN_E_CANT_READ_CONFIG, name, configuration_file); \
 		fann_destroy(ann); \
