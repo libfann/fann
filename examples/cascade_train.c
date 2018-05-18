@@ -19,7 +19,7 @@
 
 #include <stdio.h>
 
-#include "fann.h"
+#include "../include/fann/fann.h"
 
 
 int main()

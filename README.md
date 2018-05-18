@@ -1,63 +1,61 @@
-# Fast Artificial Neural Network Library
-## FANN
+# Fast Artificial Neural Network Library (Fork)
+Please read the [README.md](https://github.com/libfann/fann) file from the original repo: [README.md](https://github.com/libfann/fann)
 
-**Fast Artificial Neural Network (FANN) Library** is a free open source neural network library, which implements multilayer artificial neural networks in C with support for both fully connected and sparsely connected networks.
+## Regarding this fork
+I found some CMakeLists issues, and I might decide to rewrite some small parts of the code in the future. Since the main repo seems somewhat idle, I created this fork to be able to help out with issues on the repository. I'll later try to do a pull request with the main repo.
 
-Cross-platform execution in both fixed and floating point are supported. It includes a framework for easy handling of training data sets. It is easy to use, versatile, well documented, and fast. 
+The most efficient way to contribute to this repository is by creating pull requests. Issues are welcome obviusly, but I'm not as skilled as I wish I was.
 
-Bindings to more than 15 programming languages are available. 
+## Git-submodule + CMakeLists
+#### Git-submodule
+Add the repo to your desired folder, I will use the folder name `external/` in this example, like so:
+`git submodule add https://github.com/sciencefyll/fann external/fann`
 
-An easy to read introduction article and a reference manual accompanies the library with examples and recommendations on how to use the library. 
+Then initiate it by using:
+`git submodule update --init`
 
-Several graphical user interfaces are also available for the library.
+If you have made changes, stash them before you pull or you'll get some trouble:
+`git submodule external/fann git stash`
 
-## FANN Features
+And fetch the latest version:
+`git submodule external/fann git pull origin master`
 
-* Multilayer Artificial Neural Network Library in C
-* Backpropagation training (RPROP, Quickprop, Batch, Incremental)
-* Evolving topology training which dynamically builds and trains the ANN (Cascade2)
-* Easy to use (create, train and run an ANN with just three function calls)
-* Fast (up to 150 times faster execution than other libraries)
-* Versatile (possible to adjust many parameters and features on-the-fly)
-* Well documented (An easy to read introduction article, a thorough reference manual, and a 50+ page university report describing the implementation considerations etc.)
-* Cross-platform (configure script for linux and unix, dll files for windows, project files for MSVC++ and Borland compilers are also reported to work)
-* Several different activation functions implemented (including stepwise linear functions for that extra bit of speed)
-* Easy to save and load entire ANNs
-* Several easy to use examples
-* Can use both floating point and fixed point numbers (actually both float, double and int are available)
-* Cache optimized (for that extra bit of speed)
-* Open source, but can still be used in commercial applications (licenced under LGPL)
-* Framework for easy handling of training data sets
-* Graphical Interfaces
-* Language Bindings to a large number of different programming languages
-* Widely used (approximately 100 downloads a day)
+You could use a script to keep ur git-submodules up to date:
+```bash
+#!/bin/bash
 
-## To Install
+git submodule update --init
+git submodule foreach git stash
+git submodule foreach git pull origin master
+```
 
-### On Linux
+#### CMakeLists
+Assuming your project structure is as follows, and that every git-submodule is in the folder named `external`:
+Project_root_dir/
+- /CMakeLists.txt
+- /external/fann/*
+- /external/CMakeLists.txt
+- /src/CMakeLists.txt
 
-#### From Source
+Only files and parts of files that are relevant will be shown.
 
-First you'll want to clone the repository:
+CMakeLists.txt:
+```CMakeLists
+# Third party libraries in lib
+add_subdirectory(external) # Git-submodule folder
 
-`git clone https://github.com/libfann/fann.git`
+# Our source code folder, usually called src/ or the name of the project
+add_subdirectory(src)
+```
 
-Once that's finished, navigate to the Root directory. In this case it would be ./fann:
+external/CMakeLists.txt:
+```CMakeLists
+add_subdirectory(fann) # Fann, for simplified neural network development.
+```
 
-`cd ./fann`
+src/CMakeLists.txt:
+```CMakeLists
+include_directories("${CMAKE_CURRENT_SOURCE_DIR}/../external/fann/include
+```
 
-Then run CMake
-
-`cmake .`
-
-After that, you'll need to use elevated priviledges to install the library:
-
-`sudo make install`
-
-That's it! If everything went right, you should see a lot of text, and FANN should be installed!
-
-## To Learn More
-
-To get started with FANN, go to the [FANN help site](http://leenissen.dk/fann/wp/help/), which will include links to all the available resources. 
-
-For more information about FANN, please refer to the [FANN website](http://leenissen.dk/fann/wp/)
+This will allow you to include fann files like this: `#include "fann/fann.h"`.

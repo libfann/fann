@@ -1,4 +1,4 @@
-#include "fann.h"
+#include "../include/fann/fann.h"
 
 int main( int argc, char** argv )
 {
