@@ -113,7 +113,7 @@ extern "C"
  to use dll's. To use dll's FANN_USE_DLL has to be defined before
  including the fann headers.
 */ 
-#if (_MSC_VER > 1300)
+#if defined(_MSC_VER) && (_MSC_VER > 1300)
 #ifndef FANN_NO_DLL
 #define FANN_USE_DLL
 #endif	/* FANN_USE_LIB */
