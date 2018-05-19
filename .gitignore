@@ -47,3 +47,8 @@ libfloatfann.so*
 tests/fann_tests
 tmpFile
 tmpfile
+cascade_train.net
+cascade_train2.net
+mushroom_float.net
+robot_float.net
+scaling.net
