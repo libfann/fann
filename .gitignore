@@ -19,7 +19,11 @@ Release
 Makefile
 CMakeFiles
 CMakeCache.txt
+CPackConfig.cmake
+CPackSourceConfig.cmake
 cmake_install.cmake
+fann-config.cmake
+fann.pc
 install_manifest.txt
 *~
 /bin/cascade_traind.exe
@@ -34,3 +38,12 @@ install_manifest.txt
 *.suo
 *.filters
 *.vcxproj
+*.a
+*.so
+libfann.so*
+libdoublefann.so*
+libfixedfann.so*
+libfloatfann.so*
+tests/fann_tests
+tmpFile
+tmpfile
