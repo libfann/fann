@@ -40,8 +40,8 @@ int main()
 	
 	printf("Reading data.\n");
 	 
-	train_data = fann_read_train_from_file("../../datasets/parity8.train");
-	test_data = fann_read_train_from_file("../../datasets/parity8.test");
+	train_data = fann_read_train_from_file("../datasets/parity8.train");
+	test_data = fann_read_train_from_file("../datasets/parity8.test");
 
 	fann_scale_train_data(train_data, -1, 1);
 	fann_scale_train_data(test_data, -1, 1);

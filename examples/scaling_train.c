@@ -14,7 +14,7 @@ int main( int argc, char** argv )
 	fann_set_activation_function_hidden(ann, FANN_SIGMOID_SYMMETRIC);
 	fann_set_activation_function_output(ann, FANN_LINEAR);
 	fann_set_training_algorithm(ann, FANN_TRAIN_RPROP);
-	data = fann_read_train_from_file("../../datasets/scaling.data");
+	data = fann_read_train_from_file("../datasets/scaling.data");
 	fann_set_scaling_params(
 		    ann,
 			data,

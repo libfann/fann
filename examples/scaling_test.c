@@ -18,7 +18,7 @@ int main( int argc, char** argv )
 	fann_print_connections(ann);
 	fann_print_parameters(ann);
 	printf("Testing network.\n");
-	data = fann_read_train_from_file("../../datasets/scaling.data");
+	data = fann_read_train_from_file("../datasets/scaling.data");
 	for(i = 0; i < fann_length_train_data(data); i++)
 	{
 		fann_reset_MSE(ann);

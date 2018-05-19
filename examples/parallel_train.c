@@ -33,7 +33,7 @@ int main(int argc, const char* argv[])
 	if(argc == 2)
 		num_threads = atoi(argv[1]);
 
-	data = fann_read_train_from_file("../../datasets/mushroom.train");
+	data = fann_read_train_from_file("../datasets/mushroom.train");
 	ann = fann_create_standard(3, fann_num_input_train_data(data), 32, fann_num_output_train_data(data));
 
 	fann_set_activation_function_hidden(ann, FANN_SIGMOID_SYMMETRIC);
