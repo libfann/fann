@@ -1,6 +1,8 @@
 # The makefile requires that the fann library has been built first and is either in the
 
-GCC=gcc -I ../src/include -L ../src/
+GCC=gcc
+CFLAGS=-I ../src/include
+LDFLAGS=-L ../src/
 
 TARGETS = xor_train xor_test xor_test_fixed simple_train steepness_train simple_test robot mushroom cascade_train scaling_test scaling_train
 DEBUG_TARGETS = xor_train_debug xor_test_debug xor_test_fixed_debug cascade_train_debug
@@ -8,10 +10,10 @@ DEBUG_TARGETS = xor_train_debug xor_test_debug xor_test_fixed_debug cascade_trai
 all: $(TARGETS)
 
 %: %.c Makefile
-	$(GCC) -O3 $< -o $@ -lfann -lm
+	$(GCC) $(CFLAGS) $(LDFLAGS) -O3 $< -o $@ -lfann -lm
 
 %_fixed: %.c Makefile
-	$(GCC) -O3 -DFIXEDFANN $< -o $@ -lfixedfann -lm
+	$(GCC) $(CFLAGS) $(LDFLAGS) -O3 -DFIXEDFANN $< -o $@ -lfixedfann -lm
 
 clean:
 	rm -f $(TARGETS) $(DEBUG_TARGETS) xor_fixed.data *.net *~ *.obj *.exe *.tds noscale.txt withscale.txt scale_test_results.txt
@@ -57,10 +59,10 @@ quickcompiletest:
 debug: $(DEBUG_TARGETS)
 
 %_debug: %.c Makefile ../src/*c ../src/include/*h
-	$(GCC) -ggdb -DDEBUG -Wall -ansi -I../src/ -I../src/include/ ../src/floatfann.c $< -o $@ -lm
+	$(GCC) $(CFLAGS) $(LDFLAGS) -ggdb -DDEBUG -Wall -ansi -I../src/ ../src/floatfann.c $< -o $@ -lm
 
 %_fixed_debug: %.c Makefile ../src/*c ../src/include/*h
-	$(GCC) -ggdb -DDEBUG -Wall -ansi -DFIXEDFANN -I../src/ -I../src/include/ ../src/fixedfann.c $< -o $@ -lm
+	$(GCC) $(CFLAGS) $(LDFLAGS) -ggdb -DDEBUG -Wall -ansi -DFIXEDFANN -I../src/ ../src/fixedfann.c $< -o $@ -lm
 
 rundebug: $(DEBUG_TARGETS)
 	@echo
