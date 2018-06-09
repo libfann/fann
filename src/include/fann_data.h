@@ -197,6 +197,11 @@ static char const *const FANN_TRAIN_NAMES[] = {
 	 * span: 0 <= y <= 1
 	 * y = cos(x*s)/2+0.5
 	 * d = s*-sin(x*s)/2
+
+	FANN_LINEAR_PIECE_LEAKY - leaky ReLU
+	 * span: -inf < y < inf
+	 * y = x<0? 0.01*x: x
+	 * d = x<0? 0.01: 1
 	 
 	See also:
    	<fann_set_activation_function_layer>, <fann_set_activation_function_hidden>,
@@ -226,7 +231,8 @@ enum fann_activationfunc_enum
 	FANN_SIN_SYMMETRIC,
 	FANN_COS_SYMMETRIC,
 	FANN_SIN,
-	FANN_COS
+	FANN_COS,
+	FANN_LINEAR_PIECE_LEAKY,
 };
 
 /* Constant: FANN_ACTIVATIONFUNC_NAMES
@@ -258,7 +264,8 @@ static char const *const FANN_ACTIVATIONFUNC_NAMES[] = {
 	"FANN_SIN_SYMMETRIC",
 	"FANN_COS_SYMMETRIC",
 	"FANN_SIN",
-	"FANN_COS"
+	"FANN_COS",
+	"FANN_LINEAR_PIECE_LEAKY"
 };
 
 /* Enum: fann_errorfunc_enum

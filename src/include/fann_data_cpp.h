@@ -205,6 +205,11 @@ namespace FANN {
          * y = cos(x*s)
          * d = s*-sin(x*s)
 
+	FANN_LINEAR_PIECE_LEAKY - leaky ReLU
+	 * span: -inf < y < inf
+	 y = x<0? 0.01*x: x
+	 d = x<0? 0.01: 1
+
 	    See also:
 		    <neural_net::set_activation_function_hidden>,
 		    <neural_net::set_activation_function_output>
@@ -225,7 +230,8 @@ namespace FANN {
         LINEAR_PIECE,
         LINEAR_PIECE_SYMMETRIC,
         SIN_SYMMETRIC,
-        COS_SYMMETRIC
+        COS_SYMMETRIC,
+	LINEAR_PIECE_LEAKY
     };
 
     /* Enum: network_type_enum

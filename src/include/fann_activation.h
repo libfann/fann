@@ -152,6 +152,9 @@ switch(activation_function) \
 	case FANN_GAUSSIAN_STEPWISE: \
         result = 0; \
         break; \
+	case FANN_LINEAR_PIECE_LEAKY: \
+		result = (fann_type)((value < 0) ? value*0.01 : value); \
+        break; \
 }
 
 #endif
