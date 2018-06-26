@@ -160,7 +160,7 @@ TEST_F(FannTestData, ScaleData) {
     }
 
     EXPECT_DOUBLE_EQ(-1.0, data.get_train_output(0)[0]);
-    EXPECT_DOUBLE_EQ(2.0, data.get_train_output(0)[1]);
+    EXPECT_DOUBLE_EQ(2.0, data.get_train_output(1)[0]);
 
 }
 
