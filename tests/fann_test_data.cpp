@@ -160,7 +160,28 @@ TEST_F(FannTestData, ScaleData) {
     }
 
     EXPECT_DOUBLE_EQ(-1.0, data.get_train_output(0)[0]);
-    EXPECT_DOUBLE_EQ(2.0, data.get_train_output(0)[1]);
+    EXPECT_DOUBLE_EQ(2.0, data.get_train_output(1)[0]);
 
 }
 
+TEST_F(FannTestData, ScaleDataByANN) {
+    // Input 0, input 1, and the output are scaled normally. Input 2
+    // has a standard deviation of 0 and so is not scaled at all.
+    fann_type input[] = {0.0, 1.0, 0.5, 1.0, 2.0, 0.5};
+    fann_type output[] = {0.0, 1.5};
+    data.set_train_data(2, 3, input, 1, output);
+
+    neural_net net(LAYER, 2, 3, 1);
+    net.set_scaling_params(data, -1.0, 1.0, 0.0, 1.0);
+    net.scale_train(data);
+
+    EXPECT_DOUBLE_EQ(-1.0, data.get_train_input(0)[0]);
+    EXPECT_DOUBLE_EQ(-1.0, data.get_train_input(0)[1]);
+    EXPECT_DOUBLE_EQ(0.5, data.get_train_input(0)[2]);
+    EXPECT_DOUBLE_EQ(0.0, data.get_train_output(0)[0]);
+
+    EXPECT_DOUBLE_EQ(1.0, data.get_train_input(1)[0]);
+    EXPECT_DOUBLE_EQ(1.0, data.get_train_input(1)[1]);
+    EXPECT_DOUBLE_EQ(0.5, data.get_train_input(1)[2]);
+    EXPECT_DOUBLE_EQ(1.0, data.get_train_output(1)[0]);
+}
