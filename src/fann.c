@@ -1381,7 +1381,8 @@ FANN_EXTERNAL void FANN_API fann_get_bias_array(struct fann *ann, unsigned int *
     }
 }
 
-FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann, struct fann_connection *connections)
+static void fann_apply_to_weights(struct fann *ann, struct fann_connection *connections,
+		unsigned int from_neuron, unsigned int to_neuron, fann_type weight, int isSet)
 {
     struct fann_neuron *first_neuron;
     struct fann_layer *layer_it;
@@ -1395,25 +1396,41 @@ FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann, struct f
     source_index = 0;
     destination_index = 0;
 
-    /* The following assumes that the last unused bias has no connections */
-
     /* for each layer */
     for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++){
         /* for each neuron */
         for(neuron_it = layer_it->first_neuron; neuron_it != layer_it->last_neuron; neuron_it++){
             /* for each connection */
             for (idx = neuron_it->first_con; idx < neuron_it->last_con; idx++){
-                /* Assign the source, destination and weight */
-                connections->from_neuron = (unsigned int)(ann->connections[source_index] - first_neuron);
-                connections->to_neuron = destination_index;
-                connections->weight = ann->weights[source_index];
+		if(isSet)
+		{
+			/* If the source and destination neurons match, assign the weight */
+			if (((int)from_neuron == ann->connections[source_index] - first_neuron) &&
+			    (to_neuron == destination_index))
+			{
+			    ann->weights[source_index] = weight;
+			}
+		}
+		else
+		{
+			/* Assign the source, destination and weight */
+			connections->from_neuron = (unsigned int)(ann->connections[source_index] - first_neuron);
+			connections->to_neuron = destination_index;
+			connections->weight = ann->weights[source_index];
 
-                connections++;
+			connections++;
+		}
                 source_index++;
             }
             destination_index++;
         }
     }
+}
+
+FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann, struct fann_connection *connections)
+{
+    /* The following assumes that the last unused bias has no connections */
+    fann_apply_to_weights(ann, connections, 0, 0, 0, 0);
 }
 
 FANN_EXTERNAL void FANN_API fann_set_weight_array(struct fann *ann,
@@ -1430,39 +1447,10 @@ FANN_EXTERNAL void FANN_API fann_set_weight_array(struct fann *ann,
 FANN_EXTERNAL void FANN_API fann_set_weight(struct fann *ann,
     unsigned int from_neuron, unsigned int to_neuron, fann_type weight)
 {
-    struct fann_neuron *first_neuron;
-    struct fann_layer *layer_it;
-    struct fann_neuron *neuron_it;
-    unsigned int idx;
-    unsigned int source_index;
-    unsigned int destination_index;
-
-    first_neuron = ann->first_layer->first_neuron;
-
-    source_index = 0;
-    destination_index = 0;
-
     /* Find the connection, simple brute force search through the network
        for one or more connections that match to minimize datastructure dependencies.
        Nothing is done if the connection does not already exist in the network. */
-
-    /* for each layer */
-    for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++){
-        /* for each neuron */
-        for(neuron_it = layer_it->first_neuron; neuron_it != layer_it->last_neuron; neuron_it++){
-            /* for each connection */
-            for (idx = neuron_it->first_con; idx < neuron_it->last_con; idx++){
-                /* If the source and destination neurons match, assign the weight */
-                if (((int)from_neuron == ann->connections[source_index] - first_neuron) &&
-                    (to_neuron == destination_index))
-                {
-                    ann->weights[source_index] = weight;
-                }
-                source_index++;
-            }
-            destination_index++;
-        }
-    }
+    fann_apply_to_weights(ann, NULL, from_neuron, to_neuron, weight, 1);
 }
 
 FANN_EXTERNAL void FANN_API fann_get_weights(struct fann *ann, fann_type *weights)
@@ -1840,3 +1828,12 @@ void fann_seed_rand()
 #endif
 }
 
+long long fann_mstime(void) {
+    struct timeval tv;
+    long long ust;
+
+    gettimeofday(&tv, NULL);
+    ust = ((long long)tv.tv_sec)*1000000;
+    ust += tv.tv_usec;
+    return ust/1000;
+}
