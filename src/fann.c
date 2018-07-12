@@ -1828,12 +1828,12 @@ void fann_seed_rand()
 #endif
 }
 
-long long fann_mstime(void) {
+long fann_mstime(void) {
     struct timeval tv;
-    long long ust;
+    long ust;
 
     gettimeofday(&tv, NULL);
-    ust = ((long long)tv.tv_sec)*1000000;
+    ust = ((long)tv.tv_sec)*1000000;
     ust += tv.tv_usec;
     return ust/1000;
 }
