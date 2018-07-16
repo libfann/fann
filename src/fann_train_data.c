@@ -1044,7 +1044,7 @@ FANN_EXTERNAL void FANN_API fann_scale_input( struct fann *ann, fann_type *input
 FANN_EXTERNAL void FANN_API fann_scale_output( struct fann *ann, fann_type *output_vector )
 {
 	unsigned cur_neuron;
-	if(ann->scale_mean_in == NULL)
+	if(ann->scale_mean_out == NULL)
 	{
 		fann_error( (struct fann_error *) ann, FANN_E_SCALE_NOT_PRESENT );
 		return;
@@ -1095,7 +1095,7 @@ FANN_EXTERNAL void FANN_API fann_descale_input( struct fann *ann, fann_type *inp
 FANN_EXTERNAL void FANN_API fann_descale_output( struct fann *ann, fann_type *output_vector )
 {
 	unsigned cur_neuron;
-	if(ann->scale_mean_in == NULL)
+	if(ann->scale_mean_out == NULL)
 	{
 		fann_error( (struct fann_error *) ann, FANN_E_SCALE_NOT_PRESENT );
 		return;
