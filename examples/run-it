@@ -1,0 +1,2 @@
+export LD_LIBRARY_PATH=$PWD/../build/src:$LD_LIBRARY_PATH
+$*

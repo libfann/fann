@@ -615,6 +615,7 @@ FANN_EXTERNAL void FANN_API fann_disable_seed_rand();
 */
 FANN_EXTERNAL void FANN_API fann_enable_seed_rand();
 
+FANN_EXTERNAL long FANN_API fann_mstime(void);
 
 #ifdef FIXEDFANN
 	

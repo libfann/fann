@@ -26,7 +26,7 @@ int main(int argc, const char* argv[])
 	unsigned int num_threads = 1;
 	struct fann_train_data *data;
 	struct fann *ann;
-	long before;
+	long before, totaltime;
 	float error;
 	unsigned int i;
 
@@ -39,13 +39,14 @@ int main(int argc, const char* argv[])
 	fann_set_activation_function_hidden(ann, FANN_SIGMOID_SYMMETRIC);
 	fann_set_activation_function_output(ann, FANN_SIGMOID);
 
-	before = GetTickCount();
+	before = fann_mstime();
 	for(i = 1; i <= max_epochs; i++)
 	{
 		error = num_threads > 1 ? fann_train_epoch_irpropm_parallel(ann, data, num_threads) : fann_train_epoch(ann, data);
-		printf("Epochs     %8d. Current error: %.10f\n", i, error);
+		totaltime = fann_mstime()-before;
+		printf("Epochs     %8d. Current error: %.10f :: %ld ms by epoch\n", i, error, i ? totaltime/i : 0);
 	}
-	printf("ticks %d", GetTickCount()-before);
+	printf("Time spent %ld ms\n", totaltime);
 
 	fann_destroy(ann);
 	fann_destroy_train(data);
