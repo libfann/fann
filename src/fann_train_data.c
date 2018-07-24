@@ -1122,7 +1122,7 @@ FANN_EXTERNAL void FANN_API fann_descale_output( struct fann *ann, fann_type *ou
 FANN_EXTERNAL void FANN_API fann_scale_train( struct fann *ann, struct fann_train_data *data )
 {
 	unsigned cur_sample;
-	if(ann->scale_mean_in == NULL)
+	if(ann->scale_mean_in == NULL || ann->scale_mean_out == NULL)
 	{
 		fann_error( (struct fann_error *) ann, FANN_E_SCALE_NOT_PRESENT );
 		return;
@@ -1144,7 +1144,7 @@ FANN_EXTERNAL void FANN_API fann_scale_train( struct fann *ann, struct fann_trai
 FANN_EXTERNAL void FANN_API fann_descale_train( struct fann *ann, struct fann_train_data *data )
 {
 	unsigned cur_sample;
-	if(ann->scale_mean_in == NULL)
+	if(ann->scale_mean_in == NULL || ann->scale_mean_out == NULL)
 	{
 		fann_error( (struct fann_error *) ann, FANN_E_SCALE_NOT_PRESENT );
 		return;
