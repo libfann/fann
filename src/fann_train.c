@@ -734,15 +734,15 @@ void fann_update_weights_irpropm(struct fann *ann, unsigned int first_weight, un
 
 		same_sign = prev_slope * slope;
 
-		if(same_sign >= 0.0)
+		if(same_sign > 0.0)
 			next_step = fann_min(prev_step * increase_factor, delta_max);
-		else
+		else if(same_sign < 0.0)
 		{
 			next_step = fann_max(prev_step * decrease_factor, delta_min);
 			slope = 0;
 		}
 
-		if(slope < 0)
+		if(slope < 0.0)
 		{
 			weights[i] -= next_step;
 			if(weights[i] < -1500)
