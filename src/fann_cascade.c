@@ -134,6 +134,7 @@ FANN_EXTERNAL void FANN_API fann_cascadetrain_on_file(struct fann *ann, const ch
 
 	if(data == NULL)
 	{
+		ann->errno_f = FANN_E_CANT_READ_TD;
 		return;
 	}
 	fann_cascadetrain_on_data(ann, data, max_neurons, neurons_between_reports, desired_error);
