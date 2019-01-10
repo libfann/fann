@@ -15,7 +15,7 @@ TEST_F(FannTestTrain, TrainOnDateSimpleXor) {
     neural_net net(LAYER, 3, 2, 3, 1);
 
     data.set_train_data(4, 2, xorInput, 1, xorOutput);
-    net.train_on_data(data, 100, 100, 0.001);
+    net.train_on_data(data, 1000, 100, 0.001);
 
     EXPECT_LT(net.get_MSE(), 0.001);
     EXPECT_LT(net.test_data(data), 0.001);
