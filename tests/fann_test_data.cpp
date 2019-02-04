@@ -1,4 +1,5 @@
 #include "fann_test_data.h"
+#include "fann_error.h"
 
 void FannTestData::SetUp() {
     FannTest::SetUp();
@@ -184,4 +185,39 @@ TEST_F(FannTestData, ScaleDataByANN) {
     EXPECT_DOUBLE_EQ(1.0, data.get_train_input(1)[1]);
     EXPECT_DOUBLE_EQ(0.5, data.get_train_input(1)[2]);
     EXPECT_DOUBLE_EQ(1.0, data.get_train_output(1)[0]);
+}
+
+TEST_F(FannTestData, ScaleDataByANNError) {
+    // Scaling without setting the scaling parameters should error.
+    fann_type input[] = {0.0, 1.0, 0.5};
+    fann_type output[] = {1.5};
+
+    neural_net net(LAYER, 2, 3, 1);
+
+    // Silence error messages.
+    net.set_error_log(nullptr);
+
+    net.scale_input(input);
+    EXPECT_EQ(net.get_errno(), fann_errno_enum::FANN_E_SCALE_NOT_PRESENT);
+    EXPECT_EQ(input[0], 0.0);
+    EXPECT_EQ(input[1], 1.0);
+    EXPECT_EQ(input[2], 0.5);
+
+    net.reset_errno();
+    EXPECT_EQ(net.get_errno(), fann_errno_enum::FANN_E_NO_ERROR);
+
+    net.scale_output(output);
+    EXPECT_EQ(net.get_errno(), fann_errno_enum::FANN_E_SCALE_NOT_PRESENT);
+    EXPECT_EQ(output[0], 1.5);
+
+    net.reset_errno();
+    EXPECT_EQ(net.get_errno(), fann_errno_enum::FANN_E_NO_ERROR);
+
+    data.set_train_data(1, 3, input, 1, output);
+    net.scale_train(data);
+    EXPECT_EQ(net.get_errno(), fann_errno_enum::FANN_E_SCALE_NOT_PRESENT);
+    EXPECT_EQ(data.get_input()[0][0], 0.0);
+    EXPECT_EQ(data.get_input()[0][1], 1.0);
+    EXPECT_EQ(data.get_input()[0][2], 0.5);
+    EXPECT_EQ(data.get_output()[0][0], 1.5);
 }

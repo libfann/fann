@@ -1909,6 +1909,36 @@ namespace FANN {
                 fann_set_weight(ann, from_neuron, to_neuron, weight);
             }
         }
+	    
+        /* Method: get_weights
+
+            Get all the network weights.
+
+            See also:
+                <fann_get_weights>
+
+            This function appears in FANN >= x.y.z
+        */
+        void get_weights(fann_type *weights) {
+            if (ann != NULL) {
+                fann_get_weights(ann, weights);
+            }
+        }
+
+        /* Method: set_weights
+        
+            Set network weights.
+            
+            See also:
+                <fann_set_weights>
+                
+            This function appears in FANN >= x.y.z
+        */
+        void set_weights(fann_type *weights) {
+            if (ann != NULL) {
+                fann_set_weights(ann, weights);
+            }
+        }
 
         /*********************************************************************/
 
