@@ -742,6 +742,7 @@ fann_type fann_train_candidates_epoch(struct fann *ann, struct fann_train_data *
 				case FANN_ELLIOT:
 				case FANN_LINEAR_PIECE:
 				case FANN_LINEAR_PIECE_LEAKY:
+				case FANN_LINEAR_PIECE_RECT:
 				case FANN_SIN:
 				case FANN_COS:
 					break;
