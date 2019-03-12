@@ -654,7 +654,8 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 						break;
 				}
 
-				for(; i != num_connections; i += 4)
+				#pragma omp parallel for reduction(+:neuron_sum)
+				for(i = num_connections & 3; i < num_connections; i += 4)
 				{
 					neuron_sum +=
 						fann_mult(weights[i], neurons[i].value) +
@@ -688,7 +689,8 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 						break;
 				}
 
-				for(; i != num_connections; i += 4)
+				#pragma omp parallel for reduction(+:neuron_sum)
+				for(i = num_connections & 3; i < num_connections; i += 4)
 				{
 					neuron_sum +=
 						fann_mult(weights[i], neuron_pointers[i]->value) +
