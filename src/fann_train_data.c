@@ -1027,14 +1027,15 @@ FANN_EXTERNAL void FANN_API fann_scale_input( struct fann *ann, fann_type *input
 	}
 	
 	for( cur_neuron = 0; cur_neuron < ann->num_input; cur_neuron++ )
-		input_vector[ cur_neuron ] =
-			(
-				( input_vector[ cur_neuron ] - ann->scale_mean_in[ cur_neuron ] )
-				/ ann->scale_deviation_in[ cur_neuron ]
-				- ( (fann_type)-1.0 ) /* This is old_min */
-			)
-			* ann->scale_factor_in[ cur_neuron ]
-			+ ann->scale_new_min_in[ cur_neuron ];
+                if(ann->scale_deviation_in[ cur_neuron ] != 0.0)
+                        input_vector[ cur_neuron ] =
+                                (
+                                        ( input_vector[ cur_neuron ] - ann->scale_mean_in[ cur_neuron ] )
+                                        / ann->scale_deviation_in[ cur_neuron ]
+                                        - ( (fann_type)-1.0 ) /* This is old_min */
+                                )
+                                * ann->scale_factor_in[ cur_neuron ]
+                                + ann->scale_new_min_in[ cur_neuron ];
 }
 
 /*
@@ -1043,21 +1044,22 @@ FANN_EXTERNAL void FANN_API fann_scale_input( struct fann *ann, fann_type *input
 FANN_EXTERNAL void FANN_API fann_scale_output( struct fann *ann, fann_type *output_vector )
 {
 	unsigned cur_neuron;
-	if(ann->scale_mean_in == NULL)
+	if(ann->scale_mean_out == NULL)
 	{
 		fann_error( (struct fann_error *) ann, FANN_E_SCALE_NOT_PRESENT );
 		return;
 	}
 
 	for( cur_neuron = 0; cur_neuron < ann->num_output; cur_neuron++ )
-		output_vector[ cur_neuron ] =
-			(
-				( output_vector[ cur_neuron ] - ann->scale_mean_out[ cur_neuron ] )
-				/ ann->scale_deviation_out[ cur_neuron ]
-				- ( (fann_type)-1.0 ) /* This is old_min */
-			)
-			* ann->scale_factor_out[ cur_neuron ]
-			+ ann->scale_new_min_out[ cur_neuron ];
+                if(ann->scale_deviation_out[ cur_neuron ] != 0.0)
+                        output_vector[ cur_neuron ] =
+                                (
+                                        ( output_vector[ cur_neuron ] - ann->scale_mean_out[ cur_neuron ] )
+                                        / ann->scale_deviation_out[ cur_neuron ]
+                                        - ( (fann_type)-1.0 ) /* This is old_min */
+                                )
+                                * ann->scale_factor_out[ cur_neuron ]
+                                + ann->scale_new_min_out[ cur_neuron ];
 }
 
 /*
@@ -1073,17 +1075,18 @@ FANN_EXTERNAL void FANN_API fann_descale_input( struct fann *ann, fann_type *inp
 	}
 
 	for( cur_neuron = 0; cur_neuron < ann->num_input; cur_neuron++ )
-		input_vector[ cur_neuron ] =
-			(
-				(
-					input_vector[ cur_neuron ]
-					- ann->scale_new_min_in[ cur_neuron ]
-				)
-				/ ann->scale_factor_in[ cur_neuron ]
-				+ ( (fann_type)-1.0 ) /* This is old_min */
-			)
-			* ann->scale_deviation_in[ cur_neuron ]
-			+ ann->scale_mean_in[ cur_neuron ];
+                if(ann->scale_deviation_in[ cur_neuron ] != 0.0)
+                        input_vector[ cur_neuron ] =
+                                (
+                                        (
+                                                input_vector[ cur_neuron ]
+                                                - ann->scale_new_min_in[ cur_neuron ]
+                                        )
+                                        / ann->scale_factor_in[ cur_neuron ]
+                                        + ( (fann_type)-1.0 ) /* This is old_min */
+                                )
+                                * ann->scale_deviation_in[ cur_neuron ]
+                                + ann->scale_mean_in[ cur_neuron ];
 }
 
 /*
@@ -1092,24 +1095,25 @@ FANN_EXTERNAL void FANN_API fann_descale_input( struct fann *ann, fann_type *inp
 FANN_EXTERNAL void FANN_API fann_descale_output( struct fann *ann, fann_type *output_vector )
 {
 	unsigned cur_neuron;
-	if(ann->scale_mean_in == NULL)
+	if(ann->scale_mean_out == NULL)
 	{
 		fann_error( (struct fann_error *) ann, FANN_E_SCALE_NOT_PRESENT );
 		return;
 	}
 
 	for( cur_neuron = 0; cur_neuron < ann->num_output; cur_neuron++ )
-		output_vector[ cur_neuron ] =
-			(
-				(
-					output_vector[ cur_neuron ]
-					- ann->scale_new_min_out[ cur_neuron ]
-				)
-				/ ann->scale_factor_out[ cur_neuron ]
-				+ ( (fann_type)-1.0 ) /* This is old_min */
-			)
-			* ann->scale_deviation_out[ cur_neuron ]
-			+ ann->scale_mean_out[ cur_neuron ];
+                if(ann->scale_deviation_out[ cur_neuron ] != 0.0)
+                        output_vector[ cur_neuron ] =
+                                (
+                                        (
+                                                output_vector[ cur_neuron ]
+                                                - ann->scale_new_min_out[ cur_neuron ]
+                                        )
+                                        / ann->scale_factor_out[ cur_neuron ]
+                                        + ( (fann_type)-1.0 ) /* This is old_min */
+                                )
+                                * ann->scale_deviation_out[ cur_neuron ]
+                                + ann->scale_mean_out[ cur_neuron ];
 }
 
 /*
@@ -1118,7 +1122,7 @@ FANN_EXTERNAL void FANN_API fann_descale_output( struct fann *ann, fann_type *ou
 FANN_EXTERNAL void FANN_API fann_scale_train( struct fann *ann, struct fann_train_data *data )
 {
 	unsigned cur_sample;
-	if(ann->scale_mean_in == NULL)
+	if(ann->scale_mean_in == NULL || ann->scale_mean_out == NULL)
 	{
 		fann_error( (struct fann_error *) ann, FANN_E_SCALE_NOT_PRESENT );
 		return;
@@ -1140,7 +1144,7 @@ FANN_EXTERNAL void FANN_API fann_scale_train( struct fann *ann, struct fann_trai
 FANN_EXTERNAL void FANN_API fann_descale_train( struct fann *ann, struct fann_train_data *data )
 {
 	unsigned cur_sample;
-	if(ann->scale_mean_in == NULL)
+	if(ann->scale_mean_in == NULL || ann->scale_mean_out == NULL)
 	{
 		fann_error( (struct fann_error *) ann, FANN_E_SCALE_NOT_PRESENT );
 		return;

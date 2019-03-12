@@ -155,6 +155,9 @@ switch(activation_function) \
 	case FANN_LINEAR_PIECE_LEAKY: \
 		result = (fann_type)((value < 0) ? value*0.01 : value); \
         break; \
+	case FANN_LINEAR_PIECE_RECT: \
+		result = (fann_type)((value < 0) ? 0 : value); \
+        break; \
 }
 
 #endif

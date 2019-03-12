@@ -774,6 +774,9 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 				case FANN_LINEAR_PIECE_LEAKY:
 					neuron_it->value = (fann_type)((neuron_sum < 0) ? 0.01 * neuron_sum: neuron_sum);
 					break;
+				case FANN_LINEAR_PIECE_RECT:
+					neuron_it->value = (fann_type)((neuron_sum < 0) ? 0: neuron_sum);
+					break;
 				case FANN_ELLIOT:
 				case FANN_ELLIOT_SYMMETRIC:
 				case FANN_GAUSSIAN:

@@ -210,6 +210,11 @@ namespace FANN {
 	 y = x<0? 0.01*x: x
 	 d = x<0? 0.01: 1
 
+	FANN_LINEAR_PIECE_RECT - ReLU
+	 * span: -inf < y < inf
+	 y = x<0? 0: x
+	 d = x<0? 0: 1
+
 	    See also:
 		    <neural_net::set_activation_function_hidden>,
 		    <neural_net::set_activation_function_output>
@@ -231,7 +236,8 @@ namespace FANN {
         LINEAR_PIECE_SYMMETRIC,
         SIN_SYMMETRIC,
         COS_SYMMETRIC,
-	LINEAR_PIECE_LEAKY
+	LINEAR_PIECE_LEAKY,
+	LINEAR_PIECE_RECT
     };
 
     /* Enum: network_type_enum
