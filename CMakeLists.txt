@@ -46,8 +46,16 @@ endif ()
 
 project (FANN)
 
-INCLUDE(CheckCXXCompilerFlag)
-CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
+if(MSVC)
+    if(MSVC_VERSION GREATER_EQUAL "1800")
+        set(COMPILER_SUPPORTS_CXX11 ON)
+    else()
+        set(COMPILER_SUPPORTS_CXX11 OFF)
+    endif()
+else()
+    INCLUDE(CheckCXXCompilerFlag)
+    CHECK_CXX_COMPILER_FLAG(-std=c++11 COMPILER_SUPPORTS_CXX11)
+endif()
 
 IF(NOT COMPILER_SUPPORTS_CXX11)
   message(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Tests will not be compiled. To enable tests use a compiler that supports C++11.")

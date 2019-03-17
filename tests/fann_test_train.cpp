@@ -24,11 +24,19 @@ TEST_F(FannTestTrain, TrainOnDateSimpleXor) {
 TEST_F(FannTestTrain, TrainSimpleIncrementalXor) {
     neural_net net(LAYER, 3, 2, 3, 1);
 
+    fann_type in_0 [] = {0.0, 0.0};
+    fann_type out_0 [] = {0.0};
+    fann_type in_1 [] = {1.0, 0.0};
+    fann_type out_1 [] = {1.0};
+    fann_type in_2 [] = {0.0, 1.0};
+    fann_type out_2 [] = {1.0};
+    fann_type in_3 [] = {1.0, 1.0};
+    fann_type out_3 [] = {0.0};
     for(int i = 0; i < 100000; i++) {
-        net.train((fann_type*) (const fann_type[]) {0.0, 0.0}, (fann_type*) (const fann_type[]) {0.0});
-        net.train((fann_type*) (const fann_type[]) {1.0, 0.0}, (fann_type*) (const fann_type[]) {1.0});
-        net.train((fann_type*) (const fann_type[]) {0.0, 1.0}, (fann_type*) (const fann_type[]) {1.0});
-        net.train((fann_type*) (const fann_type[]) {1.0, 1.0}, (fann_type*) (const fann_type[]) {0.0});
+        net.train((fann_type*) in_0, (fann_type*) out_0);
+        net.train((fann_type*) in_1, (fann_type*) out_1);
+        net.train((fann_type*) in_2, (fann_type*) out_2);
+        net.train((fann_type*) in_3, (fann_type*) out_3);
     }
 
     EXPECT_LT(net.get_MSE(), 0.01);

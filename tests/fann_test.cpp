@@ -61,7 +61,8 @@ void FannTest::AssertWeights(neural_net &net, fann_type min, fann_type max, fann
 
 TEST_F(FannTest, CreateStandardThreeLayers) {
     neural_net net(LAYER, 3, 2, 3, 4);
-    AssertCreateAndCopy(net, 3, (const unsigned int[]) {2, 3, 4}, 11, 25);
+    unsigned int layers[] = {2, 3, 4};
+    AssertCreateAndCopy(net, 3, layers, 11, 25);
 }
 
 TEST_F(FannTest, CreateStandardThreeLayersUsingCreateMethod) {
@@ -90,12 +91,14 @@ TEST_F(FannTest, CreateStandardFourLayersVector) {
 
 TEST_F(FannTest, CreateSparseFourLayers) {
     neural_net net(0.5, 4, 2, 3, 4, 5);
-    AssertCreateAndCopy(net, 4, (const unsigned int[]){2, 3, 4, 5}, 17, 31);
+    unsigned int layers[] = {2, 3, 4, 5};
+    AssertCreateAndCopy(net, 4, layers, 17, 31);
 }
 
 TEST_F(FannTest, CreateSparseFourLayersUsingCreateMethod) {
     ASSERT_TRUE(net.create_sparse(0.5f, 4, 2, 3, 4, 5));
-    AssertCreateAndCopy(net, 4, (const unsigned int[]){2, 3, 4, 5}, 17, 31);
+    unsigned int layers[] = {2, 3, 4, 5};
+    AssertCreateAndCopy(net, 4, layers, 17, 31);
 }
 
 TEST_F(FannTest, CreateSparseArrayFourLayers) {
@@ -118,13 +121,15 @@ TEST_F(FannTest, CreateSparseArrayWithMinimalConnectivity) {
 
 TEST_F(FannTest, CreateShortcutFourLayers) {
     neural_net net(SHORTCUT, 4, 2, 3, 4, 5);
-    AssertCreateAndCopy(net, 4, (const unsigned int[]){2, 3, 4, 5}, 15, 83);
+    unsigned int layers[] = {2, 3, 4, 5};
+    AssertCreateAndCopy(net, 4, layers, 15, 83);
     EXPECT_EQ(SHORTCUT, net.get_network_type());
 }
 
 TEST_F(FannTest, CreateShortcutFourLayersUsingCreateMethod) {
     ASSERT_TRUE(net.create_shortcut(4, 2, 3, 4, 5));
-    AssertCreateAndCopy(net, 4, (const unsigned int[]){2, 3, 4, 5}, 15, 83);
+    unsigned int layers[] = {2, 3, 4, 5};
+    AssertCreateAndCopy(net, 4, layers, 15, 83);
     EXPECT_EQ(SHORTCUT, net.get_network_type());
 }
 
@@ -148,7 +153,8 @@ TEST_F(FannTest, CreateFromFile) {
     ASSERT_TRUE(netToBeSaved.save("tmpfile"));
 
     neural_net netToBeLoaded("tmpfile");
-    AssertCreateAndCopy(netToBeLoaded, 3, (const unsigned int[]){2, 3, 4}, 11, 25);
+    unsigned int layers[] = {2, 3, 4};
+    AssertCreateAndCopy(netToBeLoaded, 3, layers, 11, 25);
 }
 
 TEST_F(FannTest, CreateFromFileUsingCreateMethod) {
@@ -158,7 +164,8 @@ TEST_F(FannTest, CreateFromFileUsingCreateMethod) {
 
     ASSERT_TRUE(net.create_from_file("tmpfile"));
 
-    AssertCreateAndCopy(net, 3, (const unsigned int[]){2, 3, 4}, 11, 25);
+    unsigned int layers[] = {2, 3, 4};
+    AssertCreateAndCopy(net, 3, layers, 11, 25);
 }
 
 TEST_F(FannTest, RandomizeWeights) {
