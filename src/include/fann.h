@@ -37,6 +37,10 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /* Group: Creation, Destruction & Execution */
 	
 #ifndef FANN_INCLUDE
+#ifdef _PLAN9_SOURCE
+#pragma lib "/$M/lib/ape/libfann.a"
+#endif
+
 /* just to allow for inclusion of fann.h in normal stuations where only floats are needed */ 
 #ifdef FIXEDFANN
 #include "fixedfann.h"
@@ -45,7 +49,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #endif	/* FIXEDFANN  */
 	
 #else
-	
+
+#ifndef PLAN9
+
 /* COMPAT_TIME REPLACEMENT */ 
 #ifndef _WIN32
 #include <sys/time.h>
@@ -58,6 +64,8 @@ extern unsigned long __stdcall GetTickCount(void);
 #include <windows.h>
 #endif	/* _MSC_EXTENSIONS */
 #endif	/* _WIN32 */
+
+#endif
 		
 #ifndef __fann_h__
 #define __fann_h__
@@ -113,11 +121,14 @@ extern "C"
  to use dll's. To use dll's FANN_USE_DLL has to be defined before
  including the fann headers.
 */ 
+#ifndef PLAN9
 #if defined(_MSC_VER) && (_MSC_VER > 1300)
 #ifndef FANN_NO_DLL
 #define FANN_USE_DLL
 #endif	/* FANN_USE_LIB */
 #endif	/* _MSC_VER */
+#endif
+#ifndef PLAN9
 #if defined(_MSC_VER) && (defined(FANN_USE_DLL) || defined(FANN_DLL_EXPORTS))
 #ifdef FANN_DLL_EXPORTS
 #define FANN_EXTERNAL __declspec(dllexport)
@@ -126,9 +137,12 @@ extern "C"
 #endif	/* FANN_DLL_EXPORTS*/
 #define FANN_API __stdcall
 #else							/*  */
+#ifndef PLAN9
 #define FANN_EXTERNAL
 #define FANN_API
+#endif
 #endif	/* _MSC_VER */
+#endif
 /* ----- End of macros used to define DLL external entrypoints ----- */ 
 
 #include "fann_error.h"

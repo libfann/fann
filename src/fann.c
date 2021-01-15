@@ -17,12 +17,21 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef PLAN9
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <time.h>
+#include <math.h>
+#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#endif
 
 #include "config.h"
 #include "fann.h"
@@ -1836,7 +1845,7 @@ FANN_EXTERNAL void FANN_API fann_enable_seed_rand()
 /* INTERNAL FUNCTION
    Seed the random function.
  */
-void fann_seed_rand()
+void fann_seed_rand(void)
 {
 #ifndef _WIN32
 	FILE *fp = fopen("/dev/urandom", "r");

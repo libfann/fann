@@ -21,6 +21,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#ifdef PLAN9
+#include <math.h>
+#define sqrtf sqrt
+#endif
 
 #include "config.h"
 #include "fann.h"

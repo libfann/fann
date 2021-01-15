@@ -20,7 +20,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef __fann_error_h__
 #define __fann_error_h__
 
+#ifndef PLAN9
 #include <stdio.h>
+#endif
 
 #define FANN_ERRSTR_MAX 128
 struct fann_error;

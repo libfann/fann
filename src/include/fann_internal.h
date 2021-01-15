@@ -22,9 +22,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /* internal include file, not to be included directly
  */
 
+#ifndef PLAN9
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#endif
 #include "fann_data.h"
 
 #define FANN_FIX_VERSION "FANN_FIX_2.0"
@@ -70,7 +72,7 @@ int fann_save_train_internal_fd(struct fann_train_data *data, FILE * file, const
 								 unsigned int save_as_fixed, unsigned int decimal_point);
 
 void fann_update_stepwise(struct fann *ann);
-void fann_seed_rand();
+void fann_seed_rand(void);
 
 void fann_error(struct fann_error *errdat, const enum fann_errno_enum errno_f, ...);
 void fann_init_error_data(struct fann_error *errdat);
