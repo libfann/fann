@@ -1,0 +1,11 @@
+</$objtype/mkfile
+
+CC=pcc
+CFLAGS=-D_PLAN9_SOURCE -c
+NOMK=(parallel_train.c)
+TARG=`{ ls *.c | grep -v '^('$NOMK')$' | sed 's,.c$,,' }
+PROGS=${TARG:%=$O.%}
+
+all:V: $PROGS
+
+</sys/src/cmd/mkmany
