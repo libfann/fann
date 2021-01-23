@@ -1,0 +1,31 @@
+</$objtype/mkfile
+
+CC=pcc
+CFLAGS=-Iinclude/ -DPLAN9 -DFANN_API'=' -DFANN_EXTERNAL'=' -c
+LIB=/$objtype/lib/ape/libfann.a
+
+OFILES=\
+	fann.$O \
+	fann_cascade.$O \
+	fann_error.$O \
+	fann_io.$O \
+	fann_train.$O \
+	fann_train_data.$O
+
+HFILES=\
+	include/fann.h \
+	include/fann_activation.h \
+	include/fann_cascade.h \
+	include/fann_data.h \
+	include/fann_error.h \
+	include/fann_internal.h \
+	include/fann_io.h \
+	include/fann_train.h \
+	include/fixedfann.h \
+	include/floatfann.h \
+	include/doublefann.h
+
+install:V:
+	cp $HFILES /sys/include/ape
+
+</sys/src/cmd/mksyslib

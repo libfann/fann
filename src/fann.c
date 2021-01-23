@@ -17,12 +17,21 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef PLAN9
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/time.h>
+#include <time.h>
+#include <math.h>
+#else
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#endif
 
 #include "config.h"
 #include "fann.h"
@@ -654,7 +663,8 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 						break;
 				}
 
-				for(; i != num_connections; i += 4)
+				#pragma omp parallel for reduction(+:neuron_sum)
+				for(i = num_connections & 3; i < num_connections; i += 4)
 				{
 					neuron_sum +=
 						fann_mult(weights[i], neurons[i].value) +
@@ -688,7 +698,8 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 						break;
 				}
 
-				for(; i != num_connections; i += 4)
+				#pragma omp parallel for reduction(+:neuron_sum)
+				for(i = num_connections & 3; i < num_connections; i += 4)
 				{
 					neuron_sum +=
 						fann_mult(weights[i], neuron_pointers[i]->value) +
@@ -768,6 +779,12 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 					break;
 				case FANN_LINEAR_PIECE_SYMMETRIC:
 					neuron_it->value = (fann_type)((neuron_sum < -multiplier) ? -multiplier : (neuron_sum > multiplier) ? multiplier : neuron_sum);
+					break;
+				case FANN_LINEAR_PIECE_LEAKY:
+					neuron_it->value = (fann_type)((neuron_sum < 0) ? 0.01 * neuron_sum: neuron_sum);
+					break;
+				case FANN_LINEAR_PIECE_RECT:
+					neuron_it->value = (fann_type)((neuron_sum < 0) ? 0: neuron_sum);
 					break;
 				case FANN_ELLIOT:
 				case FANN_ELLIOT_SYMMETRIC:
@@ -1828,7 +1845,7 @@ FANN_EXTERNAL void FANN_API fann_enable_seed_rand()
 /* INTERNAL FUNCTION
    Seed the random function.
  */
-void fann_seed_rand()
+void fann_seed_rand(void)
 {
 #ifndef _WIN32
 	FILE *fp = fopen("/dev/urandom", "r");

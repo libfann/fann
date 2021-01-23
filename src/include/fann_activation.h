@@ -33,13 +33,19 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 __doublefann_h__ is not defined
 */
 #ifndef __doublefann_h__
+#ifndef PLAN9
 #define FANN_EXP(x) expf(x)
-#define FANN_SIN(x) sinf(x)
-#define FANN_COS(x) cosf(x)
+#define _FANN_SIN(x) sinf(x)
+#define _FANN_COS(x) cosf(x)
 #else
 #define FANN_EXP(x) exp(x)
-#define FANN_SIN(x) sin(x)
-#define FANN_COS(x) cos(x)
+#define _FANN_SIN(x) sin(x)
+#define _FANN_COS(x) cos(x)
+#endif
+#else
+#define FANN_EXP(x) exp(x)
+#define _FANN_SIN(x) sin(x)
+#define _FANN_COS(x) cos(x)
 #endif
 
 #define fann_linear_func(v1, r1, v2, r2, sum) (((((r2)-(r1)) * ((sum)-(v1)))/((v2)-(v1))) + (r1))
@@ -80,19 +86,19 @@ __doublefann_h__ is not defined
 #define fann_elliot_symmetric_derive(steepness, value, sum) (steepness * 1.0f / ((1.0f + fann_abs(sum)) * (1.0f + fann_abs(sum))))
 
 /* FANN_SIN_SYMMETRIC */
-#define fann_sin_symmetric_real(sum) (FANN_SIN(sum))
+#define fann_sin_symmetric_real(sum) (_FANN_SIN(sum))
 #define fann_sin_symmetric_derive(steepness, sum) (steepness*cos(steepness*sum))
 
 /* FANN_COS_SYMMETRIC */
-#define fann_cos_symmetric_real(sum) (FANN_COS(sum))
+#define fann_cos_symmetric_real(sum) (_FANN_COS(sum))
 #define fann_cos_symmetric_derive(steepness, sum) (steepness*-sin(steepness*sum))
 
 /* FANN_SIN */
-#define fann_sin_real(sum) (FANN_SIN(sum)/2.0f+0.5f)
+#define fann_sin_real(sum) (_FANN_SIN(sum)/2.0f+0.5f)
 #define fann_sin_derive(steepness, sum) (steepness*cos(steepness*sum)/2.0f)
 
 /* FANN_COS */
-#define fann_cos_real(sum) (FANN_COS(sum)/2.0f+0.5f)
+#define fann_cos_real(sum) (_FANN_COS(sum)/2.0f+0.5f)
 #define fann_cos_derive(steepness, sum) (steepness*-sin(steepness*sum)/2.0f)
 
 #define fann_activation_switch(activation_function, value, result) \
@@ -151,6 +157,12 @@ switch(activation_function) \
         break; \
 	case FANN_GAUSSIAN_STEPWISE: \
         result = 0; \
+        break; \
+	case FANN_LINEAR_PIECE_LEAKY: \
+		result = (fann_type)((value < 0) ? value*0.01 : value); \
+        break; \
+	case FANN_LINEAR_PIECE_RECT: \
+		result = (fann_type)((value < 0) ? 0 : value); \
         break; \
 }
 

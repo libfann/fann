@@ -17,6 +17,12 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef PLAN9
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#endif
+
 #include "config.h"
 #include "fann.h"
 #include "string.h"
@@ -741,6 +747,8 @@ fann_type fann_train_candidates_epoch(struct fann *ann, struct fann_train_data *
 				case FANN_GAUSSIAN_STEPWISE:
 				case FANN_ELLIOT:
 				case FANN_LINEAR_PIECE:
+				case FANN_LINEAR_PIECE_LEAKY:
+				case FANN_LINEAR_PIECE_RECT:
 				case FANN_SIN:
 				case FANN_COS:
 					break;

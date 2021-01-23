@@ -17,6 +17,10 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
 
+#ifdef PLAN9
+#define sqrtf sqrt
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -42,6 +46,10 @@ fann_type fann_activation_derived(unsigned int activation_function,
 		case FANN_LINEAR_PIECE:
 		case FANN_LINEAR_PIECE_SYMMETRIC:
 			return (fann_type) fann_linear_derive(steepness, value);
+		case FANN_LINEAR_PIECE_LEAKY:
+			return (fann_type) ((value<0)? steepness * 0.01: steepness);
+		case FANN_LINEAR_PIECE_RECT:
+			return (fann_type) ((value<0)? 0: steepness);
 		case FANN_SIGMOID:
 		case FANN_SIGMOID_STEPWISE:
 			value = fann_clip(value, 0.01f, 0.99f);
@@ -133,6 +141,8 @@ fann_type fann_update_MSE(struct fann *ann, struct fann_neuron* neuron, fann_typ
 		case FANN_LINEAR_PIECE:
 		case FANN_SIN:
 		case FANN_COS:
+		case FANN_LINEAR_PIECE_LEAKY:
+		case FANN_LINEAR_PIECE_RECT:
 			break;
 	}
 

@@ -19,9 +19,14 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#ifndef PLAN9
 #include <stdarg.h>
+#endif
 #include <string.h>
 #include <limits.h>
+#ifdef PLAN9
+#include <math.h>
+#endif
 
 #include "config.h"
 #include "fann.h"
