@@ -1,3 +1,4 @@
+*.cbp
 *.sdf
 *.suo
 *.user
@@ -45,6 +46,8 @@ libdoublefann.so*
 libfixedfann.so*
 libfloatfann.so*
 tests/fann_tests
+Testing/
+generated/
 tmpFile
 tmpfile
 cascade_train.net
