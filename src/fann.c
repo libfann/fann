@@ -769,6 +769,12 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 				case FANN_LINEAR_PIECE_SYMMETRIC:
 					neuron_it->value = (fann_type)((neuron_sum < -multiplier) ? -multiplier : (neuron_sum > multiplier) ? multiplier : neuron_sum);
 					break;
+				case FANN_RELU:
+					neuron_it->value = (fann_type)(neuron_sum > 0 ? neuron_sum : 0);
+					break;
+				case FANN_LEAKY_RELU:
+					neuron_it->value = (fann_type)(neuron_sum > 0 ? neuron_sum : neuron_sum / 100.0);
+					break;
 				case FANN_ELLIOT:
 				case FANN_ELLIOT_SYMMETRIC:
 				case FANN_GAUSSIAN:
@@ -894,6 +900,7 @@ FANN_EXTERNAL struct fann* FANN_API fann_copy(struct fann* orig)
 
     copy->learning_rate = orig->learning_rate;
     copy->learning_momentum = orig->learning_momentum;
+    copy->learning_l2_norm = orig->learning_l2_norm;
     copy->connection_rate = orig->connection_rate;
     copy->network_type = orig->network_type;
     copy->num_MSE = orig->num_MSE;
@@ -1284,6 +1291,7 @@ FANN_EXTERNAL void FANN_API fann_print_parameters(struct fann *ann)
 	printf("Bit fail limit                       :%8.3f\n", ann->bit_fail_limit);
 	printf("Learning rate                        :%8.3f\n", ann->learning_rate);
 	printf("Learning momentum                    :%8.3f\n", ann->learning_momentum);
+	printf("Learning l2 norm                     :%8.3f\n", ann->learning_l2_norm);
 	printf("Quickprop decay                      :%11.6f\n", ann->quickprop_decay);
 	printf("Quickprop mu                         :%8.3f\n", ann->quickprop_mu);
 	printf("RPROP increase factor                :%8.3f\n", ann->rprop_increase_factor);
@@ -1442,6 +1450,74 @@ FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann, struct f
     }
 }
 
+FANN_EXTERNAL fann_type FANN_API fann_get_l1_norm(struct fann *ann)
+{
+    struct fann_neuron *first_neuron;
+    struct fann_layer *layer_it;
+    struct fann_neuron *neuron_it;
+    unsigned int idx;
+    unsigned int source_index;
+    fann_type l1_term;
+
+    first_neuron = ann->first_layer->first_neuron;
+
+    source_index = 0;
+    l1_term = 0.f;
+    
+    /* The following assumes that the last unused bias has no connections */
+
+    /* for each layer */
+    for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++){
+        /* for each neuron */
+        for(neuron_it = layer_it->first_neuron; neuron_it != layer_it->last_neuron; neuron_it++){
+            /* for each connection */
+            for (idx = neuron_it->first_con; idx < neuron_it->last_con; idx++){
+                /* Assign the source, destination and weight */
+                l1_term += fabs(ann->weights[source_index]);
+
+                source_index++;
+            }
+        }
+    }
+
+    return l1_term;
+}
+
+FANN_EXTERNAL fann_type FANN_API fann_get_l2_norm(struct fann *ann)
+{
+    struct fann_neuron *first_neuron;
+    struct fann_layer *layer_it;
+    struct fann_neuron *neuron_it;
+    unsigned int idx;
+    unsigned int source_index;
+    fann_type l2_term;
+
+    first_neuron = ann->first_layer->first_neuron;
+
+    source_index = 0;
+    l2_term = 0.f;
+    
+    /* The following assumes that the last unused bias has no connections */
+
+    /* for each layer */
+    for(layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++){
+        /* for each neuron */
+        for(neuron_it = layer_it->first_neuron; neuron_it != layer_it->last_neuron; neuron_it++){
+            /* for each connection */
+            for (idx = neuron_it->first_con; idx < neuron_it->last_con; idx++){
+                /* Assign the source, destination and weight */
+                l2_term += ann->weights[source_index] * ann->weights[source_index];
+
+                source_index++;
+            }
+        }
+    }
+
+    return sqrt(l2_term);
+}
+
+
+
 FANN_EXTERNAL void FANN_API fann_set_weight_array(struct fann *ann,
     struct fann_connection *connections, unsigned int num_connections)
 {
@@ -1585,6 +1661,7 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
 	ann->errstr = NULL;
 	ann->learning_rate = 0.7f;
 	ann->learning_momentum = 0.0;
+	ann->learning_l2_norm = 0.0;
 	ann->total_neurons = 0;
 	ann->total_connections = 0;
 	ann->num_input = 0;

@@ -493,6 +493,10 @@ FANN_EXTERNAL void FANN_API fann_get_bias_array(struct fann *ann, unsigned int *
 FANN_EXTERNAL void FANN_API fann_get_connection_array(struct fann *ann,
     struct fann_connection *connections);
 
+FANN_EXTERNAL fann_type FANN_API fann_get_l1_norm(struct fann *ann);
+
+FANN_EXTERNAL fann_type FANN_API fann_get_l2_norm(struct fann *ann);
+
 /* Function: fann_set_weight_array
 
     Set connections in the network.

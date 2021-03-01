@@ -226,7 +226,10 @@ enum fann_activationfunc_enum
 	FANN_SIN_SYMMETRIC,
 	FANN_COS_SYMMETRIC,
 	FANN_SIN,
-	FANN_COS
+	FANN_COS,
+	FANN_SIGMOID_SYMMETRIC_LECUN,
+	FANN_RELU,
+	FANN_LEAKY_RELU
 };
 
 /* Constant: FANN_ACTIVATIONFUNC_NAMES
@@ -258,7 +261,10 @@ static char const *const FANN_ACTIVATIONFUNC_NAMES[] = {
 	"FANN_SIN_SYMMETRIC",
 	"FANN_COS_SYMMETRIC",
 	"FANN_SIN",
-	"FANN_COS"
+	"FANN_COS",
+	"FANN_SIGMOID_SYMMETRIC_LECUN",
+	"FANN_RELU",
+	"FANN_LEAKY_RELU"
 };
 
 /* Enum: fann_errorfunc_enum
@@ -491,6 +497,7 @@ struct fann
 
 	/* The learning momentum used for backpropagation algorithm. */
 	float learning_momentum;
+	float learning_l2_norm;
 
 	/* the connection rate of the network
 	 * between 0 and 1, 1 meaning fully connected

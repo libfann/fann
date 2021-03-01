@@ -59,6 +59,10 @@ __doublefann_h__ is not defined
 #define fann_sigmoid_symmetric_real(sum) (2.0f/(1.0f + FANN_EXP(-2.0f * sum)) - 1.0f)
 #define fann_sigmoid_symmetric_derive(steepness, value) steepness * (1.0f - (value*value))
 
+/* FANN_SIGMOID_SYMMETRIC_LECUN */
+#define fann_sigmoid_symmetric_lecun_real(sum) sqrt(3.f) * (2.0f/(1.0f + exp(-2.0f * sum)) - 1.0f)
+#define fann_sigmoid_symmetric_lecun_derive(steepness, value) steepness * ( sqrt(3.f) - (value*value)/sqrt(3.f) )
+
 /* FANN_GAUSSIAN */
 /* #define fann_gaussian(steepness, sum) (exp(-sum * steepness * sum * steepness)) */
 #define fann_gaussian_real(sum) (FANN_EXP(-sum * sum))
@@ -95,6 +99,13 @@ __doublefann_h__ is not defined
 #define fann_cos_real(sum) (FANN_COS(sum)/2.0f+0.5f)
 #define fann_cos_derive(steepness, sum) (steepness*-sin(steepness*sum)/2.0f)
 
+/* FANN_RELU */
+#define fann_relu_real(sum) (sum > 0.0 ? sum : 0.0)
+#define fann_relu_derive(steepness, sum) (sum > 0.0 ? steepness : 0.0)
+
+#define fann_leaky_relu_real(sum) (sum > 0.0 ? sum : (sum / 100.0))
+#define fann_leaky_relu_derive(steepness, sum) (sum > 0.0 ? steepness : (steepness / 100.0))
+
 #define fann_activation_switch(activation_function, value, result) \
 switch(activation_function) \
 { \
@@ -110,6 +121,9 @@ switch(activation_function) \
 	case FANN_SIGMOID: \
 		result = (fann_type)fann_sigmoid_real(value); \
         break; \
+	case FANN_SIGMOID_SYMMETRIC_LECUN: \
+		result = (fann_type)fann_sigmoid_symmetric_lecun_real(value); \
+	break; \
 	case FANN_SIGMOID_SYMMETRIC: \
 		result = (fann_type)fann_sigmoid_symmetric_real(value); \
         break; \
@@ -152,6 +166,12 @@ switch(activation_function) \
 	case FANN_GAUSSIAN_STEPWISE: \
         result = 0; \
         break; \
+	case FANN_RELU: \
+	result = (fann_type)fann_relu_real(value); \
+	break; \
+	case FANN_LEAKY_RELU: \
+	result = (fann_type)fann_leaky_relu_real(value); \
+	break; \
 }
 
 #endif
