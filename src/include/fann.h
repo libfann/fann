@@ -153,6 +153,10 @@ extern "C"
 #include "fann_cascade.h"
 #include "fann_io.h"
 
+#ifndef PLAN9
+int fann_setup_opencl(struct fann *ann);
+#endif
+
 /* Function: fann_create_standard
 	
 	Creates a standard fully connected backpropagation neural network.

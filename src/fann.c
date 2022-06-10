@@ -31,10 +31,44 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <CL/cl.h>
 #endif
 
 #include "config.h"
 #include "fann.h"
+
+unsigned char using_opencl = 0;
+
+#ifndef PLAN9
+
+int fann_setup_opencl(struct fann *ann)
+{
+	cl_int err;
+	cl_uint num_devices;
+	cl_device_id *devices;
+
+	ann->clctx = clCreateContextFromType(NULL, CL_DEVICE_TYPE_GPU, NULL, NULL, &err);
+	if (ann->clctx == NULL) {
+		fprintf(stderr, "clCreateContextFromType error: %d\n", err);
+		return -1;
+	}
+
+	if ((err = clGetContextInfo(ann->clctx, CL_CONTEXT_NUM_DEVICES, sizeof(num_devices), &num_devices, NULL)) != CL_SUCCESS) {
+		fprintf(stderr, "clGetContextInfo error: %d\n", err);
+		return -1;
+	}
+
+	fprintf(stderr, "number of GPUs: %d\n", num_devices);
+	devices = calloc(num_devices, sizeof(cl_device_id));
+	if ((err = clGetContextInfo(ann->clctx, CL_CONTEXT_DEVICES, sizeof(cl_device_id) * num_devices, devices, NULL)) != CL_SUCCESS) {
+		fprintf(stderr, "clGetContextInfo error: %d\n", err);
+		return -1;
+	}
+
+	return 0;
+}
+
+#endif
 
 /* #define FANN_NO_SEED */
 
@@ -157,6 +191,11 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 		fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
 		return NULL;
 	}
+
+#ifndef PLAN9
+	if (fann_setup_opencl(ann) == 0)
+		using_opencl = 1;
+#endif
 
 	ann->connection_rate = connection_rate;
 #ifdef FIXEDFANN
@@ -648,31 +687,35 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 					neurons = (layer_it - 1)->first_neuron;
 				}
 
+				if (using_opencl == 0) {
+					/* unrolled loop start */
+					i = num_connections & 3;	/* same as modulo 4 */
+					switch (i)
+					{
+						case 3:
+							neuron_sum += fann_mult(weights[2], neurons[2].value);
+						case 2:
+							neuron_sum += fann_mult(weights[1], neurons[1].value);
+						case 1:
+							neuron_sum += fann_mult(weights[0], neurons[0].value);
+						case 0:
+							break;
+					}
 
-				/* unrolled loop start */
-				i = num_connections & 3;	/* same as modulo 4 */
-				switch (i)
-				{
-					case 3:
-						neuron_sum += fann_mult(weights[2], neurons[2].value);
-					case 2:
-						neuron_sum += fann_mult(weights[1], neurons[1].value);
-					case 1:
-						neuron_sum += fann_mult(weights[0], neurons[0].value);
-					case 0:
-						break;
+					#pragma omp parallel for reduction(+:neuron_sum)
+					for(i = num_connections & 3; i < num_connections; i += 4)
+					{
+						neuron_sum +=
+							fann_mult(weights[i], neurons[i].value) +
+							fann_mult(weights[i + 1], neurons[i + 1].value) +
+							fann_mult(weights[i + 2], neurons[i + 2].value) +
+							fann_mult(weights[i + 3], neurons[i + 3].value);
+					}
+					/* unrolled loop end */
+				} else {
+#ifndef PLAN9
+#endif
 				}
-
-				#pragma omp parallel for reduction(+:neuron_sum)
-				for(i = num_connections & 3; i < num_connections; i += 4)
-				{
-					neuron_sum +=
-						fann_mult(weights[i], neurons[i].value) +
-						fann_mult(weights[i + 1], neurons[i + 1].value) +
-						fann_mult(weights[i + 2], neurons[i + 2].value) +
-						fann_mult(weights[i + 3], neurons[i + 3].value);
-				}
-				/* unrolled loop end */
 
 				/*
 				 * for(i = 0;i != num_connections; i++){

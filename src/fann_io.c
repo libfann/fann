@@ -32,6 +32,8 @@
 #include "fann.h"
 #include "fann_data.h"
 
+extern unsigned char using_opencl;
+
 /* Create a network from a configuration file.
  */
 FANN_EXTERNAL struct fann *FANN_API fann_create_from_file(const char *configuration_file)
@@ -46,6 +48,12 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_from_file(const char *configurat
 	}
 	ann = fann_create_from_fd(conf, configuration_file);
 	fclose(conf);
+
+#ifndef PLAN9
+	if (fann_setup_opencl(ann) == 0)
+		using_opencl = 1;
+#endif
+
 	return ann;
 }
 

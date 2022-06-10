@@ -22,4 +22,4 @@ else()
 endif()
 
 ADD_EXECUTABLE(fann_tests main.cpp fann_test.cpp fann_test_data.cpp fann_test_train.cpp)
-target_link_libraries(fann_tests gtest doublefann)
+target_link_libraries(fann_tests gtest doublefann OpenCL)
