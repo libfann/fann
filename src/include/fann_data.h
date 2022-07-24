@@ -434,7 +434,7 @@ struct fann_neuron
 	/* The sum of the inputs multiplied with the weights */
 	fann_type sum;
 	/* The value of the activation function applied to the sum */
-	fann_type value;
+	fann_type *value;
 	/* The steepness of the activation function */
 	fann_type activation_steepness;
 	/* Used to choose which activation function to use */
@@ -459,6 +459,8 @@ struct fann_layer
 	/* A pointer to the neuron past the last neuron in the layer */
 	/* the number of neurons is last_neuron - first_neuron */
 	struct fann_neuron *last_neuron;
+
+	fann_type *values;
 };
 
 /* Struct: struct fann_error
@@ -778,7 +780,10 @@ struct fann
 	 * Not allocated if not used.	 
 	 */
 	fann_type *prev_weights_deltas;
-	
+
+	GLuint sumShaderID;
+	GLuint sumShaderProgram;
+
 #ifndef FIXEDFANN
 	/* Arithmetic mean used to remove steady component in input data.  */
 	float *scale_mean_in;

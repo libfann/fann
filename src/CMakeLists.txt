@@ -10,15 +10,14 @@ ELSE()
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 ENDIF(NOT OPENMP_FOUND OR DISABLE_PARALLEL_FANN)
 
-FIND_PACKAGE(OpenCL)
-IF(OPENCL_FOUND)
-  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -I${OpenCL_INCLUDE_DIR}")
-  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -I${OpenCL_INCLUDE_DIR}")
-ENDIF(OPENCL_FOUND)
+FIND_PACKAGE(OpenGL)
+IF(OpenGL_FOUND)
+  SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -I${OpenGL_INCLUDE_DIR}")
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -I${OpenGL_INCLUDE_DIR}")
+ENDIF(OpenGL_FOUND)
 
 ADD_SUBDIRECTORY( include )
 
-#INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include ${CMAKE_CURRENT_SOURCE_DIR}/include/optimized/opencl)
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/include)
 ADD_DEFINITIONS(-D_REENTRANT)
 if (WIN32)
@@ -88,12 +87,6 @@ INSTALL(TARGETS fixedfann fixedfann_static LIBRARY DESTINATION ${LIB_INSTALL_DIR
 
 SET(fann_LIB_SRCS
         floatfann.c
-#	optimized/opencl/fann.c
-#	optimized/opencl/fann_cl.cpp
-#	optimized/opencl/fann_cl_kernel.c
-#	optimized/opencl/fann_cl_train.c
-#	optimized/opencl/fann_cl_ann.c
-#	optimized/opencl/fann_cl_run.c	
         )
 
 ADD_LIBRARY(fann SHARED ${fann_LIB_SRCS})

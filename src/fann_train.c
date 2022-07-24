@@ -266,7 +266,7 @@ void fann_compute_MSE(struct fann *ann, fann_type * desired_output)
 
 	for(; last_layer_begin != last_layer_end; last_layer_begin++)
 	{
-		neuron_value = last_layer_begin->value;
+		neuron_value = *(last_layer_begin->value);
 		neuron_diff = *desired_output - neuron_value;
 
 		neuron_diff = fann_update_MSE(ann, last_layer_begin, neuron_diff);
@@ -367,7 +367,7 @@ void fann_backpropagate_MSE(struct fann *ann)
 		for(neuron_it = (layer_it - 1)->first_neuron; neuron_it != last_neuron; neuron_it++)
 		{
 			*error_prev_layer *= fann_activation_derived(neuron_it->activation_function, 
-				neuron_it->activation_steepness, neuron_it->value, neuron_it->sum);
+				neuron_it->activation_steepness, *(neuron_it->value), neuron_it->sum);
 			error_prev_layer++;
 		}
 		
@@ -431,7 +431,7 @@ void fann_update_weights(struct fann *ann)
 				weights_deltas = deltas_begin + neuron_it->first_con;
 				for(i = 0; i != num_connections; i++)
 				{
-					delta_w = tmp_error * prev_neurons[i].value + learning_momentum * weights_deltas[i];
+					delta_w = tmp_error * *(prev_neurons[i].value) + learning_momentum * weights_deltas[i];
 					weights[i] += delta_w ;
 					weights_deltas[i] = delta_w;
 				}
@@ -447,7 +447,7 @@ void fann_update_weights(struct fann *ann)
 				weights_deltas = deltas_begin + neuron_it->first_con;
 				for(i = 0; i != num_connections; i++)
 				{
-					delta_w = tmp_error * prev_neurons[i].value + learning_momentum * weights_deltas[i];
+					delta_w = tmp_error * *(prev_neurons[i].value) + learning_momentum * weights_deltas[i];
 					weights[i] += delta_w;
 					weights_deltas[i] = delta_w;
 				}
@@ -524,7 +524,7 @@ void fann_update_slopes_batch(struct fann *ann, struct fann_layer *layer_begin,
 				num_connections = neuron_it->last_con - neuron_it->first_con;
 				for(i = 0; i != num_connections; i++)
 				{
-					neuron_slope[i] += tmp_error * prev_neurons[i].value;
+					neuron_slope[i] += tmp_error * *(prev_neurons[i].value);
 				}
 			}
 		}
@@ -538,7 +538,7 @@ void fann_update_slopes_batch(struct fann *ann, struct fann_layer *layer_begin,
 				connections = ann->connections + neuron_it->first_con;
 				for(i = 0; i != num_connections; i++)
 				{
-					neuron_slope[i] += tmp_error * connections[i]->value;
+					neuron_slope[i] += tmp_error * *(connections[i]->value);
 				}
 			}
 		}

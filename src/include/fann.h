@@ -140,6 +140,7 @@ extern "C"
 #ifndef PLAN9
 #define FANN_EXTERNAL
 #define FANN_API
+#include <GL/gl.h>
 #endif
 #endif	/* _MSC_VER */
 #endif
@@ -152,6 +153,8 @@ extern "C"
 #include "fann_train.h"
 #include "fann_cascade.h"
 #include "fann_io.h"
+
+#define MULTILINE_STRING(...) #__VA_ARGS__
 
 /* Function: fann_create_standard
 	

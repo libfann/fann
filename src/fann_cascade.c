@@ -452,7 +452,7 @@ int fann_initialize_candidates(struct fann *ann)
 				/* TODO candidates should actually be created both in
 				 * the last layer before the output layer, and in a new layer.
 				 */
-				neurons[candidate_index].value = 0;
+				*(neurons[candidate_index].value) = 0;
 				neurons[candidate_index].sum = 0;
 				
 				neurons[candidate_index].activation_function =
@@ -588,11 +588,11 @@ void fann_update_candidate_slopes(struct fann *ann)
 		switch (i)
 		{
 			case 3:
-				cand_sum += weights[2] * neurons[2].value;
+				cand_sum += weights[2] * *(neurons[2].value);
 			case 2:
-				cand_sum += weights[1] * neurons[1].value;
+				cand_sum += weights[1] * *(neurons[1].value);
 			case 1:
-				cand_sum += weights[0] * neurons[0].value;
+				cand_sum += weights[0] * *(neurons[0].value);
 			case 0:
 				break;
 		}
@@ -600,9 +600,9 @@ void fann_update_candidate_slopes(struct fann *ann)
 		for(; i != num_connections; i += 4)
 		{
 			cand_sum +=
-				weights[i] * neurons[i].value +
-				weights[i + 1] * neurons[i + 1].value +
-				weights[i + 2] * neurons[i + 2].value + weights[i + 3] * neurons[i + 3].value;
+				weights[i] * *(neurons[i].value) +
+				weights[i + 1] * *(neurons[i + 1].value) +
+				weights[i + 2] * *(neurons[i + 2].value) + weights[i + 3] * *(neurons[i + 3].value);
 		}
 		/*
 		 * for(i = 0; i < num_connections; i++){
@@ -623,7 +623,7 @@ void fann_update_candidate_slopes(struct fann *ann)
 		/* printf("%f = sigmoid(%f);\n", activation, cand_sum); */
 
 		cand_it->sum = cand_sum;
-		cand_it->value = activation;
+		*(cand_it->value) = activation;
 
 		derived = fann_activation_derived(cand_it->activation_function,
 										  cand_it->activation_steepness, activation, cand_sum);
@@ -661,7 +661,7 @@ void fann_update_candidate_slopes(struct fann *ann)
 		cand_slopes = ann->train_slopes + cand_it->first_con;
 		for(i = 0; i < num_connections; i++)
 		{
-			cand_slopes[i] -= error_value * neurons[i].value;
+			cand_slopes[i] -= error_value * *(neurons[i].value);
 		}
 	}
 }
@@ -931,7 +931,7 @@ void fann_add_candidate_neuron(struct fann *ann, struct fann_layer *layer)
 	}
 
 	/* Now inititalize the actual neuron */
-	neuron_place->value = 0;
+	*(neuron_place->value) = 0;
 	neuron_place->sum = 0;
 	neuron_place->activation_function = candidate->activation_function;
 	neuron_place->activation_steepness = candidate->activation_steepness;

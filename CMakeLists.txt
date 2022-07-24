@@ -34,7 +34,7 @@ IF(BIICODE)
 	  TARGET_COMPILE_OPTIONS(${BII_LIB_TARGET} PUBLIC -DFANN_DLL_EXPORTS)
 	ELSE()
 	  IF(${examples_present})
-	    TARGET_LINK_LIBRARIES(${BII_BLOCK_TARGET} INTERFACE gomp)
+	    TARGET_LINK_LIBRARIES(${BII_BLOCK_TARGET} INTERFACE gomp OpenGL)
 	  ENDIF()
 	ENDIF()
 ELSE()
@@ -66,7 +66,7 @@ INCLUDE(DefineInstallationPaths)
 
 
 configure_file (cmake/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/src/include/config.h)
-include_directories (${CMAKE_CURRENT_BINARY_DIR}/src/include/ ${CMAKE_CURRENT_BINARY_DIR}/src/include/optimized/opencl/)
+include_directories (${CMAKE_CURRENT_BINARY_DIR}/src/include/)
 
 configure_file (cmake/fann.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/fann.pc @ONLY)
 

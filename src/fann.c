@@ -31,10 +31,68 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
+#include <GLES3/gl32.h>
 #endif
 
 #include "config.h"
 #include "fann.h"
+
+static const char* sumShader = MULTILINE_STRING(#version 300 es
+	precision mediump float;
+
+	layout(local_size_x = 100, local_size_y = 1, local_size_z = 1) in;
+	layout(std430) buffer;
+	layout(binding = 0, r32f) writeonly uniform image img_output;
+
+	layout(binding = 0) buffer Input0 {
+		float elements[];
+	} input_data0;
+	layout(binding = 1) buffer Input1 {
+		float elements[];
+	} input_data1;
+
+	void main()
+	{
+		uint index = gl_GlobalInvocationID.x;
+		float result = input_data0.elements[index] * input_data1.elements[index];
+
+		atomicAdd(, result);
+	}
+);
+
+void fann_create_shader(struct fann *ann)
+{
+	GLint status;
+	GLint length;
+	char *log;
+
+	ann->sumShaderID = glCreateShader(GL_COMPUTE_SHADER);
+	int sumShaderLen = strlen(sumShader);
+	glShaderSource(ann->sumShaderID, 1, &sumShader, &sumShaderLen);
+	glCompileShader(ann->sumShaderID);
+	glGetShaderiv(ann->sumShaderID, GL_COMPILE_STATUS, &status);
+	if (status == GL_FALSE) {
+		glGetShaderiv(ann->sumShaderID, GL_INFO_LOG_LENGTH, &length);
+		log = malloc(length+1);
+		glGetShaderInfoLog(ann->sumShaderID, length, &length, log);
+		log[length] = '\0';
+		fprintf(stderr, "%s", log);
+		exit(-1);
+	}
+
+	ann->sumShaderProgram = glCreateProgram();
+	glAttachShader(ann->sumShaderProgram, ann->sumShaderID);
+	glLinkProgram(ann->sumShaderProgram);
+	glGetShaderiv(ann->sumShaderID, GL_LINK_STATUS, &status);
+	if (status == GL_FALSE) {
+		glGetProgramiv(ann->sumShaderID, GL_INFO_LOG_LENGTH, &length);
+		log = malloc(length+1);
+		glGetProgramInfoLog(ann->sumShaderID, length, &length, log);
+		log[length] = '\0';
+		fprintf(stderr, "%s", log);
+		exit(-1);
+	}
+}
 
 /* #define FANN_NO_SEED */
 
@@ -157,6 +215,8 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_sparse_array(float connection_ra
 		fann_error(NULL, FANN_E_CANT_ALLOCATE_MEM);
 		return NULL;
 	}
+
+	fann_create_shader(ann);
 
 	ann->connection_rate = connection_rate;
 #ifdef FIXEDFANN
@@ -574,6 +634,10 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 	struct fann_layer *layer_it, *last_layer;
 	unsigned int activation_function;
 	fann_type steepness;
+	GLuint BO[2];
+	GLuint texture;
+	GLenum err;
+	float *data;
 
 	/* store some variabels local for fast access */
 	struct fann_neuron *first_neuron = ann->first_layer->first_neuron;
@@ -604,13 +668,13 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 				 i, multiplier, multiplier, input[i]);
 		}
 #endif
-		first_neuron[i].value = input[i];
+		*(first_neuron[i].value) = input[i];
 	}
 	/* Set the bias neuron in the input layer */
 #ifdef FIXEDFANN
-	(ann->first_layer->last_neuron - 1)->value = multiplier;
+	*((ann->first_layer->last_neuron - 1)->value) = multiplier;
 #else
-	(ann->first_layer->last_neuron - 1)->value = 1;
+	*((ann->first_layer->last_neuron - 1)->value) = 1;
 #endif
 
 	last_layer = ann->last_layer;
@@ -623,9 +687,9 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 			{
 				/* bias neurons */
 #ifdef FIXEDFANN
-				neuron_it->value = multiplier;
+				*(neuron_it->value) = multiplier;
 #else
-				neuron_it->value = 1;
+				*(neuron_it->value) = 1;
 #endif
 				continue;
 			}
@@ -649,16 +713,17 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 				}
 
 
+#ifdef PLAN9
 				/* unrolled loop start */
 				i = num_connections & 3;	/* same as modulo 4 */
 				switch (i)
 				{
 					case 3:
-						neuron_sum += fann_mult(weights[2], neurons[2].value);
+						neuron_sum += fann_mult(weights[2], *(neurons[2].value));
 					case 2:
-						neuron_sum += fann_mult(weights[1], neurons[1].value);
+						neuron_sum += fann_mult(weights[1], *(neurons[1].value));
 					case 1:
-						neuron_sum += fann_mult(weights[0], neurons[0].value);
+						neuron_sum += fann_mult(weights[0], *(neurons[0].value));
 					case 0:
 						break;
 				}
@@ -667,13 +732,39 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 				for(i = num_connections & 3; i < num_connections; i += 4)
 				{
 					neuron_sum +=
-						fann_mult(weights[i], neurons[i].value) +
-						fann_mult(weights[i + 1], neurons[i + 1].value) +
-						fann_mult(weights[i + 2], neurons[i + 2].value) +
-						fann_mult(weights[i + 3], neurons[i + 3].value);
+						fann_mult(weights[i], *(neurons[i].value)) +
+						fann_mult(weights[i + 1], *(neurons[i + 1].value)) +
+						fann_mult(weights[i + 2], *(neurons[i + 2].value)) +
+						fann_mult(weights[i + 3], *(neurons[i + 3].value));
 				}
 				/* unrolled loop end */
+#else
+				glUseProgram(ann->sumShaderProgram);
+				glGenTextures(1, &texture);
+				glActiveTexture(GL_TEXTURE0);
+				glBindTexture(GL_TEXTURE_1D, texture);
+				glGenBuffers(2, BO);
 
+				glBindBuffer(GL_SHADER_STORAGE_BUFFER, BO[0]);
+				glBufferData(GL_SHADER_STORAGE_BUFFER, num_connections * sizeof(GLfloat), weights, GL_STATIC_DRAW);
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, BO[0]);
+
+				glBindBuffer(GL_SHADER_STORAGE_BUFFER, BO[1]);
+				glBufferData(GL_SHADER_STORAGE_BUFFER, num_connections * sizeof(GLfloat), layer_it->values, GL_STATIC_DRAW);
+				glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, BO[1]);
+
+				data = malloc(1 * sizeof(float));
+				glBindImageTexture(0, texture, 0, GL_TRUE, 0, GL_READ_WRITE, GL_R32F);
+
+				glDispatchCompute(num_connections/100, 1, 1);
+				glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	
+				glGetTexImage(GL_TEXTURE_1D, 0, GL_RED, GL_FLOAT, data);
+				neuron_sum = data[0];
+				free(data);
+
+				glDeleteBuffers(3, BO);
+#endif
 				/*
 				 * for(i = 0;i != num_connections; i++){
 				 * printf("%f += %f*%f, ", neuron_sum, weights[i], neurons[i].value);
@@ -689,11 +780,11 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 				switch (i)
 				{
 					case 3:
-						neuron_sum += fann_mult(weights[2], neuron_pointers[2]->value);
+						neuron_sum += fann_mult(weights[2], *(neuron_pointers[2]->value));
 					case 2:
-						neuron_sum += fann_mult(weights[1], neuron_pointers[1]->value);
+						neuron_sum += fann_mult(weights[1], *(neuron_pointers[1]->value));
 					case 1:
-						neuron_sum += fann_mult(weights[0], neuron_pointers[0]->value);
+						neuron_sum += fann_mult(weights[0], *(neuron_pointers[0]->value));
 					case 0:
 						break;
 				}
@@ -702,10 +793,10 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 				for(i = num_connections & 3; i < num_connections; i += 4)
 				{
 					neuron_sum +=
-						fann_mult(weights[i], neuron_pointers[i]->value) +
-						fann_mult(weights[i + 1], neuron_pointers[i + 1]->value) +
-						fann_mult(weights[i + 2], neuron_pointers[i + 2]->value) +
-						fann_mult(weights[i + 3], neuron_pointers[i + 3]->value);
+						fann_mult(weights[i], *(neuron_pointers[i]->value)) +
+						fann_mult(weights[i + 1], *(neuron_pointers[i + 1]->value)) +
+						fann_mult(weights[i + 2], *(neuron_pointers[i + 2]->value)) +
+						fann_mult(weights[i + 3], *(neuron_pointers[i + 3]->value));
 				}
 			}
 
@@ -755,36 +846,36 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 			{
 				case FANN_SIGMOID:
 				case FANN_SIGMOID_STEPWISE:
-					neuron_it->value =
+					*(neuron_it->value) =
 						(fann_type) fann_stepwise(v1, v2, v3, v4, v5, v6, r1, r2, r3, r4, r5, r6, 0,
 												  multiplier, neuron_sum);
 					break;
 				case FANN_SIGMOID_SYMMETRIC:
 				case FANN_SIGMOID_SYMMETRIC_STEPWISE:
-					neuron_it->value =
+					*(neuron_it->value) =
 						(fann_type) fann_stepwise(v1, v2, v3, v4, v5, v6, r1, r2, r3, r4, r5, r6,
 												  -multiplier, multiplier, neuron_sum);
 					break;
 				case FANN_THRESHOLD:
-					neuron_it->value = (fann_type) ((neuron_sum < 0) ? 0 : multiplier);
+					*(neuron_it->value) = (fann_type) ((neuron_sum < 0) ? 0 : multiplier);
 					break;
 				case FANN_THRESHOLD_SYMMETRIC:
-					neuron_it->value = (fann_type) ((neuron_sum < 0) ? -multiplier : multiplier);
+					*(neuron_it->value) = (fann_type) ((neuron_sum < 0) ? -multiplier : multiplier);
 					break;
 				case FANN_LINEAR:
-					neuron_it->value = neuron_sum;
+					*(neuron_it->value) = neuron_sum;
 					break;
 				case FANN_LINEAR_PIECE:
-					neuron_it->value = (fann_type)((neuron_sum < 0) ? 0 : (neuron_sum > multiplier) ? multiplier : neuron_sum);
+					*(neuron_it->value) = (fann_type)((neuron_sum < 0) ? 0 : (neuron_sum > multiplier) ? multiplier : neuron_sum);
 					break;
 				case FANN_LINEAR_PIECE_SYMMETRIC:
-					neuron_it->value = (fann_type)((neuron_sum < -multiplier) ? -multiplier : (neuron_sum > multiplier) ? multiplier : neuron_sum);
+					*(neuron_it->value) = (fann_type)((neuron_sum < -multiplier) ? -multiplier : (neuron_sum > multiplier) ? multiplier : neuron_sum);
 					break;
 				case FANN_LINEAR_PIECE_LEAKY:
-					neuron_it->value = (fann_type)((neuron_sum < 0) ? 0.01 * neuron_sum: neuron_sum);
+					*(neuron_it->value) = (fann_type)((neuron_sum < 0) ? 0.01 * neuron_sum: neuron_sum);
 					break;
 				case FANN_LINEAR_PIECE_RECT:
-					neuron_it->value = (fann_type)((neuron_sum < 0) ? 0: neuron_sum);
+					*(neuron_it->value) = (fann_type)((neuron_sum < 0) ? 0: neuron_sum);
 					break;
 				case FANN_ELLIOT:
 				case FANN_ELLIOT_SYMMETRIC:
@@ -809,7 +900,7 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 			
 			neuron_it->sum = neuron_sum;
 
-			fann_activation_switch(activation_function, neuron_sum, neuron_it->value);
+			fann_activation_switch(activation_function, neuron_sum, *(neuron_it->value));
 #endif
 		}
 	}
@@ -820,7 +911,7 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 	neurons = (ann->last_layer - 1)->first_neuron;
 	for(i = 0; i != num_output; i++)
 	{
-		output[i] = neurons[i].value;
+		output[i] = *(neurons[i].value);
 	}
 	return ann->output;
 }
@@ -1773,6 +1864,7 @@ void fann_allocate_neurons(struct fann *ann)
 	struct fann_neuron *neurons;
 	unsigned int num_neurons_so_far = 0;
 	unsigned int num_neurons = 0;
+	unsigned int i;
 
 	/* all the neurons is allocated in one long array (calloc clears mem) */
 	neurons = (struct fann_neuron *) calloc(ann->total_neurons, sizeof(struct fann_neuron));
@@ -1789,6 +1881,10 @@ void fann_allocate_neurons(struct fann *ann)
 		num_neurons = (unsigned int)(layer_it->last_neuron - layer_it->first_neuron);
 		layer_it->first_neuron = neurons + num_neurons_so_far;
 		layer_it->last_neuron = layer_it->first_neuron + num_neurons;
+		layer_it->values = calloc(num_neurons, sizeof(fann_type));
+		for (i = 0; i < num_neurons; i++) {
+			neurons[num_neurons_so_far + i].value = &(layer_it->values[i]);
+		}
 		num_neurons_so_far += num_neurons;
 	}
 
