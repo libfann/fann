@@ -712,8 +712,7 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 					neurons = (layer_it - 1)->first_neuron;
 				}
 
-
-#ifdef PLAN9
+//#ifdef PLAN9
 				/* unrolled loop start */
 				i = num_connections & 3;	/* same as modulo 4 */
 				switch (i)
@@ -738,7 +737,7 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 						fann_mult(weights[i + 3], *(neurons[i + 3].value));
 				}
 				/* unrolled loop end */
-#else
+#if 0
 				glUseProgram(ann->sumShaderProgram);
 				glGenTextures(1, &texture);
 				glActiveTexture(GL_TEXTURE0);

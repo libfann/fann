@@ -46,6 +46,7 @@ FANN_EXTERNAL struct fann *FANN_API fann_create_from_file(const char *configurat
 	}
 	ann = fann_create_from_fd(conf, configuration_file);
 	fclose(conf);
+
 	return ann;
 }
 
