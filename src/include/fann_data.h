@@ -21,9 +21,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define __fann_data_h__
 
 #include <stdio.h>
-#ifndef PLAN9
-#include <CL/cl.h>
-#endif
 
 /* Section: FANN Datatypes
 
@@ -819,10 +816,6 @@ struct fann
 	 * Resulting data values may be greater than user-defined maximum. 
 	 */
 	float *scale_factor_out;
-#endif
-
-#ifndef PLAN9
-	cl_context clctx;
 #endif
 };
 
