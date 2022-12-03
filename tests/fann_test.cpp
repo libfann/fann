@@ -24,7 +24,7 @@ void FannTest::AssertCreate(neural_net &net, unsigned int numLayers, const unsig
     for (unsigned int i = 0; i < numLayers; i++) {
         EXPECT_EQ(layers[i], layers_res[i]);
     }
-    delete layers_res;
+    delete[] layers_res;
 
     EXPECT_EQ(neurons, net.get_total_neurons());
     EXPECT_EQ(connections, net.get_total_connections());
