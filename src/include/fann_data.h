@@ -781,8 +781,22 @@ struct fann
 	 */
 	fann_type *prev_weights_deltas;
 
-	GLuint sumShaderID;
-	GLuint sumShaderProgram;
+	GLuint runShaderID;
+	GLuint runShaderProgram;
+
+	GLuint trainShaderID;
+	GLuint trainShaderProgram;
+
+	unsigned char onGPU;
+	unsigned char gl;
+
+	GLuint glweights;
+	GLuint glvalues;
+	GLuint glnetwork;
+	GLuint glinput;
+	GLuint gloutput;
+
+	fann_type *values;
 
 #ifndef FIXEDFANN
 	/* Arithmetic mean used to remove steady component in input data.  */
