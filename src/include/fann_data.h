@@ -790,6 +790,7 @@ struct fann
 	unsigned char onGPU;
 	unsigned char gl;
 
+	GLuint glerrors;
 	GLuint glweights;
 	GLuint glvalues;
 	GLuint glnetwork;

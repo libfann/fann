@@ -103,11 +103,49 @@ FANN_EXTERNAL void FANN_API fann_train(struct fann *ann, fann_type * input,
 {
 	fann_run(ann, input);
 
+if (ann->gl == 0) {
 	fann_compute_MSE(ann, desired_output);
 
 	fann_backpropagate_MSE(ann);
 
 	fann_update_weights(ann);
+} else {
+	int i;
+	fann_type error;
+
+	for (i = 0; i < ann->num_output; i++) {
+		error = desired_output[i] - ann->output[i];
+		ann->MSE_value += error * error;
+	}
+
+	GLfloat *glinput = malloc(sizeof(GLfloat) * ann->num_input);
+	for (i = 0; i < ann->num_input; i++)
+		glinput[i] = input[i];
+	glGenBuffers(1, &ann->glinput);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glinput);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->num_input * sizeof(GLfloat), glinput, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ann->glinput);
+
+	GLfloat *gloutput = malloc(sizeof(GLfloat) * ann->num_output);
+	for (i = 0; i < ann->num_output; i++)
+		gloutput[i] = desired_output[i];
+	glGenBuffers(1, &ann->gloutput);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->num_output * sizeof(GLfloat), gloutput, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ann->gloutput);
+
+	glUseProgram(ann->trainShaderProgram);
+	glDispatchCompute(1, 1, 1);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+
+	glDeleteBuffers(1, &ann->glinput);
+	glDeleteBuffers(1, &ann->gloutput);
+	free(glinput);
+	free(gloutput);
+}
+
 }
 #endif
 
@@ -387,7 +425,7 @@ void fann_update_weights(struct fann *ann)
 
 	/* store some variabels local for fast access */
 	const float learning_rate = ann->learning_rate;
-    const float learning_momentum = ann->learning_momentum;        
+	const float learning_momentum = ann->learning_momentum;
 	struct fann_neuron *first_neuron = ann->first_layer->first_neuron;
 	struct fann_layer *first_layer = ann->first_layer;
 	const struct fann_layer *last_layer = ann->last_layer;
