@@ -322,7 +322,6 @@ void fann_compute_MSE(struct fann *ann, fann_type * desired_output)
 		*error_it = fann_activation_derived(last_layer_begin->activation_function,
 											last_layer_begin->activation_steepness, neuron_value,
 											last_layer_begin->sum) * neuron_diff;
-
 		desired_output++;
 		error_it++;
 
