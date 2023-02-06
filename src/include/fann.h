@@ -137,9 +137,9 @@ extern "C"
 #endif	/* FANN_DLL_EXPORTS*/
 #define FANN_API __stdcall
 #else							/*  */
-#ifndef PLAN9
 #define FANN_EXTERNAL
 #define FANN_API
+#ifndef PLAN9
 #include <GL/gl.h>
 #endif
 #endif	/* _MSC_VER */
