@@ -103,12 +103,15 @@ FANN_EXTERNAL void FANN_API fann_train(struct fann *ann, fann_type * input,
 {
 	fann_run(ann, input);
 
+#ifndef PLAN9
 if (ann->gl == 0) {
+#endif
 	fann_compute_MSE(ann, desired_output);
 
 	fann_backpropagate_MSE(ann);
 
 	fann_update_weights(ann);
+#ifndef PLAN9
 } else {
 	int i;
 	fann_type error;
@@ -145,7 +148,7 @@ if (ann->gl == 0) {
 	free(glinput);
 	free(gloutput);
 }
-
+#endif
 }
 #endif
 

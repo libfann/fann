@@ -30,20 +30,15 @@
   I will be metal.
 */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+#include <math.h>
 #ifdef PLAN9
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <sys/time.h>
-#include <time.h>
-#include <math.h>
 #else
-#include <stdio.h>
-#include <stdlib.h>
 #include <stdarg.h>
-#include <string.h>
-#include <time.h>
-#include <math.h>
 #include <GL/gl.h>
 #include <GLES3/gl31.h>
 #include <fcntl.h>
@@ -55,6 +50,7 @@
 #include "config.h"
 #include "fann.h"
 
+#ifndef PLAN9
 static const char* runShader = "#version 310 es\n"
 	"precision lowp float;\n"
 	"layout(local_size_x = %d) in;\n"
@@ -344,6 +340,7 @@ void fann_create_shaders(struct fann *ann)
 
 	ann->onGPU = 0;
 }
+#endif
 
 /* #define FANN_NO_SEED */
 
@@ -884,9 +881,13 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 	unsigned int activation_function;
 	fann_type steepness;
 	GLenum err;
+#ifndef PLAN9
 	GLfloat *data;
+	GLfloat *glvalues;
+	GLfloat *glweights;
 	int nparameters;
 	GLfloat *parameters;
+#endif /* PLAN9 */
 
 	/* store some variabels local for fast access */
 	struct fann_neuron *first_neuron = ann->first_layer->first_neuron;
@@ -926,7 +927,9 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 	*((ann->first_layer->last_neuron - 1)->value) = 1;
 #endif
 
+#ifndef PLAN9
 if (ann->gl == 0) {
+#endif
 	last_layer = ann->last_layer;
 	for(layer_it = ann->first_layer + 1; layer_it != last_layer; layer_it++)
 	{
@@ -1134,6 +1137,7 @@ if (ann->gl == 0) {
 	{
 		output[i] = *(neurons[i].value);
 	}
+#ifndef PLAN9
 } else {
 	if (ann->onGPU == 0) {
 		glGenBuffers(1, &ann->glnetwork);
@@ -1142,12 +1146,12 @@ if (ann->gl == 0) {
 		nparameters += (int)(ann->last_layer - ann->first_layer);
 		parameters = calloc(sizeof(GLfloat), nparameters);
 		parameters[0] = nparameters - 1;
-		fprintf(stderr, "network: %0.0f ", parameters[0]);
+//		fprintf(stderr, "network: %0.0f ", parameters[0]);
 		for(i = 1, layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++, i++) {
 			parameters[i] = (int)(layer_it->last_neuron - layer_it->first_neuron) - 1;
-			fprintf(stderr, "%0.0f ", parameters[i]);
+//			fprintf(stderr, "%0.0f ", parameters[i]);
 		}
-		fprintf(stderr, " total: %d\n", ann->total_neurons);
+//		fprintf(stderr, "total: %d\n", ann->total_neurons);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glnetwork);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, nparameters * sizeof(GLfloat), parameters, GL_DYNAMIC_COPY);
@@ -1155,20 +1159,32 @@ if (ann->gl == 0) {
 
 		glGenBuffers(1, &ann->glweights);
 
+		glweights = calloc(sizeof(GLfloat), ann->total_connections);
+		for (i = 0; i != ann->total_connections; i++)
+			glweights[i] = ann->weights[i];
+
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glweights);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_connections * sizeof(fann_type), ann->weights, GL_DYNAMIC_COPY);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_connections * sizeof(GLfloat), glweights, GL_DYNAMIC_COPY);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ann->glweights);
+
+		free(glweights);
 
 		glGenBuffers(1, &ann->glvalues);
 
+		glvalues = calloc(sizeof(GLfloat), ann->total_neurons);
+		for (i = 0; i != ann->total_neurons; i++)
+			glvalues[i] = ann->values[i];
+
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glvalues);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(fann_type), ann->values, GL_DYNAMIC_COPY);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(GLfloat), glvalues, GL_DYNAMIC_COPY);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ann->glvalues);
+
+		free(glvalues);
 
 		glGenBuffers(1, &ann->glerrors);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glerrors);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(fann_type), NULL, GL_DYNAMIC_COPY);
+		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(GLfloat), NULL, GL_DYNAMIC_COPY);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ann->glerrors);
 
 		ann->onGPU = 1;
@@ -1202,9 +1218,25 @@ if (ann->gl == 0) {
 	glDeleteBuffers(1, &ann->glinput);
 	glDeleteBuffers(1, &ann->gloutput);
 }
-
+#endif
 	return ann->output;
 }
+
+#ifndef PLAN9
+FANN_EXTERNAL void FANN_API fann_from_gpu(struct fann *ann)
+{
+	GLfloat *data;
+	int i;
+
+	if (ann->gl != 0) {
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glweights);
+		data = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->total_connections * sizeof(GLfloat), GL_MAP_READ_BIT);
+		for(i = 0; i != ann->total_connections; i++)
+			ann->weights[i] = data[i];
+		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
+	}
+}
+#endif /* PLAN9 */
 
 FANN_EXTERNAL void FANN_API fann_destroy(struct fann *ann)
 {
@@ -2107,8 +2139,10 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
 
 	ann->last_layer = ann->first_layer + num_layers;
 
+#ifndef PLAN9
 	fann_init_egl();
 	fann_create_shaders(ann);
+#endif
 
 	return ann;
 }
