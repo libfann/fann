@@ -880,8 +880,8 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 	struct fann_layer *layer_it, *last_layer;
 	unsigned int activation_function;
 	fann_type steepness;
-	GLenum err;
 #ifndef PLAN9
+	GLenum err;
 	GLfloat *data;
 	GLfloat *glvalues;
 	GLfloat *glweights;
@@ -2010,7 +2010,9 @@ struct fann *fann_allocate_structure(unsigned int num_layers)
 		return NULL;
 	}
 
+#ifndef PLAN9
 	ann->gl = 0;
+#endif
 	ann->errno_f = FANN_E_NO_ERROR;
 	ann->error_log = fann_default_error_log;
 	ann->errstr = NULL;
