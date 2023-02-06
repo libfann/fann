@@ -22,6 +22,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
 #ifndef PLAN9
 #include <stdio.h>
+#else
+#define FANN_API
 #endif
 
 #define FANN_ERRSTR_MAX 128
