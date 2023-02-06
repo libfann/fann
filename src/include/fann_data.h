@@ -781,6 +781,7 @@ struct fann
 	 */
 	fann_type *prev_weights_deltas;
 
+#ifndef PLAN9
 	GLuint runShaderID;
 	GLuint runShaderProgram;
 
@@ -796,6 +797,7 @@ struct fann
 	GLuint glnetwork;
 	GLuint glinput;
 	GLuint gloutput;
+#endif /* PLAN9 */
 
 	fann_type *values;
 
