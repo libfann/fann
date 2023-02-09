@@ -52,7 +52,7 @@
 
 #ifndef PLAN9
 static const char* runShader = "#version 310 es\n"
-	"precision lowp float;\n"
+	"precision highp float;\n"
 	"layout(local_size_x = %d) in;\n"
 	"layout(std430) buffer;\n"
 	"layout(binding = 0) buffer Network\n"
@@ -84,10 +84,10 @@ static const char* runShader = "#version 310 es\n"
 	"	int idx = int(gl_LocalInvocationID.x);\n"
 	"	int threads = %d;\n"
 	"	int layers;\n"
-	"	int i, o, inputs, outputs, n, l, total_neurons, total_weights;\n"
+	"	int i, o, n, inputs, outputs, l, total_neurons, total_weights;\n"
 	"	layers = int(network.e[0]);\n"
-	"	n = int(network.e[1]);\n"
-	"	for (i = idx; i < n; i += threads)\n"
+	"	inputs = int(network.e[1]);\n"
+	"	for (i = idx; i < inputs; i += threads)\n"
 	"		values.e[i] = input_data.e[i];\n"
 	"	barrier();\n"
 	"	total_neurons = 0;\n"
@@ -125,7 +125,7 @@ static const char* runShader = "#version 310 es\n"
 	"}\n";
 
 static const char* trainShader = "#version 310 es\n"
-	"precision lowp float;\n"
+	"precision highp float;\n"
 	"layout(local_size_x = %d) in;\n"
 	"layout(std430) buffer;\n"
 	"layout(binding = 0) buffer Network\n"
@@ -1146,12 +1146,8 @@ if (ann->gl == 0) {
 		nparameters += (int)(ann->last_layer - ann->first_layer);
 		parameters = calloc(sizeof(GLfloat), nparameters);
 		parameters[0] = nparameters - 1;
-//		fprintf(stderr, "network: %0.0f ", parameters[0]);
-		for(i = 1, layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++, i++) {
+		for(i = 1, layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++, i++)
 			parameters[i] = (int)(layer_it->last_neuron - layer_it->first_neuron) - 1;
-//			fprintf(stderr, "%0.0f ", parameters[i]);
-		}
-//		fprintf(stderr, "total: %d\n", ann->total_neurons);
 
 		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glnetwork);
 		glBufferData(GL_SHADER_STORAGE_BUFFER, nparameters * sizeof(GLfloat), parameters, GL_DYNAMIC_COPY);
@@ -1217,6 +1213,7 @@ if (ann->gl == 0) {
 
 	glDeleteBuffers(1, &ann->glinput);
 	glDeleteBuffers(1, &ann->gloutput);
+	free(glinput);
 }
 #endif
 	return ann->output;
