@@ -797,6 +797,9 @@ struct fann
 	GLuint glnetwork;
 	GLuint glinput;
 	GLuint gloutput;
+
+	GLfloat *glinputdata;
+	GLfloat *gloutputdata;
 #endif /* PLAN9 */
 
 	fann_type *values;

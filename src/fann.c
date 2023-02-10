@@ -85,7 +85,7 @@ static const char* runShader = "#version 310 es\n"
 	"	int threads = %d;\n"
 	"	int layers;\n"
 	"	int i, o, n, inputs, outputs, l, total_neurons, total_weights;\n"
-	"	layers = int(network.e[0]);\n"
+	"	layers = int(network.e[0]) - 1;\n"
 	"	inputs = int(network.e[1]);\n"
 	"	for (i = idx; i < inputs; i += threads)\n"
 	"		values.e[i] = input_data.e[i];\n"
@@ -96,31 +96,50 @@ static const char* runShader = "#version 310 es\n"
 	"		inputs = int(network.e[l]);\n"
 	"		outputs = int(network.e[l+1]);\n"
 	"		for (o = idx; o < outputs; o += threads)\n"
-	"			input_data.e[o] = 0.0;\n"
+	"			errors.e[o] = 0.0;\n"
 	"		barrier();\n"
 	"		values.e[total_neurons + inputs] = 1.0;\n"
 	"		for (o = idx; o < outputs; o += threads) {\n"
 	"			n = o * inputs + o;\n"
 	"			for (i = 0; i <= inputs; i++)\n"
-	"				input_data.e[o] += values.e[total_neurons + i] * weights.e[total_weights + n + i];\n"
+	"				errors.e[o] += values.e[total_neurons + i] * weights.e[total_weights + n + i];\n"
 	"		}\n"
 	"		barrier();\n"
 	"		total_neurons += inputs + 1;\n"
 	"		for (o = idx; o < outputs; o += threads) {\n"
-	"			input_data.e[o] *= 0.5;\n"
-	"			if (input_data.e[o] > 300.0)\n"
-	"				input_data.e[o] = 300.0;\n"
-	"			else if (input_data.e[o] < -300.0)\n"
-	"				input_data.e[o] = -300.0;\n"
-	"			if (input_data.e[o] < 0.0)\n"
-	"				input_data.e[o] *= 0.01;\n"
-	"			values.e[total_neurons + o] = input_data.e[o];\n"
+	"			errors.e[o] *= 0.5;\n"
+	"			if (errors.e[o] > 300.0)\n"
+	"				errors.e[o] = 300.0;\n"
+	"			else if (errors.e[o] < -300.0)\n"
+	"				errors.e[o] = -300.0;\n"
+	"			if (errors.e[o] < 0.0)\n"
+	"				errors.e[o] *= 0.01;\n"
+	"			values.e[total_neurons + o] = errors.e[o];\n"
 	"		}\n"
 	"		barrier();\n"
 	"		total_weights += inputs * outputs + outputs;\n"
 	"	}\n"
+	"	inputs = int(network.e[layers]);\n"
+	"	outputs = int(network.e[layers+1]);\n"
 	"	for (o = idx; o < outputs; o += threads)\n"
+	"		errors.e[o] = 0.0;\n"
+	"	barrier();\n"
+	"	values.e[total_neurons + inputs] = 1.0;\n"
+	"	for (o = idx; o < outputs; o += threads) {\n"
+	"		n = o * inputs + o;\n"
+	"		for (i = 0; i <= inputs; i++)\n"
+	"			errors.e[o] += values.e[total_neurons + i] * weights.e[total_weights + n + i];\n"
+	"	}\n"
+	"	barrier();\n"
+	"	total_neurons += inputs + 1;\n"
+	"	for (o = idx; o < outputs; o += threads) {\n"
+	"		if (errors.e[o] > 600.0)\n"
+	"			errors.e[o] = 600.0;\n"
+	"		else if (errors.e[o] < -600.0)\n"
+	"			errors.e[o] = -600.0;\n"
+	"		values.e[total_neurons + o] = (1.0/(1.0 + exp(-errors.e[o])));\n"
 	"		output_data.e[o] = values.e[total_neurons + o];\n"
+	"	}\n"
 	"	barrier();\n"
 	"}\n";
 
@@ -181,9 +200,7 @@ static const char* trainShader = "#version 310 es\n"
 	"			neuron_diff = 17.0;\n"
 	"		else\n"
 	"			neuron_diff = log((1.0 + neuron_diff) / (1.0 - neuron_diff));\n"
-	"		errors.e[total_neurons + o] = neuron_diff * 0.5;\n"
-	"		if (values.e[total_neurons + o] < 0.0)\n"
-	"			errors.e[total_neurons + o] *= 0.01;\n"
+	"		errors.e[total_neurons + o] = neuron_diff * values.e[total_neurons + o] * (1.0 - values.e[total_neurons + o]);\n"
 	"	}\n"
 	"	barrier();\n"
 	"	for (l = layers; l > 2; l--) {\n"
@@ -264,6 +281,9 @@ void fann_init_egl(void) {
 		printf("eglMakeCurrent failed returned %d\n", returnValue);
 		exit(-1);
 	}
+
+	fprintf(stderr, "%s\n", glGetString(GL_VERSION));
+	fprintf(stderr, "%s\n", glGetString(GL_EXTENSIONS));
 }
 
 void fann_create_shaders(struct fann *ann)
@@ -1183,37 +1203,36 @@ if (ann->gl == 0) {
 		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(GLfloat), NULL, GL_DYNAMIC_COPY);
 		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ann->glerrors);
 
+		glGenBuffers(1, &ann->glinput);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glinput);
+		glBufferStorage(GL_SHADER_STORAGE_BUFFER, ann->num_input * sizeof(GLfloat), NULL, GL_MAP_WRITE_BIT|GL_MAP_PERSISTENT_BIT|GL_MAP_COHERENT_BIT);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ann->glinput);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glinput);
+		ann->glinputdata = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->num_input * sizeof(GLfloat), GL_MAP_WRITE_BIT|GL_MAP_COHERENT_BIT|GL_MAP_PERSISTENT_BIT);
+
+		glGenBuffers(1, &ann->gloutput);
+
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
+		glBufferStorage(GL_SHADER_STORAGE_BUFFER, ann->num_output * sizeof(GLfloat), NULL, GL_MAP_READ_BIT|GL_MAP_WRITE_BIT|GL_MAP_PERSISTENT_BIT|GL_MAP_COHERENT_BIT);
+		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ann->gloutput);
+		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
+		ann->gloutputdata = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->num_output * sizeof(GLfloat), GL_MAP_READ_BIT|GL_MAP_WRITE_BIT|GL_MAP_COHERENT_BIT|GL_MAP_PERSISTENT_BIT);
+
 		ann->onGPU = 1;
 	}
 
-	GLfloat *glinput = malloc(sizeof(GLfloat) * ann->num_input);
 	for (i = 0; i < ann->num_input; i++)
-		glinput[i] = input[i];
-	glGenBuffers(1, &ann->glinput);
+		ann->glinputdata[i] = input[i];
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glinput);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->num_input * sizeof(GLfloat), glinput, GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ann->glinput);
-
-	glGenBuffers(1, &ann->gloutput);
-
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->num_output * sizeof(GLfloat), NULL, GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ann->gloutput);
-
+	glFinish();
 	glUseProgram(ann->runShaderProgram);
 	glDispatchCompute(1, 1, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glFinish();
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
-	data = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->num_output * sizeof(GLfloat), GL_MAP_READ_BIT);
 	for(i = 0; i != ann->num_output; i++)
-		ann->output[i] = data[i];
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
-
-	glDeleteBuffers(1, &ann->glinput);
-	glDeleteBuffers(1, &ann->gloutput);
-	free(glinput);
+		ann->output[i] = ann->gloutputdata[i];
 }
 #endif
 	return ann->output;

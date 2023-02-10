@@ -121,32 +121,17 @@ if (ann->gl == 0) {
 		ann->MSE_value += error * error;
 	}
 
-	GLfloat *glinput = malloc(sizeof(GLfloat) * ann->num_input);
 	for (i = 0; i < ann->num_input; i++)
-		glinput[i] = input[i];
-	glGenBuffers(1, &ann->glinput);
+		ann->glinputdata[i] = input[i];
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glinput);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->num_input * sizeof(GLfloat), glinput, GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ann->glinput);
-
-	GLfloat *gloutput = malloc(sizeof(GLfloat) * ann->num_output);
 	for (i = 0; i < ann->num_output; i++)
-		gloutput[i] = desired_output[i];
-	glGenBuffers(1, &ann->gloutput);
+		ann->gloutputdata[i] = desired_output[i];
 
-	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
-	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->num_output * sizeof(GLfloat), gloutput, GL_DYNAMIC_COPY);
-	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ann->gloutput);
-
+	glFinish();
 	glUseProgram(ann->trainShaderProgram);
 	glDispatchCompute(1, 1, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
-
-	glDeleteBuffers(1, &ann->glinput);
-	glDeleteBuffers(1, &ann->gloutput);
-	free(glinput);
-	free(gloutput);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glFinish();
 }
 #endif
 }
