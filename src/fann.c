@@ -1228,7 +1228,7 @@ if (ann->gl == 0) {
 	glFinish();
 	glUseProgram(ann->runShaderProgram);
 	glDispatchCompute(1, 1, 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	glFinish();
 
 	for(i = 0; i != ann->num_output; i++)

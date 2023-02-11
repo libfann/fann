@@ -130,7 +130,7 @@ if (ann->gl == 0) {
 	glFinish();
 	glUseProgram(ann->trainShaderProgram);
 	glDispatchCompute(1, 1, 1);
-	glMemoryBarrier(GL_ALL_BARRIER_BITS);
+	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
 	glFinish();
 }
 #endif
