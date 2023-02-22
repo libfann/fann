@@ -636,6 +636,8 @@ FANN_EXTERNAL void FANN_API fann_enable_seed_rand();
 
 FANN_EXTERNAL void FANN_API fann_from_gpu(struct fann *ann);
 
+FANN_EXTERNAL void FANN_API fann_init_gpu(struct fann *ann);
+
 #endif /* PLAN9 */
 
 #ifdef FIXEDFANN

@@ -114,11 +114,12 @@ if (ann->gl == 0) {
 #ifndef PLAN9
 } else {
 	int i;
-	fann_type error;
+	fann_type err;
+	GLfloat *errors;
 
 	for (i = 0; i < ann->num_output; i++) {
-		error = desired_output[i] - ann->output[i];
-		ann->MSE_value += error * error;
+		err = desired_output[i] - ann->output[i];
+		ann->MSE_value += err * err;
 	}
 
 	for (i = 0; i < ann->num_input; i++)
@@ -130,8 +131,15 @@ if (ann->gl == 0) {
 	glFinish();
 	glUseProgram(ann->trainShaderProgram);
 	glDispatchCompute(1, 1, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glFinish();
+
+/*	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glerrors);
+	errors = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->total_neurons * sizeof(GLfloat), GL_MAP_READ_BIT);
+	for (i = 0; i < ann->num_output; i++)
+		fprintf(stderr, "%0.10f ", errors[ann->total_neurons - ann->num_output - 1 + i]);
+	fprintf(stderr, "\n");
+	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER); */
 }
 #endif
 }
@@ -310,11 +318,13 @@ void fann_compute_MSE(struct fann *ann, fann_type * desired_output)
 		*error_it = fann_activation_derived(last_layer_begin->activation_function,
 											last_layer_begin->activation_steepness, neuron_value,
 											last_layer_begin->sum) * neuron_diff;
+//		fprintf(stderr, "%0.10f ", *error_it);
 		desired_output++;
 		error_it++;
 
 		ann->num_MSE++;
 	}
+//	fprintf(stderr, "\n");
 }
 
 /* INTERNAL FUNCTION

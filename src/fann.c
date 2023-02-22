@@ -95,16 +95,15 @@ static const char* runShader = "#version 310 es\n"
 	"	for (l = 1; l < layers; l++) {\n"
 	"		inputs = int(network.e[l]);\n"
 	"		outputs = int(network.e[l+1]);\n"
-	"		for (o = idx; o < outputs; o += threads)\n"
-	"			errors.e[o] = 0.0;\n"
+	"		if (idx == 0)\n"
+	"			values.e[total_neurons + inputs] = 1.0;\n"
 	"		barrier();\n"
-	"		values.e[total_neurons + inputs] = 1.0;\n"
 	"		for (o = idx; o < outputs; o += threads) {\n"
+	"			errors.e[o] = 0.0;\n"
 	"			n = o * inputs + o;\n"
 	"			for (i = 0; i <= inputs; i++)\n"
 	"				errors.e[o] += values.e[total_neurons + i] * weights.e[total_weights + n + i];\n"
 	"		}\n"
-	"		barrier();\n"
 	"		total_neurons += inputs + 1;\n"
 	"		for (o = idx; o < outputs; o += threads) {\n"
 	"			errors.e[o] *= 0.5;\n"
@@ -121,24 +120,20 @@ static const char* runShader = "#version 310 es\n"
 	"	}\n"
 	"	inputs = int(network.e[layers]);\n"
 	"	outputs = int(network.e[layers+1]);\n"
-	"	for (o = idx; o < outputs; o += threads)\n"
-	"		errors.e[o] = 0.0;\n"
+	"	if (idx == 0)\n"
+	"		values.e[total_neurons + inputs] = 1.0;\n"
 	"	barrier();\n"
-	"	values.e[total_neurons + inputs] = 1.0;\n"
 	"	for (o = idx; o < outputs; o += threads) {\n"
+	"		errors.e[o] = 0.0;\n"
 	"		n = o * inputs + o;\n"
 	"		for (i = 0; i <= inputs; i++)\n"
 	"			errors.e[o] += values.e[total_neurons + i] * weights.e[total_weights + n + i];\n"
-	"	}\n"
-	"	barrier();\n"
-	"	total_neurons += inputs + 1;\n"
-	"	for (o = idx; o < outputs; o += threads) {\n"
 	"		if (errors.e[o] > 600.0)\n"
 	"			errors.e[o] = 600.0;\n"
 	"		else if (errors.e[o] < -600.0)\n"
 	"			errors.e[o] = -600.0;\n"
-	"		values.e[total_neurons + o] = (1.0/(1.0 + exp(-errors.e[o])));\n"
-	"		output_data.e[o] = values.e[total_neurons + o];\n"
+	"		values.e[total_neurons + inputs + 1 + o] = (1.0/(1.0 + exp(-errors.e[o])));\n"
+	"		output_data.e[o] = values.e[total_neurons + inputs + 1 + o];\n"
 	"	}\n"
 	"	barrier();\n"
 	"}\n";
@@ -182,7 +177,6 @@ static const char* trainShader = "#version 310 es\n"
 	"	inputs = int(network.e[1]);\n"
 	"	for (i = idx; i < inputs; i += threads)\n"
 	"		values.e[i] = input_data.e[i];\n"
-	"	values.e[inputs] = 1.0;\n"
 	"	barrier();\n"
 	"	total_neurons = 0;\n"
 	"	total_weights = 0;\n"
@@ -207,14 +201,10 @@ static const char* trainShader = "#version 310 es\n"
 	"		outputs = int(network.e[l]);\n"
 	"		inputs = int(network.e[l-1]);\n"
 	"		neuron_prev = total_neurons - inputs - 1;\n"
-	"		for (i = idx; i <= inputs; i += threads)\n"
+	"		for (i = idx; i <= inputs; i += threads) {\n"
 	"			errors.e[neuron_prev + i] = 0.0;\n"
-	"		barrier();\n"
-	"		for (i = idx; i < inputs; i += threads)\n"
 	"			for (o = 0; o < outputs; o++)\n"
 	"				errors.e[neuron_prev + i] += errors.e[total_neurons + o] * weights.e[total_weights + o * inputs + o + i];\n"
-	"		barrier();\n"
-	"		for (i = idx; i < inputs; i += threads) {\n"
 	"			errors.e[neuron_prev + i] *= 0.5;\n"
 	"			if (values.e[neuron_prev + i] < 0.0)\n"
 	"				errors.e[neuron_prev + i] *= 0.01;\n"
@@ -242,7 +232,7 @@ static const char* trainShader = "#version 310 es\n"
 	"}\n";
 
 void fann_init_egl(void) {
-	int32_t fd = open ("/dev/dri/card0", O_RDWR);
+	int32_t fd = open ("/dev/dri/card1", O_RDWR);
 	if (fd <= 0)
 		exit(-3);
  
@@ -900,15 +890,6 @@ FANN_EXTERNAL fann_type *FANN_API fann_run(struct fann * ann, fann_type * input)
 	struct fann_layer *layer_it, *last_layer;
 	unsigned int activation_function;
 	fann_type steepness;
-#ifndef PLAN9
-	GLenum err;
-	GLfloat *data;
-	GLfloat *glvalues;
-	GLfloat *glweights;
-	int nparameters;
-	GLfloat *parameters;
-#endif /* PLAN9 */
-
 	/* store some variabels local for fast access */
 	struct fann_neuron *first_neuron = ann->first_layer->first_neuron;
 
@@ -1160,64 +1141,7 @@ if (ann->gl == 0) {
 #ifndef PLAN9
 } else {
 	if (ann->onGPU == 0) {
-		glGenBuffers(1, &ann->glnetwork);
-
-		nparameters = 1;
-		nparameters += (int)(ann->last_layer - ann->first_layer);
-		parameters = calloc(sizeof(GLfloat), nparameters);
-		parameters[0] = nparameters - 1;
-		for(i = 1, layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++, i++)
-			parameters[i] = (int)(layer_it->last_neuron - layer_it->first_neuron) - 1;
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glnetwork);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, nparameters * sizeof(GLfloat), parameters, GL_DYNAMIC_COPY);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ann->glnetwork);
-
-		glGenBuffers(1, &ann->glweights);
-
-		glweights = calloc(sizeof(GLfloat), ann->total_connections);
-		for (i = 0; i != ann->total_connections; i++)
-			glweights[i] = ann->weights[i];
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glweights);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_connections * sizeof(GLfloat), glweights, GL_DYNAMIC_COPY);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ann->glweights);
-
-		free(glweights);
-
-		glGenBuffers(1, &ann->glvalues);
-
-		glvalues = calloc(sizeof(GLfloat), ann->total_neurons);
-		for (i = 0; i != ann->total_neurons; i++)
-			glvalues[i] = ann->values[i];
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glvalues);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(GLfloat), glvalues, GL_DYNAMIC_COPY);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ann->glvalues);
-
-		free(glvalues);
-
-		glGenBuffers(1, &ann->glerrors);
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glerrors);
-		glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(GLfloat), NULL, GL_DYNAMIC_COPY);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ann->glerrors);
-
-		glGenBuffers(1, &ann->glinput);
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glinput);
-		glBufferStorage(GL_SHADER_STORAGE_BUFFER, ann->num_input * sizeof(GLfloat), NULL, GL_MAP_WRITE_BIT|GL_MAP_PERSISTENT_BIT|GL_MAP_COHERENT_BIT);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ann->glinput);
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glinput);
-		ann->glinputdata = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->num_input * sizeof(GLfloat), GL_MAP_WRITE_BIT|GL_MAP_COHERENT_BIT|GL_MAP_PERSISTENT_BIT);
-
-		glGenBuffers(1, &ann->gloutput);
-
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
-		glBufferStorage(GL_SHADER_STORAGE_BUFFER, ann->num_output * sizeof(GLfloat), NULL, GL_MAP_READ_BIT|GL_MAP_WRITE_BIT|GL_MAP_PERSISTENT_BIT|GL_MAP_COHERENT_BIT);
-		glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ann->gloutput);
-		glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
-		ann->gloutputdata = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->num_output * sizeof(GLfloat), GL_MAP_READ_BIT|GL_MAP_WRITE_BIT|GL_MAP_COHERENT_BIT|GL_MAP_PERSISTENT_BIT);
+		fann_init_gpu(ann);
 
 		ann->onGPU = 1;
 	}
@@ -1228,7 +1152,7 @@ if (ann->gl == 0) {
 	glFinish();
 	glUseProgram(ann->runShaderProgram);
 	glDispatchCompute(1, 1, 1);
-	glMemoryBarrier(GL_SHADER_STORAGE_BARRIER_BIT);
+	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glFinish();
 
 	for(i = 0; i != ann->num_output; i++)
@@ -1251,6 +1175,77 @@ FANN_EXTERNAL void FANN_API fann_from_gpu(struct fann *ann)
 			ann->weights[i] = data[i];
 		glUnmapBuffer(GL_SHADER_STORAGE_BUFFER);
 	}
+}
+
+FANN_EXTERNAL void FANN_API fann_init_gpu(struct fann *ann)
+{
+	GLfloat *data;
+	GLfloat *glvalues;
+	GLfloat *glweights;
+	int nparameters;
+	GLfloat *parameters;
+	int i;
+	struct fann_layer *layer_it;
+
+	glGenBuffers(1, &ann->glnetwork);
+
+	nparameters = 1;
+	nparameters += (int)(ann->last_layer - ann->first_layer);
+	parameters = calloc(sizeof(GLfloat), nparameters);
+	parameters[0] = nparameters - 1;
+	for(i = 1, layer_it = ann->first_layer; layer_it != ann->last_layer; layer_it++, i++)
+		parameters[i] = (int)(layer_it->last_neuron - layer_it->first_neuron) - 1;
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glnetwork);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, nparameters * sizeof(GLfloat), parameters, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ann->glnetwork);
+
+	glGenBuffers(1, &ann->glweights);
+
+	glweights = calloc(sizeof(GLfloat), ann->total_connections);
+	for (i = 0; i != ann->total_connections; i++)
+		glweights[i] = ann->weights[i];
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glweights);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_connections * sizeof(GLfloat), glweights, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ann->glweights);
+
+	free(glweights);
+
+	glGenBuffers(1, &ann->glvalues);
+
+	glvalues = calloc(sizeof(GLfloat), ann->total_neurons);
+	for (i = 0; i != ann->total_neurons; i++)
+		glvalues[i] = ann->values[i];
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glvalues);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(GLfloat), glvalues, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ann->glvalues);
+
+	free(glvalues);
+
+	glGenBuffers(1, &ann->glerrors);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glerrors);
+	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(GLfloat), NULL, GL_DYNAMIC_COPY);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 3, ann->glerrors);
+
+	glGenBuffers(1, &ann->glinput);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glinput);
+	glBufferStorage(GL_SHADER_STORAGE_BUFFER, ann->num_input * sizeof(GLfloat), NULL, GL_MAP_WRITE_BIT|GL_MAP_PERSISTENT_BIT|GL_MAP_COHERENT_BIT);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 4, ann->glinput);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glinput);
+	ann->glinputdata = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->num_input * sizeof(GLfloat), GL_MAP_WRITE_BIT|GL_MAP_COHERENT_BIT|GL_MAP_PERSISTENT_BIT);
+
+	glGenBuffers(1, &ann->gloutput);
+
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
+	glBufferStorage(GL_SHADER_STORAGE_BUFFER, ann->num_output * sizeof(GLfloat), NULL, GL_MAP_READ_BIT|GL_MAP_WRITE_BIT|GL_MAP_PERSISTENT_BIT|GL_MAP_COHERENT_BIT);
+	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 5, ann->gloutput);
+	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->gloutput);
+	ann->gloutputdata = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->num_output * sizeof(GLfloat), GL_MAP_READ_BIT|GL_MAP_WRITE_BIT|GL_MAP_COHERENT_BIT|GL_MAP_PERSISTENT_BIT);
+
 }
 #endif /* PLAN9 */
 
