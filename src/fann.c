@@ -53,7 +53,7 @@
 #ifndef PLAN9
 static const char* runShader = "#version 310 es\n"
 	"precision highp float;\n"
-	"layout(local_size_x = %d) in;\n"
+	"layout(local_size_x = %d, local_size_y = 1, local_size_z = 1) in;\n"
 	"layout(std430) buffer;\n"
 	"layout(binding = 0) buffer Network\n"
 	"{\n"
@@ -140,7 +140,7 @@ static const char* runShader = "#version 310 es\n"
 
 static const char* trainShader = "#version 310 es\n"
 	"precision highp float;\n"
-	"layout(local_size_x = %d) in;\n"
+	"layout(local_size_x = %d, local_size_y = 1, local_size_z = 1) in;\n"
 	"layout(std430) buffer;\n"
 	"layout(binding = 0) buffer Network\n"
 	"{\n"
