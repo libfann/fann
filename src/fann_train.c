@@ -116,6 +116,7 @@ if (ann->gl == 0) {
 	int i;
 	fann_type err;
 	GLfloat *errors;
+	GLenum glerr;
 
 	for (i = 0; i < ann->num_output; i++) {
 		err = desired_output[i] - ann->output[i];
@@ -133,13 +134,6 @@ if (ann->gl == 0) {
 	glDispatchCompute(1, 1, 1);
 	glMemoryBarrier(GL_ALL_BARRIER_BITS);
 	glFinish();
-
-/*	glBindBuffer(GL_SHADER_STORAGE_BUFFER, ann->glerrors);
-	errors = (GLfloat*)glMapBufferRange(GL_SHADER_STORAGE_BUFFER, 0, ann->total_neurons * sizeof(GLfloat), GL_MAP_READ_BIT);
-	for (i = 0; i < ann->num_output; i++)
-		fprintf(stderr, "%0.10f ", errors[ann->total_neurons - ann->num_output - 1 + i]);
-	fprintf(stderr, "\n");
-	glUnmapBuffer(GL_SHADER_STORAGE_BUFFER); */
 }
 #endif
 }

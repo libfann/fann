@@ -82,7 +82,7 @@ static const char* runShader = "#version 310 es\n"
 	"void main()\n"
 	"{\n"
 	"	int idx = int(gl_LocalInvocationID.x);\n"
-	"	int threads = %d;\n"
+	"	int threads = int(gl_WorkGroupSize.x);\n"
 	"	int layers;\n"
 	"	int i, o, n, inputs, outputs, l, total_neurons, total_weights;\n"
 	"	layers = int(network.e[0]) - 1;\n"
@@ -169,15 +169,12 @@ static const char* trainShader = "#version 310 es\n"
 	"void main()\n"
 	"{\n"
 	"	int idx = int(gl_LocalInvocationID.x);\n"
-	"	int threads = %d;\n"
+	"	int threads = int(gl_WorkGroupSize.x);\n"
 	"	int layers;\n"
-	"	int i, o, l, total_neurons, total_weights, outputs, inputs, neuron_prev;\n"
+	"	int i, o, l, n, total_neurons, total_weights, outputs, inputs, neuron_prev;\n"
 	"	float neuron_diff, tmp_error;\n"
 	"	layers = int(network.e[0]);\n"
 	"	inputs = int(network.e[1]);\n"
-	"	for (i = idx; i < inputs; i += threads)\n"
-	"		values.e[i] = input_data.e[i];\n"
-	"	barrier();\n"
 	"	total_neurons = 0;\n"
 	"	total_weights = 0;\n"
 	"	for (l = 1; l < layers; l++) {\n"
@@ -201,7 +198,7 @@ static const char* trainShader = "#version 310 es\n"
 	"		outputs = int(network.e[l]);\n"
 	"		inputs = int(network.e[l-1]);\n"
 	"		neuron_prev = total_neurons - inputs - 1;\n"
-	"		for (i = idx; i <= inputs; i += threads) {\n"
+	"		for (i = idx; i < inputs; i += threads) {\n"
 	"			errors.e[neuron_prev + i] = 0.0;\n"
 	"			for (o = 0; o < outputs; o++)\n"
 	"				errors.e[neuron_prev + i] += errors.e[total_neurons + o] * weights.e[total_weights + o * inputs + o + i];\n"
@@ -221,8 +218,9 @@ static const char* trainShader = "#version 310 es\n"
 	"		inputs = int(network.e[l-1]);\n"
 	"		for (o = idx; o < outputs; o += threads) {\n"
 	"			tmp_error = errors.e[total_neurons + o] * 0.7;\n"
+	"			n = o * inputs + o;\n"
 	"			for (i = 0; i <= inputs; i++)\n"
-	"				weights.e[total_weights + o * inputs + o + i] += tmp_error * values.e[neuron_prev + i];\n"
+	"				weights.e[total_weights + n + i] += tmp_error * values.e[neuron_prev + i];\n"
 	"		}\n"
 	"		barrier();\n"
 	"		neuron_prev = total_neurons;\n"
@@ -232,7 +230,7 @@ static const char* trainShader = "#version 310 es\n"
 	"}\n";
 
 void fann_init_egl(void) {
-	int32_t fd = open ("/dev/dri/card1", O_RDWR);
+	int32_t fd = open ("/dev/dri/card0", O_RDWR);
 	if (fd <= 0)
 		exit(-3);
  
@@ -1140,6 +1138,8 @@ if (ann->gl == 0) {
 	}
 #ifndef PLAN9
 } else {
+	GLenum err;
+
 	if (ann->onGPU == 0) {
 		fann_init_gpu(ann);
 
@@ -1200,6 +1200,8 @@ FANN_EXTERNAL void FANN_API fann_init_gpu(struct fann *ann)
 	glBufferData(GL_SHADER_STORAGE_BUFFER, nparameters * sizeof(GLfloat), parameters, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 0, ann->glnetwork);
 
+//	free(parameters);
+
 	glGenBuffers(1, &ann->glweights);
 
 	glweights = calloc(sizeof(GLfloat), ann->total_connections);
@@ -1210,7 +1212,7 @@ FANN_EXTERNAL void FANN_API fann_init_gpu(struct fann *ann)
 	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_connections * sizeof(GLfloat), glweights, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 1, ann->glweights);
 
-	free(glweights);
+//	free(glweights);
 
 	glGenBuffers(1, &ann->glvalues);
 
@@ -1222,7 +1224,7 @@ FANN_EXTERNAL void FANN_API fann_init_gpu(struct fann *ann)
 	glBufferData(GL_SHADER_STORAGE_BUFFER, ann->total_neurons * sizeof(GLfloat), glvalues, GL_DYNAMIC_COPY);
 	glBindBufferBase(GL_SHADER_STORAGE_BUFFER, 2, ann->glvalues);
 
-	free(glvalues);
+//	free(glvalues);
 
 	glGenBuffers(1, &ann->glerrors);
 

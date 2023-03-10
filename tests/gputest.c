@@ -1,4 +1,6 @@
 #include <floatfann.h>
+#include <stdlib.h>
+#include <time.h>
 
 void
 fanntest(struct fann *ann, fann_type *input, fann_type *output, fann_type *desired_output, int gl)
@@ -15,7 +17,6 @@ fanntest(struct fann *ann, fann_type *input, fann_type *output, fann_type *desir
 
 	fann_reset_MSE(ann);
 	fann_train(ann, input, desired_output);
-//	fann_run(ann, input);
 
 	gettimeofday(&now, NULL);
 	a = now.tv_sec * 1000000;
@@ -32,6 +33,7 @@ main(int argc, char **argv)
 	fann_type *desired_output;
 	struct fann *ann;
 	int i;
+	GLfloat *data;
 
 	if (argc < 2)
 		return -1;
@@ -44,15 +46,20 @@ main(int argc, char **argv)
 	input = calloc(sizeof(fann_type), ann->num_input);
 	desired_output = calloc(sizeof(fann_type), ann->num_output);
 
+	srand(time(NULL));
+
+	for (i = 0; i < ann->num_input; i++)
+		input[i] = ((float)rand()/RAND_MAX)-0.5;
+
 	for (i = 0; i < ann->num_output; i++)
-		desired_output[i] = 0.73;
+		desired_output[i] = ((float)rand()/RAND_MAX)-0.5;
 
 	fann_print_parameters(ann);
 
-	for (i = 0; i < 10; i++)
+	for (i = 0; i < 10; i++) {
 		fanntest(ann, input, output, desired_output, 1);
-	for (i = 0; i < 10; i++)
 		fanntest(ann, input, output, desired_output, 0);
+	}
 
 	return 0;
 }
