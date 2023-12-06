@@ -178,6 +178,12 @@ __doublefann_h__ is not defined
     case FANN_GAUSSIAN_STEPWISE:                                                                   \
       result = 0;                                                                                  \
       break;                                                                                       \
+    case FANN_LINEAR_PIECE_LEAKY:                                                                  \
+      result = (fann_type)((value < 0) ? value * 0.01 : value);                                    \
+      break;                                                                                       \
+    case FANN_LINEAR_PIECE_RECT:                                                                   \
+      result = (fann_type)((value < 0) ? 0 : value);                                               \
+      break;                                                                                       \
   }
 
 #endif
