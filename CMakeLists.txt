@@ -1,7 +1,7 @@
 IF(BIICODE)
 	# Initializes block variables
 	INIT_BIICODE_BLOCK()
-	
+
 	# Output folder for binaries
 	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/../bin/fann/examples)
 	SET(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG  ${CMAKE_CURRENT_SOURCE_DIR}/../bin/fann/examples)
@@ -18,11 +18,11 @@ IF(BIICODE)
 	LIST(FIND BII_BLOCK_EXES examples_parallel_train examples_present)
 	SET(examples_present (NOT ${examples_present} EQUAL "-1")) # Depending on examples
 	IF(${examples_present} AND NOT WIN32 AND NOT APPLE) # Linux doesn't have GetTickCount
-		LIST(REMOVE_ITEM BII_BLOCK_EXES examples_parallel_train)		
+		LIST(REMOVE_ITEM BII_BLOCK_EXES examples_parallel_train)
 	ENDIF()
 
 	ADD_BIICODE_TARGETS()
-	
+
 	IF(${examples_present})
 	   # This example needs CPP11
            ACTIVATE_CPP11(lasote_fann_examples_xor_sample)
@@ -61,6 +61,11 @@ IF(NOT COMPILER_SUPPORTS_CXX11)
   message(WARNING "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Tests will not be compiled. To enable tests use a compiler that supports C++11.")
 ENDIF()
 
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    # ugly-hack - fix [-Werror,-Wdeprecated-copy] in macos
+    add_compile_options(-Wno-deprecated)
+endif()
+
 list (APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/Modules)
 
 set (FANN_VERSION_MAJOR 2)
@@ -82,7 +87,7 @@ configure_file (cmake/fann.pc.cmake ${CMAKE_CURRENT_BINARY_DIR}/fann.pc @ONLY)
 
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/fann.pc DESTINATION ${PKGCONFIG_INSTALL_DIR})
 
-ADD_SUBDIRECTORY( src ) 
+ADD_SUBDIRECTORY( src )
 
 ################# cpack ################
 
@@ -95,7 +100,7 @@ SET(CPACK_PACKAGE_VERSION_MINOR "${FANN_VERSION_MINOR}")
 SET(CPACK_PACKAGE_VERSION_PATCH "${FANN_VERSION_PATCH}")
 SET(CPACK_GENERATOR "TGZ;ZIP")
 SET(CPACK_SOURCE_GENERATOR "TGZ;ZIP")
-SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Steffen Nissen") 
+SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "Steffen Nissen")
 SET(CPACK_PACKAGE_INSTALL_DIRECTORY "CMake ${CMake_VERSION_MAJOR}.${CMake_VERSION_MINOR}")
 IF(WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
