@@ -196,15 +196,15 @@ static char const *const FANN_TRAIN_NAMES[] = {"FANN_TRAIN_INCREMENTAL", "FANN_T
          * y = cos(x*s)/2+0.5
          * d = s*-sin(x*s)/2
 
-        FANN_LINEAR_PIECE_LEAKY - leaky ReLU
-         * span: -inf < y < inf
-         * y = x<0? 0.01*x: x
-         * d = x<0? 0.01: 1
-
         FANN_LINEAR_PIECE_RECT - ReLU
          * span: -inf < y < inf
          * y = x<0? 0: x
          * d = x<0? 0: 1
+
+        FANN_LINEAR_PIECE_RECT_LEAKY - leaky ReLU
+         * span: -inf < y < inf
+         * y = x<0? 0.01*x: x
+         * d = x<0? 0.01: 1
 
         See also:
         <fann_set_activation_function_layer>, <fann_set_activation_function_hidden>,
@@ -234,8 +234,8 @@ enum fann_activationfunc_enum {
   FANN_COS_SYMMETRIC,
   FANN_SIN,
   FANN_COS,
-  FANN_LINEAR_PIECE_LEAKY,
-  FANN_LINEAR_PIECE_RECT
+  FANN_LINEAR_PIECE_RECT,
+  FANN_LINEAR_PIECE_RECT_LEAKY
 };
 
 /* Constant: FANN_ACTIVATIONFUNC_NAMES
@@ -267,8 +267,8 @@ static char const *const FANN_ACTIVATIONFUNC_NAMES[] = {"FANN_LINEAR",
                                                         "FANN_COS_SYMMETRIC",
                                                         "FANN_SIN",
                                                         "FANN_COS",
-                                                        "FANN_LINEAR_PIECE_LEAKY",
-                                                        "FANN_LINEAR_PIECE_RECT"};
+                                                        "FANN_LINEAR_PIECE_RECT",
+                                                        "FANN_LINEAR_PIECE_RECT_LEAKY"};
 
 /* Enum: fann_errorfunc_enum
         Error function used during training.

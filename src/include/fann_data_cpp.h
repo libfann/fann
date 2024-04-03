@@ -200,15 +200,15 @@ enum training_algorithm_enum {
      * y = cos(x*s)
      * d = s*-sin(x*s)
 
-    FANN_LINEAR_PIECE_LEAKY - leaky ReLU
-     * span: -inf < y < inf
-     * y = x<0? 0.01*x: x
-     * d = x<0? 0.01: 1
-
     FANN_LINEAR_PIECE_RECT - ReLU
      * span: -inf < y < inf
      * y = x<0? 0: x
      * d = x<0? 0: 1
+
+    FANN_LINEAR_PIECE_RECT_LEAKY - leaky ReLU
+     * span: -inf < y < inf
+     * y = x<0? 0.01*x: x
+     * d = x<0? 0.01: 1
 
         See also:
                 <neural_net::set_activation_function_hidden>,
@@ -231,8 +231,8 @@ enum activation_function_enum {
   LINEAR_PIECE_SYMMETRIC,
   SIN_SYMMETRIC,
   COS_SYMMETRIC,
-  LINEAR_PIECE_LEAKY,
-  LINEAR_PIECE_RECT
+  LINEAR_PIECE_RECT,
+  LINEAR_PIECE_RECT_LEAKY
 };
 
 /* Enum: network_type_enum
