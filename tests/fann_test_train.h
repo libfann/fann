@@ -4,21 +4,13 @@
 #include "fann_test.h"
 
 class FannTestTrain : public FannTest {
-protected:
-    fann_type xorInput[8] = {
-            0.0, 0.0,
-            0.0, 1.0,
-            1.0, 0.0,
-            1.0, 1.0};
-    fann_type xorOutput[4] = {
-            0.0,
-            1.0,
-            1.0,
-            0.0};
+ protected:
+  fann_type xorInput[8] = {0.0, 0.0, 0.0, 1.0, 1.0, 0.0, 1.0, 1.0};
+  fann_type xorOutput[4] = {0.0, 1.0, 1.0, 0.0};
 
-    virtual void SetUp();
+  virtual void SetUp();
 
-    virtual void TearDown();
+  virtual void TearDown();
 };
 
 #endif

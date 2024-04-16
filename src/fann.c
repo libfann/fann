@@ -1413,10 +1413,11 @@ void fann_update_stepwise(struct fann *ann) {
       fann_min(ann->multiplier - (fann_type)(ann->multiplier / 100.0 + 1.0), ann->multiplier - 1);
 
   for (i = 0; i < 6; i++) {
-    ann->sigmoid_values[i] = (fann_type)(
-        ((log(ann->multiplier / (float)ann->sigmoid_results[i] - 1) * (float)ann->multiplier) /
-         -2.0) *
-        (float)ann->multiplier);
+    ann->sigmoid_values[i] =
+        (fann_type)(((log(ann->multiplier / (float)ann->sigmoid_results[i] - 1) *
+                      (float)ann->multiplier) /
+                     -2.0) *
+                    (float)ann->multiplier);
     ann->sigmoid_symmetric_values[i] =
         (fann_type)(((log((ann->multiplier - (float)ann->sigmoid_symmetric_results[i]) /
                           ((float)ann->sigmoid_symmetric_results[i] + ann->multiplier)) *
