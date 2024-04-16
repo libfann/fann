@@ -21,6 +21,30 @@ TEST_F(FannTestTrain, TrainOnDateSimpleXor) {
     EXPECT_LT(net.test_data(data), 0.001);
 }
 
+TEST_F(FannTestTrain, TrainOnReLUSimpleXor) {
+    neural_net net(LAYER, 3, 2, 3, 1);
+
+    data.set_train_data(4, 2, xorInput, 1, xorOutput);
+    net.set_activation_function_hidden(FANN::LINEAR_PIECE_RECT);
+    net.set_activation_steepness_hidden(1.0);
+    net.train_on_data(data, 100, 100, 0.001);
+
+    EXPECT_LT(net.get_MSE(), 0.001);
+    EXPECT_LT(net.test_data(data), 0.001);
+}
+
+TEST_F(FannTestTrain, TrainOnReLULeakySimpleXor) {
+    neural_net net(LAYER, 3, 2, 3, 1);
+
+    data.set_train_data(4, 2, xorInput, 1, xorOutput);
+    net.set_activation_function_hidden(FANN::LINEAR_PIECE_RECT_LEAKY);
+    net.set_activation_steepness_hidden(1.0);
+    net.train_on_data(data, 100, 100, 0.001);
+
+    EXPECT_LT(net.get_MSE(), 0.001);
+    EXPECT_LT(net.test_data(data), 0.001);
+}
+
 TEST_F(FannTestTrain, TrainSimpleIncrementalXor) {
     neural_net net(LAYER, 3, 2, 3, 1);
 
@@ -41,3 +65,4 @@ TEST_F(FannTestTrain, TrainSimpleIncrementalXor) {
 
     EXPECT_LT(net.get_MSE(), 0.01);
 }
+
