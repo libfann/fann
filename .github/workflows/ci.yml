@@ -1,46 +1,62 @@
-# this workflow will run ci
-name: ci
+name: CI
+
 on:
   push:
     branches:
       - alpha
       - beta
       - master
+  pull_request:
   workflow_dispatch:
-env:
-  zzzz1234: 1
+
 jobs:
-  job1:
+  build-and-test:
     strategy:
+      fail-fast: false
       matrix:
-        architecture:
-          # - arm64
-          - x64
-          # - x86
-        os:
-          - macos-latest
-          - ubuntu-latest
-          # - windows-latest
-# base - .github/workflows/ci.yml - beg
-    env:
-      CI_MATRIX_NAME: >
-        ${{ matrix.architecture }}
-        ${{ matrix.os }}
-      CI_WORKFLOW_NAME: >
-        ${{ github.workflow }}
-        - ${{ github.event_name }}
-        - ${{ github.event.inputs.workflow_dispatch_name }}
-        - ${{ github.ref_name }}
-    name: >
-      ${{ matrix.architecture }}
-      ${{ matrix.os }}
+        os: [ubuntu-24.04, macos-latest]
+        compiler: [gcc, clang]
+        exclude:
+          # macOS doesn't have gcc in GitHub Actions (it's aliased to clang)
+          - os: macos-latest
+            compiler: gcc
+    
+    name: ${{ matrix.os }} - ${{ matrix.compiler }}
     runs-on: ${{ matrix.os }}
+    
     steps:
-      - run: echo "$(date -u +"%Y-%m-%d %TZ") - ${{ env.CI_WORKFLOW_NAME }}" # "
-      # disable autocrlf in windows
-      - run: git config --global core.autocrlf false
-      # https://github.com/actions/checkout
-      - uses: actions/checkout@v3
-      # run nodejs coverages and tests
-      - run: sh ./ci.sh
-# base - .github/workflows/ci.yml - end
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive  # if googletest is a submodule
+      
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
+      
+      - name: Set compiler (GCC)
+        if: matrix.compiler == 'gcc'
+        run: |
+          echo "CC=gcc" >> $GITHUB_ENV
+          echo "CXX=g++" >> $GITHUB_ENV
+      
+      - name: Set compiler (Clang)
+        if: matrix.compiler == 'clang'
+        run: |
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
+      
+      - name: Configure CMake
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DFANN_BUILD_TESTS=ON
+      
+      - name: Build
+        run: cmake --build build --config Release -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+      
+      - name: Run tests
+        working-directory: build
+        run: ./tests/fann_tests
