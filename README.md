@@ -3,11 +3,11 @@
 
 **Fast Artificial Neural Network (FANN) Library** is a free open source neural network library, which implements multilayer artificial neural networks in C with support for both fully connected and sparsely connected networks.
 
-Cross-platform execution in both fixed and floating point are supported. It includes a framework for easy handling of training data sets. It is easy to use, versatile, well documented, and fast. 
+Cross-platform execution in both fixed and floating point are supported. It includes a framework for easy handling of training data sets. It is easy to use, versatile, well documented, and fast.
 
-Bindings to more than 15 programming languages are available. 
+Bindings to more than 15 programming languages are available.
 
-An easy to read introduction article and a reference manual accompanies the library with examples and recommendations on how to use the library. 
+An easy to read introduction article and a reference manual accompanies the library with examples and recommendations on how to use the library.
 
 Several graphical user interfaces are also available for the library.
 
@@ -40,19 +40,19 @@ Several graphical user interfaces are also available for the library.
 
 First you'll want to clone the repository:
 
-`git clone https://github.com/libfann/fann.git`
+    git clone https://github.com/libfann/fann.git
 
 Once that's finished, navigate to the Root directory. In this case it would be ./fann:
 
-`cd ./fann`
+    cd ./fann
 
 Then run CMake
 
-`cmake .`
+    cmake .
 
 After that, you'll need to use elevated privileges to install the library:
 
-`sudo make install`
+    sudo make install
 
 That's it! If everything went right, you should see a lot of text, and FANN should be installed!
 
