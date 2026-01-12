@@ -56,6 +56,16 @@ After that, you'll need to use elevated privileges to install the library:
 
 That's it! If everything went right, you should see a lot of text, and FANN should be installed!
 
+#### From Distribution Packages
+
+Many Linux distributions carry precompiled FANN packages in their binary repositories.
+
+See Repology for further information: [![Packaging status](https://repology.org/badge/tiny-repos/fann.svg)](https://repology.org/project/fann/versions).
+
+On Debian derived distributions install the package [libfann2](https://packages.debian.org/search?searchon=names&keywords=libfann2) and potentially [libfann-dev](https://packages.debian.org/search?searchon=names&keywords=libfann-dev) if you desire to develop for the library. Fx. by issuing the following command in a root terminal:
+
+    apt install libfann2 libfann-dev
+
 ### Building fann - Using vcpkg
 
 You can download and install fann using the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager:
