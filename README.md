@@ -67,9 +67,3 @@ You can download and install fann using the [vcpkg](https://github.com/Microsoft
     ./vcpkg install fann
 
 The fann port in vcpkg is kept up to date by Microsoft team members and community contributors. If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
-
-## To Learn More
-
-To get started with FANN, go to the [FANN help site](http://leenissen.dk/fann/wp/help/), which will include links to all the available resources. 
-
-For more information about FANN, please refer to the [FANN website](http://leenissen.dk/fann/wp/)
