@@ -160,11 +160,15 @@ install (FILES
  )
 
 ################# compile tests ################
+option(fann_tests_enabled "Enable fann google tests" Off)
 
+if (fann_tests_enabled)
 ADD_SUBDIRECTORY( lib/googletest )
 
 if(COMPILER_SUPPORTS_CXX11)
   ADD_SUBDIRECTORY( tests )
+endif()
+
 endif()
 
 ENDIF()
