@@ -24,7 +24,9 @@ SET(floatfann_LIB_SRCS
         )
 
 ADD_LIBRARY(floatfann SHARED ${floatfann_LIB_SRCS})
+target_include_directories(floatfann PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 ADD_LIBRARY(floatfann_static STATIC ${floatfann_LIB_SRCS})
+target_include_directories(floatfann_static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 SET_TARGET_PROPERTIES(floatfann PROPERTIES VERSION ${FANN_VERSION_STRING} SOVERSION ${FANN_VERSION_MAJOR})
 SET_TARGET_PROPERTIES(floatfann_static PROPERTIES VERSION ${FANN_VERSION_STRING} SOVERSION ${FANN_VERSION_MAJOR})
@@ -43,7 +45,9 @@ SET(doublefann_LIB_SRCS
         )
 
 ADD_LIBRARY(doublefann SHARED ${doublefann_LIB_SRCS})
+target_include_directories(doublefann PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 ADD_LIBRARY(doublefann_static STATIC ${doublefann_LIB_SRCS})
+target_include_directories(doublefann_static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 SET_TARGET_PROPERTIES(doublefann PROPERTIES VERSION ${FANN_VERSION_STRING} SOVERSION ${FANN_VERSION_MAJOR})
 SET_TARGET_PROPERTIES(doublefann_static PROPERTIES VERSION ${FANN_VERSION_STRING} SOVERSION ${FANN_VERSION_MAJOR})
@@ -62,7 +66,9 @@ SET(fixedfann_LIB_SRCS
         )
 
 ADD_LIBRARY(fixedfann SHARED ${fixedfann_LIB_SRCS})
+target_include_directories(fixedfann PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 ADD_LIBRARY(fixedfann_static STATIC ${fixedfann_LIB_SRCS})
+target_include_directories(fixedfann_static PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(NOT MSVC)
 TARGET_LINK_LIBRARIES(fixedfann m)
@@ -86,7 +92,9 @@ SET(fann_LIB_SRCS
         )
 
 ADD_LIBRARY(fann SHARED ${fann_LIB_SRCS})
+target_include_directories(fann PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 ADD_LIBRARY(fann_static STATIC ${fann_LIB_SRCS})
+target_include_directories(fann PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 if(NOT MSVC)
 TARGET_LINK_LIBRARIES(fann m)
